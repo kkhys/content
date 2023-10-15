@@ -1,0 +1,21 @@
+# Category
+- name: 'category: tech'
+  description: ''
+  color: '#f4db01'
+- name: 'category: life'
+  description: ''
+  color: '#f4db01'
+- name: 'category: fashion'
+  description: ''
+  color: '#f4db01'
+
+# Type
+- name: 'type: create'
+  description: ''
+  color: '#f2edfc'
+- name: 'type: update'
+  description: ''
+  color: '#f2edfc'
+- name: 'type: correct'
+  description: ''
+  color: '#f2edfc'
