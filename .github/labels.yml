@@ -1,21 +1,23 @@
+# Area
+- name: 'area: post'
+  description: ''
+  color: '#f4db01'
+
 # Category
 - name: 'category: tech'
   description: ''
-  color: '#f4db01'
+  color: '#f2edfc'
 - name: 'category: life'
   description: ''
-  color: '#f4db01'
+  color: '#f2edfc'
 - name: 'category: fashion'
   description: ''
-  color: '#f4db01'
+  color: '#f2edfc'
 
 # Type
 - name: 'type: create'
   description: ''
-  color: '#f2edfc'
+  color: '#02de0a'
 - name: 'type: update'
   description: ''
-  color: '#f2edfc'
-- name: 'type: correct'
-  description: ''
-  color: '#f2edfc'
+  color: '#02de0a'
