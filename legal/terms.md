@@ -1,5 +1,6 @@
 ---
 title: Terms of Service
+slug: terms
 publishedAt: 2023-12-27
 ---
 

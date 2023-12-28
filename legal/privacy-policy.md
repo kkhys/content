@@ -1,5 +1,6 @@
 ---
 title: Privacy Policy
+slug: privacy-policy
 publishedAt: 2023-12-27
 ---
 
