@@ -1,5 +1,6 @@
 ---
 title: Terms of Service
+description: Terms of Service of Keisuke Hayashi.
 slug: terms
 publishedAt: 2023-12-27
 ---

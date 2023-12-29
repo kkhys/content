@@ -1,5 +1,6 @@
 ---
 title: Privacy Policy
+description: Privacy Policy of Keisuke Hayashi.
 slug: privacy-policy
 publishedAt: 2023-12-27
 ---
