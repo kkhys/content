@@ -200,8 +200,7 @@ https://github.com/kkhys/me/issues/342
 以下のようにタイトルを付けることもできる。
 
 ```typescript title="Currying sample by TypeScript"
-const add = (x: number, y: number): number => x + y;
-const curriedAdd = (x: number): (y: number) => number => (y: number) => add(x, y);
+const curriedAdd = (x: number) => (y: number) => x + y;
 
 const add10 = curriedAdd(10);
 const result = add10(5);
