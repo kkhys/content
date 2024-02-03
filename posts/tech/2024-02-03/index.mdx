@@ -104,7 +104,8 @@ export const rehypeMermaidOptions = {
 
 ### Flowchart
 
-```text
+````md
+```mermaid
 flowchart TB
     c1 --> a2
 
@@ -124,6 +125,7 @@ flowchart TB
     three --> two
     two --> c2
 ```
+````
 
 <p className='text-center'>↓</p>
 
@@ -150,7 +152,8 @@ flowchart TB
 
 ### Sequence diagrams
 
-```text
+````md
+```mermaid
 sequenceDiagram
     autonumber
 
@@ -166,6 +169,7 @@ sequenceDiagram
     John ->> Bob: How about you?
     Bob -->> John: Jolly good!
 ```
+````
 
 <p className='text-center'>↓</p>
 
@@ -188,7 +192,8 @@ sequenceDiagram
 
 ### State diagrams
 
-```text
+````md
+```mermaid
 stateDiagram-v2
     state fork_state <<fork>>
         [*] --> fork_state
@@ -201,6 +206,7 @@ stateDiagram-v2
         join_state --> State4
         State4 --> [*]
 ```
+````
 
 <p className='text-center'>↓</p>
 
@@ -220,7 +226,8 @@ stateDiagram-v2
 
 ### Gitgraph Diagrams
 
-```text
+````md
+```mermaid
 gitGraph
     commit id: "ZERO"
     branch develop
@@ -239,6 +246,7 @@ gitGraph
     checkout develop
     commit id: "C"
 ```
+````
 
 <p className='text-center'>↓</p>
 
