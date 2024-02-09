@@ -50,7 +50,7 @@ publishedAt: 2024-01-26
 Contentlayer ではビルドするとき、よしなにメタデータを生成する機能がある。
 そのタイミングでスラッグを生成する処理を挟み込んだ。
 
-```typescript title="lib/contentlayer/definitions/Post.ts"
+```ts title="lib/contentlayer/definitions/Post.ts" showLineNumbers
 export const Post = defineDocumentType(() => ({
   ...
   computedFields: {
@@ -85,7 +85,7 @@ https://contentlayer.dev/docs/sources/files/generated-data-bd588cf1
 
 先ほど出てきた関数 `generateSlug` は以下のようになっている。
 
-```typescript title="lib/contentlayer/utils.ts"
+```ts title="lib/contentlayer/utils.ts" showLineNumbers
 /**
  * Generates a unique slug based on the given data.
  *

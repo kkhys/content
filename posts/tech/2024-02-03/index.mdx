@@ -38,7 +38,7 @@ Mermaid の描画は通常クライアント（ブラウザ）側で行われる
 とりあえず使うだけなら以下のように `rehypePlugins` に追加するだけで良い。
 この際の注意点として、[rehype-pretty-code](https://github.com/rehype-pretty/rehype-pretty-code) などのシンタックスハイライト系のプラグインを使っている場合は、それよりも前に定義する必要がある。
 
-```typescript title="contentlayer.config.ts"
+```ts title="contentlayer.config.ts" showLineNumbers {6}
 import rehypeMermaid from 'rehype-mermaid';
 
 export default makeSource({
@@ -59,7 +59,7 @@ https://mermaid.js.org/config/schema-docs/config.html
 
 公式ドキュメントを見てもいまいちオプションが分からなかったが、幸いにも TypeScript の型定義がされていたのでそれを元に以下のように設定ファイルを書いた。
 
-```typescript title="src/lib/mdx/rehype-mermaid.ts"
+```ts title="src/lib/mdx/rehype-mermaid.ts" showLineNumbers
 import type { RehypeMermaidOptions } from 'rehype-mermaid';
 
 const mermaidConfig = {

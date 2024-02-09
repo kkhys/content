@@ -107,7 +107,7 @@ Next.js というフレームワークでこのサイトは作られているが
 まずは使用するフォントを定義する。
 何個でもカスタムフォントを定義できるが、使えば使うほどパフォーマンスが落ちるため注意。
 
-```ts title="lib/nextjs/fonts.ts"
+```ts title="lib/nextjs/fonts.ts" showLineNumbers
 import { Inter, JetBrains_Mono, Newsreader, Noto_Emoji, Noto_Sans_JP } from 'next/font/google';
 
 export const notoSansJP = Noto_Sans_JP({
@@ -148,7 +148,7 @@ export const notoEmoji = Noto_Emoji({
 次に `<html>` 要素にフォントを追加する。
 そうすることでサイト全体に反映される。
 
-```tsx title="app/layout.tsx"
+```tsx title="app/layout.tsx" showLineNumbers {5}
 import { inter, jetBrainsMono, newsreader, notoEmoji, notoSansJP } from '#/lib/nextjs/fonts';
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
@@ -165,7 +165,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
 
 最後に Tailwind CSS の設定を行う。
 
-```ts title="tailwind.config.ts"
+```ts title="tailwind.config.ts" showLineNumbers
 import type { Config } from 'tailwindcss';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
