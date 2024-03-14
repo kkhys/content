@@ -5,6 +5,7 @@ category: Tech
 tags: []
 status: published
 publishedAt: 2024-02-03
+updatedAt: 2024-03-14
 ---
 
 文字だけで見ると難しそうなことでも、図に起こしてみることで構造を単純化できることは多々ある。
@@ -31,6 +32,8 @@ https://github.com/kkhys/me/issues/493
 
 このライブラリの良いところはインライン SVG の生成をビルド時に行ってくれることである。
 内部的に [Playwright](https://playwright.dev) のヘッドレスブラウザを使っているようだ。
+
+<Alert type='warning' description='CI 環境ではビルドが不安定になる現象が何度か観測されている。デバッグに自信がなければ rehype-mermaid の使用は控えた方が良さそう。' />
 
 Mermaid の描画は通常クライアント（ブラウザ）側で行われるが、その際にノードの数が多くなればなるほど負荷が高くなってしまう。
 リンクカードのときもそうだったが、可能な限り SSG でページを生成してパフォーマンスを良くしたい。
