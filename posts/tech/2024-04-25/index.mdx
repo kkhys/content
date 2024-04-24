@@ -1,0 +1,137 @@
+---
+title: "Next.js では searchParams の扱いにご用心"
+emoji: 🔼
+category: Tech
+tags: [Next.js]
+status: published
+publishedAt: 2024-04-25
+---
+
+当ブログは主に Next.js を使って構築している（現時点でのバージョンは `14.2.2`）。
+先日、トップページから [記事一覧ページ](/posts) に遷移するときに少しもっさりしている感じがした。
+
+こういった感覚というのは大体合っているもので後から問題が見つかるパターンが多い。
+そこで怪しいと思ったキャッシュ関連を調査していると、そもそも記事一覧ページが [動的 Route](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes) （SSR の一種）として生成されていることが分かった。
+
+以下がビルド時の出力結果。
+
+```text
+Route (app)                                               Size     First Load JS
+┌ ○ /                                                     338 B           292 kB
+...
+├ ƒ /posts                                                475 B           662 kB
+├ ● /posts/[slug]                                         490 B           662 kB
+├   ├ /posts/p1e0lpm
+├   ├ /posts/p18vcqd
+├   ├ /posts/p16vfnq
+├   └ [+11 more paths]
+...
+└ ○ /sitemap.xml                                          0 B                0 B
++ First Load JS shared by all                             87 kB
+  ├ chunks/313-7c44dae77fe97d18.js                        31.4 kB
+  ├ chunks/73ebd006-83408596cd117cc0.js                   53.6 kB
+  └ other shared chunks (total)                           1.93 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+```
+
+`/posts` を見ると `ƒ` とあり、これは動的 Route で生成されていることを表している（前の記号は `λ` だったと思うが、定義が変わったのか？）。
+現在の記事一覧ページはただのリストを表示させているだけなので動的 Route にするメリットは全くない。
+
+まず、静的 Route を使うと何が嬉しいのか。
+それは TTFB（Time To First Byte）が短縮され、高パフォーマンスを出せる点である。
+
+静的 Route であればリクエストが発生する前にサーバがレンダリングを行う。
+あらかじめ生成されたキャッシュ（[Full Route Cache](https://nextjs.org/docs/app/building-your-application/caching#full-route-cache)）をレスポンスするため非常に初期表示が早い。
+
+もし、これが動的 Route だとキャッシュを即座にレスポンスせずにサーバでレンダリングしてからレスポンスするため若干ラグが発生する。
+
+では、なぜ静的 Route で生成されるべきページが動的 Route になっていたのか。
+
+初めはどこかのコンポーネントでデータ取得を行っているのではないかと考えた。
+全てのコンポーネントを辿ってみたが、そういった箇所はなかった。
+
+消去法で `generateMetadata` をコメントアウトしてからビルドすると以下のような出力結果になった。
+
+```text
+Route (app)                                               Size     First Load JS
+┌ ○ /                                                     338 B           292 kB
+...
+├ ○ /posts                                                475 B           666 kB
+├ ● /posts/[slug]                                         490 B           666 kB
+├   ├ /posts/p1e0lpm
+├   ├ /posts/p18vcqd
+├   ├ /posts/p16vfnq
+├   └ [+11 more paths]
+...
+└ ○ /sitemap.xml                                          0 B                0 B
++ First Load JS shared by all                             87 kB
+  ├ chunks/313-7c44dae77fe97d18.js                        31.4 kB
+  ├ chunks/73ebd006-83408596cd117cc0.js                   53.6 kB
+  └ other shared chunks (total)                           1.93 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+```
+
+（`/posts` が静的 Route として生成されている）
+
+`generateMetadata` 自体は動的 Route にスイッチさせるような関数ではない。
+意外な結果なのだが、`searchParams` を参照すると強制的に動的 Route になってしまうようである。
+
+`page.tsx` で渡される `params` は `generateStaticParams`[^1] で指定すれば SSG にできるが、`searchParams` は指定できない。
+それゆえ、`searchParams` を使うだけでは動的 Route にはならないという思い込みがあったのが今回の反省だ。
+
+[^1]: `generateStaticParams` 関数を使うと指定されたパスパラメータはビルド時に SSG が実行される。逆に指定しなければリクエスト時に SSG が実行されるのでできるだけ指定した方が良い
+
+元の `generateMetadata` は以下のようになっていた。
+
+```ts title="page.tsx" showLineNumbers
+export const generateMetadata = ({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) => {
+  const category = (searchParams.category as string) ?? 'blog';
+  return {
+    title: `${category.charAt(0).toUpperCase()}${category.slice(1)}`,
+    description: 'Blog posts of Keisuke Hayashi.',
+    alternates: {
+      canonical: '/posts',
+    },
+    openGraph: {
+      url: '/posts',
+    },
+  } satisfies Metadata;
+};
+```
+
+これはパラメータの値によってページタイトルを動的に変更したくてこの形にした。
+例えば `https://kkhys.me/posts?category=tech` という URL であればタイトルは `Tech` になる。
+
+結果的に対症療法として以下のようにメタデータを設定することにした。
+
+```ts title="page.tsx" showLineNumbers
+export const metadata = {
+  title: 'Blog',
+  description: 'Blog posts of Keisuke Hayashi.',
+  alternates: {
+    canonical: '/posts',
+  },
+  openGraph: {
+    url: '/posts',
+  },
+} satisfies Metadata;
+```
+
+静的 Route かつページタイトルを動的に変更したければ `https://kkhys.me/posts/tech` のような URL にするしかない。
+これだとあまり美しくないから URL 設計を見直さなければならない。
+
+Next.js は便利だが、こういった規約を強制させられる点がイマイチなところだ。
+今後 `generateStaticParams` で `searchParams` を設定できるようになると良いけど、その可能性は低いかもしれない。
+
+コンポーネントで `searchParams` の値が必要な場合は `page.tsx` の props から引っ張ってくるのではなく、`useSearchParams` を使って CSR でレンダリングする方が場合によっては有効。
+
+今回の件については [reddit](https://www.reddit.com/r/nextjs/comments/15dnnv4/nextjs_13_static_searchparams) が参考になった。
+最近は Stack Overflow よりも reddit の方が有益な情報が落ちていることが多いように感じる。
+
+また、Next.js リポジトリのこの [Issue](https://github.com/vercel/next.js/issues/49735) も参考になる。
