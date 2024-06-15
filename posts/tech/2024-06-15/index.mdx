@@ -254,9 +254,9 @@ const authenticate = async (username: string, password: string) => {
 }
 ```
 
-### セキュリティに関する質問を使わない
+### 秘密の質問を使わない
 
-パスワードをリセットするときにユーザしか知り得ないような質問を設定する方法がある（[秘密の質問](https://w.wiki/6Waf)）。
+パスワードをリセットするときにユーザしか知り得ないような質問の回答を要求する方法がある（[秘密の質問](https://w.wiki/6Waf)）。
 この方法は NIST SP 800-63 で許容される認証要素として認められなくなったため使用しないようにする。
 
 [Google のセキュリティブログ](https://security.googleblog.com/2015/05/new-research-some-tough-questions-for.html) に秘密の質問に関する問題点がわかりやすくまとめてある。
