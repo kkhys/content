@@ -860,6 +860,8 @@ sequenceDiagram
     participant C as Client
     participant B as Backend
     participant R as Resend
+    participant V as Vercel Edge Config
+    actor A as Admin
 
     opt 確認メールの送信を希望した場合
         B ->>+ R: メール送信をリクエスト
