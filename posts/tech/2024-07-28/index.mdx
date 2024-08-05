@@ -5,6 +5,7 @@ category: Tech
 tags: []
 status: published
 publishedAt: 2024-07-28
+updatedAt: 2024-08-05
 ---
 
 v1.7.0 で PV カウント機能を実装した。
@@ -185,7 +186,7 @@ Upstash の Redis に移行するにあたり、PostgreSQL に保存されてい
 
 Next.js に Ruby on Rails の Rake タスクみたいな機能があれば良いのだが、残念ながら無いので API として定義してそれをクライアント側から呼び出すことにした。
 
-```ts
+```ts title="apps/web/src/ui/post/view-counter/index.tsx" showLineNumbers
 import type { TRPCRouterRecord } from '@trpc/server';
 
 import { publicProcedure } from '../trpc';
