@@ -314,14 +314,16 @@ https://github.com/kkhys/me/issues/626
     <TabsTrigger value='component'>Component</TabsTrigger>
     <TabsTrigger value='code'>Code</TabsTrigger>
   </TabsList>
-  <TabsContent value='component' className='space-y-4'>
-    <Alert type='note' description='情報量の多いページで、ユーザが重要な情報を見逃さないようにするために使用する。記事全体の概要を簡単に伝えたい場合にも使用できる。' />
+  <TabsContent value='component'>
+    <div style={{ display: 'flex', 'flex-direction': 'column', 'gap': '16px' }}>
+      <Alert type='note' description='情報量の多いページで、ユーザが重要な情報を見逃さないようにするために使用する。記事全体の概要を簡単に伝えたい場合にも使用できる。' />
 
-    <Alert type='tip' description='ユーザが役立つと感じる情報を提供するために使用する。記事の内容をより深く理解するためのヒントやコツなどを提供する。' />
+      <Alert type='tip' description='ユーザが役立つと感じる情報を提供するために使用する。記事の内容をより深く理解するためのヒントやコツなどを提供する。' />
 
-    <Alert type='important' description='ユーザが絶対に知っておくべき重要な情報を伝えるために使用する。警告や注意喚起などにも使用できる。' />
+      <Alert type='important' description='ユーザが絶対に知っておくべき重要な情報を伝えるために使用する。警告や注意喚起などにも使用できる。' />
 
-    <Alert type='warning' description='ユーザが危険な状況を回避するために必要な情報を伝えるために使用する。緊急性の高い警告などにも使用できる。' />
+      <Alert type='warning' description='ユーザが危険な状況を回避するために必要な情報を伝えるために使用する。緊急性の高い警告などにも使用できる。' />
+    </div>
   </TabsContent>
   <TabsContent value='code'>
     ```tsx title="index.mdx"
