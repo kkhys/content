@@ -85,10 +85,10 @@ publishedAt: 2019-08-14
 フォーマットは以下のようなシンプルな形式。
 
 ```text
+# 「撮影日 / 作成日時の古い順にカウントした番号」
 2019-08-14 / 10
 ```
 
-「撮影日 / 作成日時の古い順にカウントした番号」
 これなら、無駄な頭脳的コストをかけずに済む。
 
 上述したメタデータを元に、ページを Next.js の SSG（Static Site Generation）で生成する。
@@ -156,7 +156,7 @@ enum を指定すると、Contentlayer が自動的にユニオン型を付与�
 - 画像の横幅・縦幅の取得
 - ページのレイアウトを崩さないために、事前に画像サイズを取得
 - [Plaiceholder](https://plaiceholder.co/docs) を使った Blur 画像の生成
-  - 高解像度の写真を表示する前に、ぼかし画像を一瞬挟むことでスムーズなユーザ体験を提供
+  - 高解像度の写真を表示する前に、ぼかし画像を一瞬挟むことでスムーズな UX を提供
 
 ただし、これらの詳細な処理については割愛する。
 
@@ -217,7 +217,7 @@ OGP 画像の URL にアクセスしたときの処理の大まかな流れは�
 最初は以下のように環境変数 `VERCEL_URL` を使って URL を作成していた。
 
 ```ts
-const url = `${env.VERCEL_URL || "http://localhost:3000"}${path}`;
+const url = `https://${env.VERCEL_URL || "http://localhost:3000"}${path}`;
 ```
 
 デプロイ先の Vercel にはシステム環境変数を自動で設定してくれる便利な機能がある（[参考](https://vercel.com/docs/projects/environment-variables/system-environment-variables)）。
