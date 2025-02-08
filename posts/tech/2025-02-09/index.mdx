@@ -1,0 +1,136 @@
+---
+title: "v2.3.0 リリースノート: Cron で毎日自動デプロイ"
+emoji: 🚀
+category: Tech
+tags: ["Release note"]
+status: draft
+publishedAt: 2025-02-09
+---
+
+このサイトは基本的に SSG で静的にページを生成している。
+そのおかげで、ブラウザに直接 HTML を届けられるため、高速なパフォーマンスを得られる。
+しかし、その代償としてランダムに表示させたい項目があったとしても、再ビルドしない限り氷漬けのままになってしまう。
+
+このサイトでビルドするたびに結果が変わる項目は以下のとおり。
+
+- タグクラウド
+- 検索モーダルを開いたときの初期表示
+- 記事下部にある関連記事
+
+今は頻繁に更新しているので問題ないが、忙しさに飲み込まれた日々が続けば、サイトが時間の狭間に取り残される可能性も十分にある。
+そんなケースを見越して、毎日午前 3 時に自動で再デプロイする機能を追加した。
+みんなが寝静まっているころにひっそりとサイトを更新させる。
+
+## 実装方法
+
+1. Vercel の Deploy Hook を作成する
+2. Vercel の Cron Jobs を使う
+3. デプロイを実行する API を作成する
+
+やることはシンプル、この 3 ステップだけ。
+
+### Vercel の Deploy Hook を作成する
+
+まずは Vercel の管理画面から Deploy Hook を作成する。
+
+https://vercel.com/docs/deployments/deploy-hooks
+
+この Deploy Hook の URL に POST リクエストを送るだけで、自動でデプロイが走る仕組みである。
+ヘッドレス CMS を使っている場合、コンテンツの変更と同時にデプロイをトリガーする用途でも活用できる。
+
+ただし、この URL が流出すると、誰でも勝手に再デプロイできるようになってしまうので注意が必要。
+
+### Vercel の Cron Jobs を設定する
+
+次に、Vercel の Cron Jobs を設定して、自動的にデプロイを実行する。
+
+https://vercel.com/docs/cron-jobs
+
+`vercel.json` に以下のような設定を追加すれば、指定した時間に実行される。
+
+```json title="vercel.json"
+{
+  "crons": [
+    {
+      "path": "/api/cron/deploy",
+      "schedule": "0 18 * * *"
+    }
+  ]
+}
+```
+
+ここで注意すべきは タイムゾーンが UTC であること。
+JST（日本標準時）で 毎日 3 時 に実行したい場合は、9 時間マイナスして `0 18 * * *` となる。
+
+ちなみに GitHub Actions でも Cron を設定することは可能。
+
+https://docs.github.com/ja/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
+
+### デプロイを実行する API を作成する
+
+あとは `/api/cron/deploy` にアクセスされたとき、Deploy Hook を叩く処理を書くだけ。
+
+```ts title="apps/web/src/app/api/cron/deploy/route.ts" showLineNumbers
+import { env } from "#/env";
+
+const createResponse = (message: string, status: number) =>
+  new Response(message, {
+    status,
+    headers: {
+      "Content-Type": "text/plain",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+
+export const GET = async (request: Request) => {
+  const webhookUrl = env.VERCEL_DEPLOY_HOOK_URL;
+
+  if (!webhookUrl) {
+    return createResponse("Deploy hook URL is missing", 500);
+  }
+
+  const authHeader = request.headers.get("authorization");
+
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+    return createResponse("Unauthorized", 401);
+  }
+
+  try {
+    const response = await fetch(webhookUrl, { method: "POST" });
+
+    if (response.ok) {
+      return createResponse("Redeployment triggered", 200);
+    }
+
+    console.error(
+      `Failed to trigger redeployment: ${response.status} ${response.statusText}`,
+    );
+
+    return createResponse("Failed to trigger redeployment", 500);
+  } catch (error) {
+    console.error("Error communicating with deploy hook", error);
+    return createResponse("Error communicating with deploy hook", 500);
+  }
+};
+```
+
+ここで重要なのは 21 行目である。
+API リクエストの認証を行わなければ、誰でも無制限に API を叩けてしまう。
+
+それは困るので、Cron 用の環境変数（`CRON_SECRET`）を使い、正しい認証情報を持ったリクエストのみ許可するようにする。
+具体的には、`Authorization` ヘッダを `Bearer` トークン の形で受け取り、それが環境変数 `CRON_SECRET` と一致するかを確認する。
+
+この仕組みにより、正しい `CRON_SECRET` を持ったリクエストだけがデプロイを実行できるようになる。
+
+### 実際に動くかテスト
+
+実装に問題がない場合、以下のコマンドを叩けばデプロイ処理が走り出す。
+
+```shell
+curl -X GET "https://xxx.com/api/cron/deploy" \
+-H "Authorization: Bearer xxx"
+```
+
+### さいごに
+
+何でも自動で動くのは最高。
