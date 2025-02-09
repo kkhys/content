@@ -3,7 +3,7 @@ title: "v2.3.0 リリースノート: Cron で毎日自動デプロイ"
 emoji: 🚀
 category: Tech
 tags: ["Release note"]
-status: draft
+status: published
 publishedAt: 2025-02-09
 ---
 
@@ -39,6 +39,8 @@ https://vercel.com/docs/deployments/deploy-hooks
 ヘッドレス CMS を使っている場合、コンテンツの変更と同時にデプロイをトリガーする用途でも活用できる。
 
 ただし、この URL が流出すると、誰でも勝手に再デプロイできるようになってしまうので注意が必要。
+
+<Alert type='warning' description='デフォルトだとビルドキャッシュが有効になっているため、Cron によるデプロイを実行してもアプリケーションの更新がされない。Deploy Hook URL の末尾に `?buildCache=false` を付与することで、ビルドキャッシュを無効化できる。' />
 
 ### Vercel の Cron Jobs を設定する
 
