@@ -1,54 +1,275 @@
 ---
 title: "Mac を買ったらやっておくべき初期設定（エンジニア向け）"
-emoji: 🚀
+emoji: ⚙️
 category: Tech
-tags: ["Release note"]
+tags: ["Environment"]
 status: draft
-publishedAt: 2025-03-18
+publishedAt: 2025-03-23
 ---
 
-1. ドックを必要最小限に
-2. 壁紙を黒くする
-3. ロック画面の設定
-4. デスクトップと Dock
-5. キーボードショートカットとマウスショートカット
-6. ホットコーナー
-7. Night Shift
-8. ネットワーク。ファイアウォール
-9. Spotlight
-10. コントロールセンター
-11. 外観。スクロールバー
-12. 通知
-13. サウンド
-14. 位置情報サービス
-15. iCloud
-16. キーボード
-17. マウス
+この前、Mac mini を購入した。
+その際の記事については以下を参照。
 
-グリッドに沿う
+https://kkhys.me/posts/p1r3zrr
 
-Finder の初期表示
+Mac の設定は千差万別。
+初期設定のまま使用する強者でない限りは、ほとんどの人が慣れ親しんだ設定があるはずである。
 
-サイドバー
+そこで、せっかく良い機会なので、一通りの設定を記録として残しておく（重要なものだけ）。
+これ以上ないほど便利な設定にしたとは全く思っていないが、これだけ設定しておけば問題なく使用できるというレベルのものを記載している。
+また、Mac の設定は OS のバージョンによっても異なるため、あくまで参考程度にしてほしい。
 
-ファイル拡張子
+そして、これが 1 番大事なことだが、全て真似するのではなく、自分が必要なものを選んで設定してほしい。
 
-表示順序
+## 設定する上での思想
 
-パスバー表示
+- できるだけデフォルトの設定を変更しない
+- 少しでも不要だと思ったら消す
+- 組み込みの機能でなんとかなるならそれを使う
 
-Finder アプリの終了
+## 今回断念していること
 
-Chromeのダウンロード
+- Mac の設定を全て CLI 経由で行うこと（ドキュメントが乏しいため。また、いつ破壊的変更があるか不明なので）
 
-Bitwarden ダウンロード
-App storeから
+## システム設定関連
 
-Karabiner-Elements インストール
+### 1. ファイアウォールを設定
+
+ファイアウォールは、外部ネットワークからの通信を制御し、不要なアクセスをブロックする。
+特に公共の Wi-Fi を使用する場合や、セキュリティリスクが不明なネットワーク環境に連携する際は有効にしておいたほうが良い。
+オンにしていて困ったことは今までないので、何も考えずにオンにしておくべき。
+
+```shell
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+```
+
+### 2. Spotlight
+
+Spotlight は、Mac の検索機能であり、アプリケーションやファイルを素早く見つけるために非常に便利である。
+ただ、デフォルトでは、Spotlight の検索結果に表示される項目が多すぎるため、必要なものだけを表示するように設定する。
+
+私の場合は「アプリケーション」のみを表示するように設定している。
+もちろん、「Apple の検索機能の改善に協力」はしない。
+
+- システム設定 → Spotlight
+  - 検索結果: 「アプリケーション」のみを選択
+  - Apple の検索機能の改善に協力: 「オフ」に設定
+
+![Spotlight を設定](/images/tech/2025-03-23/01.png)
+
+Spotlight の代わりに [Alfred](https://www.alfredapp.com) や [Raycast](https://www.raycast.com) をランチャーツールとして使用するのもありだと思う。
+調べた感じだと Raycast が良さげなので今度入れてみる予定。
+
+### 3. Mission Control
+
+「デスクトップと Dock」は作業の効率に与える影響が大きいため、設定を変えながら自分に合うように調整していくことをおすすめする。
+私の場合は、基本的にアプリをフルスクリーンにして使用しているので、Mission Control を多様している。
+
+Mission Control を使うことで目的のアプリケーションをすぐに見つけることができ、作業の効率が向上する。
+また、仮想デスクトップ（Spaces）を使えば、プロジェクトごとに作業スペースを分けることができ、作業の整理がしやすくなる。
+
+![Mission Control の一例](/images/tech/2025-03-23/02.png "Mission Control の一例")
+
+Mission Control の設定では、以下の項目を変更している。
+
+- システム設定 → デスクトップと Dock
+  - 最新の使用状況に基づいて操作スペースを自動的に並び替える: 「オフ」に設定
+    - 勝手に操作スペースが並び替えられるので、使いたいアプリを見失ってしまうため
+  - ウインドウをアプリケーションごとにグループ化: 「オン」に設定
+    - 複数フォルダを開いている場合などにまとめてくれるため便利
+  - ディスプレイごとに個別の操作スペース
+    - マルチディスプレイを使用する場合に、ディスプレイごとに個別の操作スペースを持たせたほうが便利なため
+
+![Mission Control の設定](/images/tech/2025-03-23/03.png)
+
+### 4. ホットコーナー
+
+ホットコーナーを設定することで、右上にカーソルを持っていくと Launchpad が表示されるようにしている。
+
+Launchpad とは以下のような画面で、アプリ一覧を表示してくれる。
+
+![Launchpad](/images/tech/2025-03-23/04.png)
+
+ホットコーナーには、他にクイックメモやスリープ機能を割り当てることができるが、右上以外のホットコーナーは誤って触れてしまうことが多いため、右上のみに設定している。
+
+- システム設定 → デスクトップと Dock → ホットコーナー
+  - 右上: 「Launchpad」を選択
+  - 他のホットコーナーは「オフ」に設定
+
+![ホットコーナーの設定](/images/tech/2025-03-23/05.png)
+
+### 5. スクロールバーを常に表示
+
+スクロールバーは、デフォルトでは必要なときにのみ表示されるようになっているが、常に表示するように設定している。
+そうすることで、スクロールバーの環境ごとの表示の違いを気にせず、作業を進めることができる（[参考](https://ics.media/entry/230206/#macos%E3%81%A7%E5%88%B6%E4%BD%9C%E3%81%99%E3%82%8B%E6%99%82%E3%81%AF%E3%80%81%E3%82%AF%E3%83%A9%E3%82%B7%E3%83%83%E3%82%AF%E3%82%B9%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AB%E3%83%90%E3%83%BC%E3%82%92%E5%B8%B8%E3%81%AB%E8%A1%A8%E7%A4%BA%E3%81%97%E3%82%88%E3%81%86)）。
+
+```shell
+defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
+```
+
+### 6. キーボード
+
+タイピングを快適にするために、「キーのリピート速度」は最も速く、「リピート入力認識までの時間」を最も短く設定している。
+
+キーボードショートカットは誤作動を防ぐために、自分が本当に使用するものだけを選択するようにしておく。
+
+- システム設定 → キーボード
+  - キーのリピート速度: 最も速く設定
+  - リピート入力認識までの時間: 最も短く選択
+
+![スクロールバーの設定](/images/tech/2025-03-23/06.png)
+
+## その他の Mac 設定関連
+
+### 7. Finder 設定
+
+![Finder の設定](/images/tech/2025-03-23/07.png "サイドバーも整理している")
+
+Finder はパスバーがあると便利なので、以下のコマンドを実行して常時表示させる。
+
+```shell
+defaults write com.apple.finder ShowPathbar -bool true
+```
+
+### 8. Finder アプリを終了可能にする
+
+デフォルトでは Finder アプリは終了（Quit）できないが、以下のコマンドを実行することで終了可能にできる。
+もちろん、Finder は開きっぱなしでも問題ないように設計されていると思うが、終了できないのはちょっと気持ち悪いので設定している。
+
+```shell
+defaults write com.apple.finder QuitMenuItem -bool false
+
+killall Finder
+```
+
+### 9. ファイル拡張子
+
+ファイル拡張子は、デフォルトでは非表示になっているが、以下のコマンドを実行することで常に表示される。
+
+```shell
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+killall Finder
+```
+
+### 10. スクリーンショット
+
+スクリーンショットでは以下の設定を行なっている。
+
+```shell
+# スクリーンショットのファイル名をカスタマイズ
+# この場合、スクリーンショットのファイル名の冒頭が "screenshot" になる
+defaults write com.apple.screencapture name "screenshot"
+
+# スクリーンショットの保存先のディレクトリを変更
+defaults write com.apple.screencapture location /Users/kkhys/Desktop/screenshots
+
+# スクリーンショットを撮った後、右下隅に表示される「サムネイルプレビュー」を無効化
+defaults write com.apple.screencapture show-thumbnail -bool false
+
+# 上記の変更を反映させる
+killall SystemUIServer
+```
+
+### 11. キーのリピート入力を有効化
+
+Vim で上下左右に移動するときなど、キーのリピート入力は必須である。
+デフォルトでは、キーのリピート入力が無効になっているが、以下のコマンドを実行することで有効化できる。
+
+```shell
+defaults write -g ApplePressAndHoldEnabled -bool false
+```
+
+### 12. Mac デフォルトのディレクトリ名を英語表示にする
+
+Mac のホームディレクトリにあるディレクトリ（「アプリケーション」や「デスクトップ」）が日本語表記になっているのは好ましくないため、英語表記に変更する。
+以下のコマンドを実行することで、英語表記に変更できる。
+くれぐれも直接ディレクトリ名を変更しないように。
+
+```shell
+rm ~/Applications/.localized
+
+rm ~/Documents/.localized
+
+rm ~/Downloads/.localized
+
+rm ~/Desktop/.localized
+
+rm ~/Public/.localized
+
+rm ~/Pictures/.localized
+
+rm ~/Music/.localized
+
+rm ~/Movies/.localized
+
+rm ~/Library/.localized
+```
+
+## インタフェース関連
+
+### 13. Karabiner-Elements
+
+[Karabiner-Elements](https://karabiner-elements.pqrs.org) は、キーボードのカスタマイズを行うためのアプリケーションである。
+私は [HHKB Professional HYBRID Type-S](https://amzn.asia/d/fNPTi3l) を愛用しており、このアプリは Mac の設定ではできないキーボードのカスタマイズを行うために使用している。
+
+基本的にキーマッピングはあまり変更しない主義だが、以下の設定は行う価値があると思う。
+
+- 左右のコマンドキー（`⌘`）を、単独で押したときは英数・かなキーとして扱う（左 `⌘` は英数、右 `⌘` はかな）
+- `⌘ + Q`を 2 連打したときのみアプリが閉じるようにする
+
+高速でタイピングをしているときに、誤って `⌘ + Q` を押してしまうことがあるため、2 連打しないとアプリが閉じないように設定している。
+過去に保存していないファイルを誤って閉じてしまったことがあるので、同じ轍を踏まないために多少不便だが、この設定を行なっている。
+
+以下のルールセットをインストールすることで簡単に設定可能。
+
+https://ke-complex-modifications.pqrs.org/#ei-kana-cmd
+
+### 14. Logi Options+
+
+キーボードに続いて、今度は外付けマウスの設定をしていく。
+
+私は [Logicool MX Master 3s](https://amzn.asia/d/1GNof5X) を使用しているが、これをより便利に使用するためには [Logi Options+](https://www.logicool.co.jp/ja-jp/software/logi-options-plus.html) をインストールする必要がある。
+
+ジェスチャーボタンを使用して、Mission Control を制御できるのは非常に便利なのでおすすめ。
+
+![Logi Options+](/images/tech/2025-03-23/08.png "設定方法の一例")
+
+## 開発関連
+
+ここから先はエンジニア向けの設定なので一般の方はスルーしてもらっても問題ない。
+
+### 15. 好みの等幅フォントをインストール
+
+こだわりのあるエンジニアであれば、お気に入りの等幅フォント（monospaced font）があるはずである。
+私の場合は [JetBrains Mono](https://www.jetbrains.com/ja-jp/lp/mono) といったように。
+
+このブログのコードブロックにも JetBrains Mono を使用しているし、IDE やターミナル系のアプリでも使用している。
+この段階でインストールして、Mac の Font Book に登録しておくと後々便利である。
+
+![Font Book](/images/tech/2025-03-23/09.png)
+
+### 16. 好みのターミナルエミュレータをインストール
+
+以前は [Alacritty](https://alacritty.org) を使用していたが、最近は [Warp](https://warp.dev) を使用している。
+Warp の良いところは、プラグインを追加することなく、デフォルトで必要な機能が揃っているという点である。
+もちろん、AI による補完機能もあるが、あまり使っていない。
+
+Alacritty では見た目に関しては [Starship](https://starship.rs/ja-JP) を使用していたが、Warp ではデフォルトのテーマを使用している。
+デフォルトでも十分に美しいので、特に変更する必要はないと思う。
+
+また、Zsh プラグインマネージャとして [Sheldon](https://sheldon.cli.rs) を使って、[zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) のようなプラグインを追加していた。
+これらのプラグインも Warp では必要ない。
+
+![Font Book](/images/tech/2025-03-23/10.png)
 
 JetBrains Toolbox App インストール
 
-Warp インストール
+VSCode, Cursor
+
+Docker
+
+Xcode
 
 vim インストール
 
@@ -69,6 +290,15 @@ git config
 brew install gnupg pinentry-mac
 
 gpg 秘密鍵をインポート
+
+## アプリ関連
+
+Chromeのダウンロード
+
+Bitwarden ダウンロード
+App storeから
+
+Adobe
 
 アプリ
 - AppCleaner
