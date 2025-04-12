@@ -228,7 +228,7 @@ if (!isDryRun) {
 ```
 
 ```bash
-bun release
+bun run scripts/release.ts
 ```
 
 上記を実行すると、以下のようにリリースが作成される。
@@ -238,7 +238,7 @@ https://github.com/kkhys/me/releases/tag/2025.04.12-2
 dry run モードだと以下の出力になる。
 
 ```bash
-bun release --dry-run
+bun run scripts/release.ts --dry-run
 
 🔖 Creating tag: 2025.04.12-3
 💡 Dry run mode is ON
