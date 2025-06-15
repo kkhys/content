@@ -291,24 +291,24 @@ public class HomeController extends Controller {
 `public` ディレクトリに配置したファイルを Play Framework のアセットコントローラとして使うためには `routes` ファイルに以下の設定を追加する。
 この操作を経ることで Reverse routing（リソースの URL を取得できる）が使用可能になる。
 
-```text title="conf/routes"
+```diff title="conf/routes"
 GET        /                    controllers.HomeController.index()
 
-GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset) // [!code ++]
++ GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
 ```
 
 `versioned` としているのは後々フィンガープリントに使用するためである。
 
 上記で `puclic` をルーティングに追加したことで View ファイル内で以下のように `puclic` ディレクトリ以下の静的ファイルを呼び出せるようになった。
 
-```html title="app/views/main.scala.html"
+```diff lang="html" title="app/views/main.scala.html"
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
 <html lang="ja">
     <head>
         <title>@title</title>
-        <script type="module" src="@routes.Assets.versioned("javascripts/main.js")" async></script> // [!code ++]
++       <script type="module" src="@routes.Assets.versioned("javascripts/main.js")" async></script>
     </head>
     <body>
         @content
@@ -369,29 +369,29 @@ export default {
 
 続いて npm スクリプトを追加する。
 
-```json title="frontend/package.json"
+```diff lang="json" title="frontend/package.json"
 {
   "name": "play-framework-java-playground",
   "private": true,
   "scripts": {
     "vite:dev": "vite build --watch",
     "vite:build": "vite build",
-    "tailwind:dev": "tailwindcss -i src/styles/input.css -o ../public/stylesheets/main.css --watch=always", // [!code ++]
-    "tailwind:build": "tailwindcss -i src/styles/input.css -o ../public/stylesheets/main.css --minify" // [!code ++]
++   "tailwind:dev": "tailwindcss -i src/styles/input.css -o ../public/stylesheets/main.css --watch=always",
++   "tailwind:build": "tailwindcss -i src/styles/input.css -o ../public/stylesheets/main.css --minify"
   }
 }
 ```
 
 最後に CSS ファイルをインポートする。
 
-```html title="app/views/main.scala.html"
+```diff lang="html" title="app/views/main.scala.html"
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
 <html lang="ja">
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")"> // [!code ++]
++       <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <script type="module" src="@routes.Assets.versioned("javascripts/main.js")" async></script>
     </head>
     <body>
@@ -584,7 +584,7 @@ object PlayDevRunHook {
 
 次に `build.sbt` に以下のコードを追記する。
 
-```text title="build.sbt"
+```diff title="build.sbt"
 import scala.sys.process.Process
 
 name := """play-framework-java-playground"""
@@ -605,7 +605,7 @@ lazy val root = (project in file("."))
     )
   )
 
-PlayKeys.playRunHooks += baseDirectory.map(PlayDevRunHook.apply).value // [!code ++]
++ PlayKeys.playRunHooks += baseDirectory.map(PlayDevRunHook.apply).value
 ```
 
 `sbt run` を実行すると同時に Vite と Tailwind のコンパイルも行われ、変更した際にもホットリロードが有効になっていることを確認できた。
@@ -616,24 +616,24 @@ PlayKeys.playRunHooks += baseDirectory.map(PlayDevRunHook.apply).value // [!code
 
 こちらはシンプルに以下のコードを `build.sbt` に追加するだけで良い。
 
-```text title="build.sbt"
-import scala.sys.process.Process // [!code ++]
+```diff title="build.sbt"
++ import scala.sys.process.Process
 
 ...
 
-lazy val frontEndBuild = taskKey[Unit]("Execute frontend build command") // [!code ++]
++ lazy val frontEndBuild = taskKey[Unit]("Execute frontend build command")
 
-val frontendPath = "frontend" // [!code ++]
-val frontEndFile = file(frontendPath) // [!code ++]
++ val frontendPath = "frontend"
++ val frontEndFile = file(frontendPath)
 
-frontEndBuild := { // [!code ++]
-  println(Process("pnpm install", frontEndFile).!!) // [!code ++]
-  println(Process("pnpm vite:build", frontEndFile).!!) // [!code ++]
-  println(Process("pnpm tailwind:build", frontEndFile).!!) // [!code ++]
-} // [!code ++]
++ frontEndBuild := {
++ println(Process("pnpm install", frontEndFile).!!)
++ println(Process("pnpm vite:build", frontEndFile).!!)
++ println(Process("pnpm tailwind:build", frontEndFile).!!)
++ }
 
-dist := (dist dependsOn frontEndBuild).value // [!code ++]
-stage := (stage dependsOn dist).value // [!code ++]
++ dist := (dist dependsOn frontEndBuild).value
++ stage := (stage dependsOn dist).value
 ```
 
 ## フィンガープリントを静的ファイルに付与する
@@ -645,21 +645,21 @@ stage := (stage dependsOn dist).value // [!code ++]
 
 `puclic` ディレクトリ以下のファイルにフィンガープリントを付与するためには [sbt-digest](https://github.com/sbt/sbt-digest) が必要なので追加する。
 
-```text title="project/plugins.sbt"
+```diff title="project/plugins.sbt"
 addSbtPlugin("org.playframework" % "sbt-plugin" % "3.0.1")
-addSbtPlugin("com.github.sbt" % "sbt-digest" % "2.0.0") // [!code ++]
++ addSbtPlugin("com.github.sbt" % "sbt-digest" % "2.0.0")
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ```
 
 次に `build.sbt` に以下の設定を追加する。
 
-```text title="build.sbt"
+```diff title="build.sbt"
 ...
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayJava)
-  .enablePlugins(SbtWeb) // [!code ++]
++ .enablePlugins(SbtWeb)
   .settings(
     libraryDependencies ++= Seq(
       guice,
@@ -668,7 +668,7 @@ lazy val root = (project in file("."))
     )
   )
 
-Assets / pipelineStages := Seq(digest) // [!code ++]
++ Assets / pipelineStages := Seq(digest)
 ```
 
 `Assets / pipelineStages` の処理を追加しているのはローカル環境でもフィンガープリントを追加するためである。
