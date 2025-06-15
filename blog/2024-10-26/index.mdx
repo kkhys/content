@@ -518,8 +518,8 @@ POSIX
 vim /etc/locale.gen
 ```
 
-```text title="/etc/locale.gen"
-ja_JP.UTF-8 UTF-8 // [!code ++]
+```diff title="/etc/locale.gen"
++ ja_JP.UTF-8 UTF-8
 ```
 
 `locale-gen` でシステムで利用できるロケールを作成する。
@@ -543,9 +543,9 @@ POSIX
 vim /etc/locale.conf
 ```
 
-```text title="/etc/locale.conf"
-# LANG=en_US.UTF-8 // [!code --]
-LANG=ja_JP.UTF-8 // [!code ++]
+```diff title="/etc/locale.conf"
+- # LANG=en_US.UTF-8
++ LANG=ja_JP.UTF-8
 ```
 
 最後にインスタンスを再起動させることで変更が反映される。
@@ -580,9 +580,9 @@ EDITOR=vim visudo
 
 `sudo` を利用するときに、パスワード入力を要求されないほうが使いやすいので、セキュリティ的には弱くなるが、パスワード入力なしで `sudo` コマンドを使用できるように設定しておく。
 
-```text title="/etc/sudoers"
-# %wheel ALL=(ALL:ALL) NOPASSWD: ALL // [!code --]
-%wheel ALL=(ALL:ALL) NOPASSWD: ALL // [!code ++]
+```diff title="/etc/sudoers"
+- # %wheel ALL=(ALL:ALL) NOPASSWD: ALL
++ %wheel ALL=(ALL:ALL) NOPASSWD: ALL
 ```
 
 次は SSH 接続時の設定を変更する。
@@ -595,12 +595,12 @@ vim /etc/ssh/sshd_config
 また、`PasswordAuthentication no` でパスワードを使ったログインを無効にし、公開鍵などの認証方式を用いることを強制してセキュリティを強化した。
 これは公開鍵を紛失したら二度とサーバにログインできないことを意味する。
 
-```text title="/etc/ssh/sshd_config"
-PermitRootLogin yes // [!code --]
-PermitRootLogin no // [!code ++]
+```diff title="/etc/ssh/sshd_config"
+- PermitRootLogin yes
++ PermitRootLogin no
 
-PasswordAuthentication yes // [!code --]
-PasswordAuthentication no // [!code ++]
+- PasswordAuthentication yes
++ PasswordAuthentication no
 ```
 
 最後に SSH サーバを有効化して上記の設定を反映させる。
@@ -1077,9 +1077,9 @@ vim /home/mastodon/live/.env.production
 
 以下の環境変数を追加。
 
-```text title="/home/mastodon/live/.env.production"
-S3_ENDPOINT=https://xxx.r2.cloudflarestorage.com/ // [!code ++]
-S3_PERMISSION=private // [!code ++]
+```diff title="/home/mastodon/live/.env.production"
++ S3_ENDPOINT=https://xxx.r2.cloudflarestorage.com/
++ S3_PERMISSION=private
 ```
 
 Mastodon の最低限の設定は以上で終わり。
@@ -1281,7 +1281,7 @@ vim /etc/nginx/sites-available/mastodon
 
 デフォルトでは証明書との紐付けがうまくいかないため、以下の変更を行う。
 
-```text title="/etc/nginx/sites-available/mastodon"
+```diff title="/etc/nginx/sites-available/mastodon"
 map $http_upgrade $connection_upgrade {
   default upgrade;
   ''      close;
@@ -1308,22 +1308,22 @@ proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=CACHE:10m inactive=7d max
 server {
   listen 80;
   listen [::]:80;
-  server_name example.com; // [!code --]
-  server_name mastodon.kkhys.me; // [!code ++]
+- server_name example.com;
++ server_name mastodon.kkhys.me;
   root /home/mastodon/live/public;
   location /.well-known/acme-challenge/ { allow all; }
   location / { return 301 https://$host$request_uri; }
 }
 
 server {
-  listen 443 ssl http2; // [!code --]
-  listen 443 ssl; // [!code ++]
-  listen [::]:443 ssl http2; // [!code --]
-  listen [::]:443 ssl; // [!code ++]
-  http2 on; // [!code ++]
+- listen 443 ssl http2;
++ listen 443 ssl;
+- listen [::]:443 ssl http2;
++ listen [::]:443 ssl;
++  http2 on;
 
-  server_name example.com; // [!code --]
-  server_name mastodon.kkhys.me; // [!code ++]
+- server_name example.com;
++ server_name mastodon.kkhys.me;
 
   ssl_protocols TLSv1.2 TLSv1.3;
 
@@ -1336,10 +1336,10 @@ server {
   ssl_session_tickets off;
 
   # Uncomment these lines once you acquire a certificate:
-  # ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem; // [!code --]
-  ssl_certificate /etc/letsencrypt/live/mastodon.kkhys.me/fullchain.pem; // [!code ++]
-  # ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem; // [!code --]
-  ssl_certificate_key /etc/letsencrypt/live/mastodon.kkhys.me/privkey.pem; // [!code ++]
+- # ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
++ ssl_certificate /etc/letsencrypt/live/mastodon.kkhys.me/fullchain.pem;
+- # ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
++ ssl_certificate_key /etc/letsencrypt/live/mastodon.kkhys.me/privkey.pem;
 
   keepalive_timeout    70;
   sendfile             on;
@@ -1520,8 +1520,8 @@ sudo pacman -S libheif imagemagick openslide poppler-glib
 
 次に `.env.production` を編集して以下の環境変数を追加する。
 
-```text title=".env/production"
-MASTODON_USE_LIBVIPS=true // [!code ++]
+```diff title=".env/production"
++ MASTODON_USE_LIBVIPS=true
 ```
 
 最後に Mastodon サービスを再起動すれば完了。
@@ -1556,11 +1556,11 @@ Elasticsearch を有効化するために環境変数を追加する。
 vim /home/mastodon/live/.env.production
 ```
 
-```text title="/home/mastodon/live/.env.production"
-ES_ENABLED=true // [!code ++]
-ES_HOST=localhost // [!code ++]
-ES_PORT=9200 // [!code ++]
-ES_PRESET=single_node_cluster // [!code ++]
+```diff title="/home/mastodon/live/.env.production"
++ ES_ENABLED=true
++ ES_HOST=localhost
++ ES_PORT=9200
++ ES_PRESET=single_node_cluster
 ```
 
 次に Elasticsearch の設定ファイルにセキュリティとノード構成のオプションを追加する。
@@ -1569,12 +1569,12 @@ ES_PRESET=single_node_cluster // [!code ++]
 vim /etc/elasticsearch/elasticsearch.yml
 ```
 
-```yaml title="/etc/elasticsearch/elasticsearch.yml"
+```diff lang="yaml" title="/etc/elasticsearch/elasticsearch.yml"
 # Elasticsearch のセキュリティ機能（認証とアクセス制御）を有効化する
-xpack.security.enabled: true // [!code ++]
++ xpack.security.enabled: true
 
 # Elasticsearch を単一ノード構成で動作させる
-discovery.type: single-node // [!code ++]
++ discovery.type: single-node
 ```
 
 続いて、Elasticsearch のセキュリティ設定とユーザパスワードの初期設定を行う。
@@ -1650,9 +1650,9 @@ Elasticsearch に mastodon ユーザを作成したので、Mastodon アプリ�
 vim /home/mastodon/live/.env.production
 ```
 
-```text title="/home/mastodon/live/.env.production"
-ES_USER=mastodon // [!code ++]
-ES_PASS=xxx // [!code ++]
+```diff title="/home/mastodon/live/.env.production"
++ ES_USER=mastodon
++ ES_PASS=xxx
 ```
 
 Elasticsearch の設定は完了したため、次に Mastodon 関連のサービスを再起動させてから全文検索のインデックスを作成する。
