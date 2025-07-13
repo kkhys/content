@@ -46,6 +46,8 @@ data:
   - professional:
     - title: "LT 会に登壇する"
     - title: "ハッカソンに参加する"
+      description: "2025年7月12日。Vibe Cording ハッカソンに参加"
+      completedAt: 2025-07-12
     - title: "本を出版する"
     - title: "個人サービスで月 10 万円の収入を得る"
     - title: "GitHub のスターを 1 つのリポジトリで 1,000 個獲得"
