@@ -1,0 +1,979 @@
+---
+title: 複数の Claude Code を並列実行する Git worktree 活用術
+description: Claude Code と Git worktree を組み合わせて、複数の AI 開発セッションを並列実行する手法を解説。OWASP Juice Shop を例に、セキュリティ修正タスクを同時並行で処理する実践的な開発手法である。
+emoji: 🔀
+category: Tech
+tags: [AI]
+status: published
+publishedAt: 2025-07-21
+slug: b1dwyvg
+---
+
+AI にコードを書かせるという行為が、いつの間にか日常の一部になってしまった。
+Claude Code と付き合い始めて、そろそろ 2 か月が経つ。
+
+ただし、完璧な関係などというものは存在しない。
+AI が考えを巡らせている間、人間の方はただ待つしかない。
+この手持ち無沙汰な時間が、なんとももったいなく感じていた。
+
+Claude Code の[ベストプラクティス](https://www.anthropic.com/engineering/claude-code-best-practices)でも言及されているように、Claude インスタンスを並列で動かすことでその課題が解決できるので、Git worktree を使った実例をまとめる。
+
+## 環境のセットアップ
+
+Claude Code の活用法としては、1 から何かを作るというよりも、実務では積み上がった Issue を消化させることに使うケースが多い。
+なので、今回は実際に存在するプロジェクトを元に並列処理で複数の Claude セッションを同時に実行させる。
+
+今回、実験対象となるのは [OWASP Juice Shop](https://github.com/juice-shop/juice-shop)。
+意図的にあらゆる Web の脆弱性が組み込まれたジュース屋さんの Web アプリである。
+
+まずはローカル環境で立ち上げる。
+
+```shell
+git clone git@github.com:juice-shop/juice-shop.git
+
+cd juice-shop
+
+npm i
+
+npm start
+```
+
+以下のトップページが表示されれば起動に成功。
+
+![OWASP Juice Shop のトップページ](./01.png)
+
+## 実行させるタスクを抽出する
+
+さて、この Web アプリには数多くの脆弱性が潜んでいる。
+それを Claude Code にまとめてもらう。
+
+まずはトークン消費数を節約するために、コンテキストとなる `CLAUDE.md` を生成する。
+スラッシュコマンドの `/init` を実行すると、以下のようなファイルが生成される。
+
+````md title="CLAUDE.md"
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## プロジェクト概要
+
+OWASP Juice Shopは、セキュリティトレーニング、デモ、CTF、セキュリティツールテスト用の脆弱なWebアプリケーションです。OWASP Top Tenをすべて網羅し、100以上のセキュリティチャレンジを含む教育プラットフォームです。
+
+**重要**: このアプリケーションは意図的に脆弱に設計されています。
+
+## 開発コマンド
+
+### アプリケーション起動
+```bash
+npm run serve              # 開発用（TypeScript + Angular同時起動）
+npm run serve:dev          # 開発用ホットリロード
+npm start                  # 本番用ビルドを起動
+```
+
+### ビルド
+```bash
+npm run build:server       # TypeScriptコンパイル
+npm run build:frontend     # Angularフロントエンドビルド
+npm run build              # 完全ビルド
+```
+
+### テスト実行
+```bash
+npm test                   # フルテストスイート
+npm run test:server        # サーバーサイド単体テスト（Mocha + nyc）
+npm run test:api           # API統合テスト（Frisby/Jest）
+npm run cypress:run        # E2Eテスト（ヘッドレス）
+npm run cypress:open       # Cypress開発モード
+```
+
+### コード品質
+```bash
+npm run lint               # ESLint + フロントエンドlint
+npm run lint:fix           # 自動修正付きlinting
+npm run lint:config        # 設定ファイルvalidation
+```
+
+## アーキテクチャ概要
+
+### フルスタック構成
+- **バックエンド**: Node.js + Express + TypeScript
+- **フロントエンド**: Angular 19 + Material Design
+- **データベース**: SQLite + Sequelize ORM
+- **認証**: JWT + OAuth
+- **リアルタイム**: Socket.io
+
+### 主要コンポーネント
+
+**サーバーサイド**:
+- `app.ts` - アプリケーションエントリーポイント
+- `server.ts` - Express サーバー設定
+- `routes/` - 45以上のAPIエンドポイント
+- `models/` - Sequelize データモデル
+- `lib/` - ユーティリティとヘルパー関数
+
+**フロントエンド**:
+- `frontend/` - Angular アプリケーション
+- Material Designコンポーネント使用
+- TypeScriptでの実装
+
+**セキュリティチャレンジ**:
+- `data/` - チャレンジ定義とデータ
+- 意図的な脆弱性の実装
+- 100以上のセキュリティ学習課題
+
+### データベース構造
+SQLiteデータベースでSequelize ORMを使用。重要なモデル:
+- Users（ユーザー管理）
+- Products（商品カタログ）
+- Baskets（ショッピングカート）
+- Challenges（セキュリティチャレンジ）
+- Complaints（お問い合わせ）
+
+## テスト戦略
+
+### 多層テストアプローチ
+1. **単体テスト**: Mocha + Chai（サーバー）、Jasmine + Karma（Angular）
+2. **API統合テスト**: Frisby + Jest
+3. **E2Eテスト**: Cypress
+4. **コードカバレッジ**: nyc（Istanbul）
+
+### テスト実行のベストプラクティス
+- 新機能にはE2Eテストが必須
+- APIエンドポイント変更時はFrisbyテスト更新
+- セキュリティチャレンジには対応するCypressテスト
+
+## 開発ガイドライン
+
+### TypeScript設定
+- `strict: true`モード使用
+- ES2020ターゲット
+- 型安全性を重視
+
+### コード品質要件
+- ESLint Standard TypeScript設定
+- すべてのコミットにDeveloper Certificate of Origin署名必須
+- Status checksパス必須
+
+### セキュリティ考慮事項
+**重要**: このプロジェクトは教育目的の脆弱なアプリケーションです：
+- セキュリティ脆弱性は意図的なもの
+- 新しいチャレンジ追加時は脆弱性を慎重に設計
+
+## CI/CDとデプロイ
+
+### GitHub Actionsワークフロー
+- `ci.yml` - メインCI/CD（lint, test, build）
+- `lint-fixer.yml` - 自動lint修正
+- `codeql-analysis.yml` - セキュリティ分析
+- `release.yml` - リリース自動化
+
+### サポート環境
+- Node.js: 20.x, 22.x
+- OS: Ubuntu, macOS, Windows
+- Docker: bkimminich/juice-shop
+
+## 特殊機能
+
+### 国際化（i18n）
+- 40以上の言語サポート
+- Crowdin統合による翻訳管理
+- `frontend/src/assets/i18n/` にローカライゼーションファイル
+
+### チャレンジシステム
+- SQLクエリでのチャレンジ管理
+- リアルタイムスコアトラッキング
+- CTFモード対応
+
+### Web3/ブロックチェーン機能
+- NFT関連チャレンジ
+- 暗号通貨ペイメント機能
+- ブロックチェーン脆弱性デモ
+
+## 開発時の注意事項
+
+1. **依存関係**: `npm install --legacy-peer-deps`が必要な場合あり
+2. **テスト**: 新機能には必ずE2Eテストを追加
+3. **国際化**: 新しいテキストは翻訳キーを使用
+4. **チャレンジ**: 新しいセキュリティチャレンジ追加時は慎重に設計
+````
+
+「脆弱性は教育目的のため修正しない」と当初は書かれていたが、今回は脆弱性を取り除いていくのが目的なのでテキストを削除している。
+
+次に脆弱性診断を行い、タスク化していく。
+
+WebStorm の[スクラッチファイル](https://pleiades.io/help/idea/scratches.html)（一時保存用のファイル置き場）に以下のマークダウンファイルを追加する（VSCode にはスクラッチファイル的な機能はないので適当な場所に置く）。
+
+```md title="security-audit.md"
+# 脆弱性診断
+
+包括的なセキュリティ評価を実行してください。
+
+## 手順
+
+以下の手順に従って体系的なセキュリティ監査を実行してください：
+
+1. **環境セットアップ**
+    - 技術スタックとフレームワークを特定
+    - 既存のセキュリティツールと設定を確認
+
+2. **依存関係のセキュリティ**
+    - 既知の脆弱性についてすべての依存関係をスキャン
+    - セキュリティ問題のある古いパッケージを確認
+    - 依存関係のソースと整合性を確認
+    - 適切なツールを使用：`npm audit`など
+
+3. **認証と認可**
+    - 認証メカニズムと実装を確認
+    - 適切なセッション管理を確認
+    - 認可制御とアクセス制限を検証
+    - パスワードポリシーと保存方法を確認
+
+4. **入力検証とサニタイゼーション**
+    - すべてのユーザー入力の検証とサニタイゼーションを確認
+    - SQLインジェクションの脆弱性を探す
+    - 潜在的なXSS（クロスサイトスクリプティング）問題を特定
+    - ファイルアップロードのセキュリティと検証を確認
+
+5. **データ保護**
+    - 機密データの取り扱い方法を特定
+    - 保存時および転送時のデータ暗号化実装を確認
+    - データマスキングと匿名化の実践を確認
+    - セキュアな通信プロトコル（HTTPS、TLS）を検証
+
+6. **シークレット管理**
+    - ハードコードされたシークレット、APIキー、パスワードをスキャン
+    - 適切なシークレット管理の実践を確認
+    - 環境変数のセキュリティを確認
+    - 公開された設定ファイルを特定
+
+7. **エラーハンドリングとログ記録**
+    - 情報漏洩のためのエラーメッセージを確認
+    - セキュリティイベントのログ記録実践を確認
+    - 機密データがログに記録されていないことを検証
+    - エラーハンドリングの堅牢性を評価
+
+8. **セキュリティヘッダーとCORS**
+    - セキュリティヘッダーの実装を確認
+    - CORS設定を確認
+    - CSP（コンテンツセキュリティポリシー）設定を検証
+    - クッキーのセキュリティ属性を確認
+
+9. **その他のセキュリティ考慮事項**
+    - サードパーティサービスと統合のセキュリティを確認
+    - セキュリティパッチと更新の適用状況を確認
+    - セキュリティベストプラクティスに従っていることを確認
+
+10. **報告**
+    - 重要度レベル（重大、高、中、低）でのすべての発見事項を文書化
+    - 各問題に対する具体的な修復手順を提供
+    - コード例とファイル参照を含める
+    - 主要な推奨事項を含む要約を作成
+    - 箇条書きでタスクを細分化（後で Claude Code にタスクを投げる予定）
+```
+
+脆弱性診断用のマークダウンファイルを Claude Code に読み取らせる。
+
+```bash
+> @xxx/JetBrains/WebStorm2025.1/scratches/security-audit.md の内容を実施してください。結果は xxx/JetBrains/WebStorm2025.1/scratches/security-audit-result.md に出力してください。
+```
+
+結果をスクラッチファイルに出力させる。
+
+````md title="security-audit-result.md"
+# OWASP Juice Shop 包括的セキュリティ脆弱性診断報告書
+
+## エグゼクティブサマリー
+
+OWASP Juice Shopの包括的なセキュリティ評価を実施しました。このアプリケーションは教育目的の脆弱なWebアプリケーションとして設計されており、**意図的に多数の重大なセキュリティ脆弱性を含んでいます**。
+
+### 重要度別脆弱性サマリー
+- **重大 (Critical)**: 15件
+- **高 (High)**: 23件
+- **中 (Medium)**: 18件
+- **低 (Low)**: 8件
+
+**⚠️ 重要な注意事項**: この報告書は教育目的の脆弱なアプリケーションに関するものです。実際のプロダクション環境では、以下で報告するすべての脆弱性を修正する必要があります。
+
+---
+
+## 1. 技術スタックとアーキテクチャ
+
+### 確認された技術構成
+- **バックエンド**: Node.js v20-22 + Express.js + TypeScript
+- **フロントエンド**: Angular 19 + Material Design
+- **データベース**: SQLite + Sequelize ORM
+- **認証**: JWT (RS256) + OAuth + 2FA (TOTP)
+- **リアルタイム通信**: Socket.io
+- **セキュリティツール**: Helmet (部分的)、CORS (緩い設定)
+
+---
+
+## 2. 依存関係のセキュリティ脆弱性 【重大度: 高】
+
+### 検出された脆弱性 (npm audit結果)
+**合計41件の脆弱性**:
+- 重大 (Critical): 6件
+- 高 (High): 19件
+- 中 (Medium): 15件
+- 低 (Low): 1件
+
+#### 重大な脆弱性例:
+```
+- crypto-js <4.2.0: PBKDF2が1993年基準より1,000倍、現在基準より130万倍弱い
+- marsdb: コマンドインジェクション脆弱性
+- vm2: サンドボックスエスケープ脆弱性
+- lodash ≤4.17.20: 複数のプロトタイプ汚染とReDoS脆弱性
+```
+
+### 修復推奨事項:
+```bash
+# 危険なパッケージの更新
+npm audit fix --force  # 破壊的変更を含む修正
+```
+
+---
+
+## 3. 認証と認可の脆弱性 【重大度: 重大】
+
+### 3.1 重大な認証バイパス脆弱性
+
+#### SQLインジェクション経由の認証バイパス
+**ファイル**: `routes/login.ts:34`
+```typescript
+// 脆弱なコード
+models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${security.hash(req.body.password || '')}' AND deletedAt IS NULL`)
+```
+**攻撃例**: `email: admin@juice-sh.op' OR '1'='1' --`
+
+#### JWT秘密キー漏洩
+**ファイル**: `lib/insecurity.ts:23`
+```typescript
+// 秘密キーがハードコード
+const privateKey = '-----BEGIN RSA PRIVATE KEY-----\r\nMIICXAIBAAKBgQDNwqLEe9wgTXCbC7+RPdDbBbeqjdbs4kOPOIGzqLpXvJXlxxW8iMz0EaM4BKUqYsIa+ndv3NAn2RxCd5ubVdJJcX43zO6Ko0TFEZx/65gY3BE0O6syCEmUP4qbSd6exou/F+WTISzbQ5FBVPVmhnYhG/kpwt/cIxK5iUn5hm+4tQIDAQABAoGBAI+8xiPoOrA+KMnG/T4jJsG6TsHQcDHvJi7o1IKC/hnIXha0atTX5AUkRRce95qSfvKFweXdJXSQ0JMGJyfuXgU6dI0TcseFRfewXAa/ssxAC+iUVR6KUMh1PE2wXLitfeI6JLvVtrBYswm2I7CtY0q8n5AGimHWVXJPLfGV7m0BAkEA+fqFt2LXbLtyg6wZyxMA/cnmt5Nt3U2dAu77MzFJvibANUNHE4HPLZxjGNXN+a6m0K6TD4kDdh5HfUYLWWRBYQJBANK3carmulBwqzcDBjsJ0YrIONBpCAsXxk8idXb8jL9aNIg15Wumm2enqqObahDHB5jnGOLmbasizvSVqypfM9UCQCQl8xIqy+YgURXzXCN+kwUgHinrutZms87Jyi+D8Br8NY0+Nlf+zHvXAomD2W5CsEK7C+8SLBr3k/TsnRWHJuECQHFE9RA2OP8WoaLPuGCyFXaxzICThSRZYluVnWkZtxsBhW2W8z1b8PvWUE7kMy7TnkzeJS2LSnaNHoyxi7IaPQUCQCwWU4U+v4lD7uYBw00Ga/xt+7+UqFPlPVdz1yyr4q24Zxaw0LgmuEvgU5dycq8N7JxjTubX0MIRR+G9fmDBBl8=\r\n-----END RSA PRIVATE KEY-----'
+```
+
+### 3.2 脆弱なパスワードハッシュ化
+**ファイル**: `lib/insecurity.ts:43`
+```typescript
+// MD5ハッシュ使用（ソルトなし）
+export const hash = (data: string) => crypto.createHash('md5').update(data).digest('hex')
+```
+
+### 3.3 公開キーファイルの露出
+**ディレクトリ**: `/encryptionkeys/`
+- `jwt.pub`: JWT公開キーが一般アクセス可能
+- `premium.key`: プレミアムキーが露出
+
+---
+
+## 4. 入力検証とサニタイゼーションの脆弱性 【重大度: 重大】
+
+### 4.1 SQLインジェクション脆弱性
+
+#### 商品検索機能
+**ファイル**: `routes/search.ts:23`
+```typescript
+// 脆弱なコード
+models.sequelize.query(`SELECT * FROM Products WHERE ((name LIKE '%${criteria}%' OR description LIKE '%${criteria}%') AND deletedAt IS NULL) ORDER BY name`)
+```
+
+#### NoSQLインジェクション
+**ファイル**: `routes/showProductReviews.ts:36`
+```typescript
+// MongoDBの$where句にユーザー入力を直接結合
+db.reviewsCollection.find({ $where: 'this.product == ' + id }).then((reviews: Review[]) => {
+```
+
+### 4.2 XSS (クロスサイトスクリプティング) 脆弱性
+
+#### DOM XSS
+**ファイル**: `frontend/src/app/search-result/search-result.component.html:13`
+```html
+<!-- 危険なinnerHTML使用 -->
+<span id="searchValue" [innerHTML]="searchValue"></span>
+```
+
+#### 反射型XSS
+**ファイル**: `routes/saveLoginIp.ts:22-26`
+```typescript
+// 条件付きサニタイゼーション
+if (utils.isChallengeEnabled(challenges.httpHeaderXssChallenge)) {
+  challengeUtils.solveIf(challenges.httpHeaderXssChallenge, () => { return lastLoginIp === '<iframe src="javascript:alert(`xss`)">' })
+} else {
+  lastLoginIp = security.sanitizeSecure(lastLoginIp ?? '')
+}
+```
+
+### 4.3 ファイルアップロード脆弱性
+
+#### パストラバーサル攻撃
+**ファイル**: `routes/fileUpload.ts:42-48`
+```typescript
+// 不十分なパス検証
+const absolutePath = path.resolve('uploads/complaints/' + fileName)
+if (absolutePath.includes(path.resolve('.'))) {
+  entry.pipe(fs.createWriteStream('uploads/complaints/' + fileName))
+}
+```
+
+#### XXE (XML外部エンティティ) 攻撃
+**ファイル**: `routes/fileUpload.ts:80-87`
+```typescript
+// 外部エンティティ処理が有効
+const xmlDoc = vm.runInContext('libxml.parseXml(data, { noblanks: true, noent: true, nocdata: true })', sandbox, { timeout: 2000 })
+```
+
+---
+
+## 5. データ保護の脆弱性 【重大度: 高】
+
+### 5.1 暗号化の問題
+- **データベース暗号化**: SQLiteファイルは暗号化されていない
+- **転送時暗号化**: HTTPS強制なし
+- **保存時暗号化**: パスワードのMD5ハッシュ化のみ
+
+### 5.2 PII (個人識別情報) の不適切な処理
+**ファイル**: `routes/dataExport.ts:21`
+```typescript
+// 不十分な匿名化
+const updatedEmail = email.replace(/[aeiou]/gi, '*')
+```
+
+---
+
+## 6. シークレット管理の脆弱性 【重大度: 重大】
+
+### 6.1 ハードコードされたシークレット
+
+#### JWT秘密キー
+- RSA秘密キーがソースコードに直接埋め込み
+
+#### HMAC キー
+**ファイル**: `lib/insecurity.ts:44`
+```typescript
+export const hmac = (data: string) => crypto.createHmac('sha256', 'pa4qacea4VK9t9nGv7yZtwmj').update(data).digest('hex')
+```
+
+#### セキュリティ質問の答え
+**ファイル**: `routes/resetPassword.ts:57-84`
+```typescript
+// ハードコードされた答え
+challengeUtils.solveIf(challenges.resetPasswordJimChallenge, () => { return user.id === users.jim.id && answer === 'Samuel' })
+challengeUtils.solveIf(challenges.resetPasswordBenderChallenge, () => { return user.id === users.bender.id && answer === 'Stop\'n\'Drop' })
+```
+
+### 6.2 設定ファイルでのパスワード露出
+**設定ファイル**: `config/*.yml`
+```yaml
+# 複数の設定ファイルで弱いパスワードやAPIキーが設定
+weakPasswordChallenge: true
+```
+
+---
+
+## 7. エラーハンドリングとログ記録の問題 【重大度: 中】
+
+### 7.1 情報漏洩のリスク
+**ファイル**: `lib/logger.ts:8-13`
+```typescript
+// 機密情報のマスキング機能なし
+export default winston.createLogger({
+  transports: [
+    new winston.transports.Console({ level: process.env.NODE_ENV === 'test' ? 'error' : 'info' })
+  ],
+  format: winston.format.simple()
+})
+```
+
+### 7.2 詳細なエラー情報の露出
+- アプリケーションエラーで内部情報が露出する可能性
+- データベースエラーの詳細が外部に漏洩
+
+---
+
+## 8. セキュリティヘッダーとCORSの問題 【重大度: 中】
+
+### 8.1 不完全なセキュリティヘッダー
+**ファイル**: `server.ts:184-192`
+```typescript
+app.use(helmet.noSniff())
+app.use(helmet.frameguard())
+// app.use(helmet.xssFilter()); // XSSフィルターが無効化
+app.disable('x-powered-by')
+```
+
+**欠落しているヘッダー**:
+- `Strict-Transport-Security` (HSTS)
+- `Content-Security-Policy` (CSP)
+- `X-XSS-Protection` (意図的に無効化)
+
+### 8.2 緩いCORS設定
+**ファイル**: `server.ts:179-181`
+```typescript
+// すべてのオリジンを許可
+app.options('*', cors())
+app.use(cors())
+```
+
+---
+
+## 9. その他のセキュリティ考慮事項 【重大度: 低-中】
+
+### 9.1 Web3/ブロックチェーン脆弱性
+- NFT関連チャレンジでの秘密キー露出
+- 暗号通貨ウォレットの不適切な実装
+
+### 9.2 API設計の問題
+- RESTful APIでの不適切な認証
+- GraphQLエンドポイントのセキュリティ不備
+
+### 9.3 セッション管理の問題
+- セッションIDの再生成なし
+- セッション固定攻撃の可能性
+
+---
+
+## 修復推奨事項とアクションプラン
+
+### 即座に対応すべき重大な問題
+
+#### 1. SQLインジェクション対策 【重要度: 最高】
+```typescript
+// 現在の脆弱なコード
+models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email}'`)
+
+// 推奨される修正
+models.User.findAll({
+  where: {
+    email: req.body.email,
+    password: security.hash(req.body.password),
+    deletedAt: null
+  }
+})
+```
+
+#### 2. パスワードハッシュ化の改善 【重要度: 最高】
+```typescript
+// 現在: MD5 (脆弱)
+export const hash = (data: string) => crypto.createHash('md5').update(data).digest('hex')
+
+// 推奨: bcrypt with salt
+import bcrypt from 'bcrypt'
+export const hash = async (data: string) => await bcrypt.hash(data, 12)
+```
+
+#### 3. JWT秘密キー管理の改善 【重要度: 最高】
+```typescript
+// 現在: ハードコード
+const privateKey = '-----BEGIN RSA PRIVATE KEY-----...'
+
+// 推奨: 環境変数
+const privateKey = process.env.JWT_PRIVATE_KEY || generateRandomKey()
+```
+
+#### 4. XSS対策の強化 【重要度: 高】
+```typescript
+// 現在: innerHTML使用
+<span [innerHTML]="searchValue"></span>
+
+// 推奨: テキストバインディング
+<span>{{searchValue}}</span>
+
+// CSP設定の追加
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"]
+    }
+  }
+}))
+```
+
+### 中期的改善項目
+
+#### 5. セキュリティヘッダーの包括的実装
+```typescript
+app.use(helmet({
+  hsts: { maxAge: 31536000, includeSubDomains: true },
+  contentSecurityPolicy: { /* 設定 */ },
+  xssFilter: true,
+  noCache: true
+}))
+```
+
+#### 6. 入力検証フレームワークの導入
+```typescript
+import Joi from 'joi'
+
+const userSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required()
+})
+```
+
+#### 7. ログ記録の改善
+```typescript
+// 機密情報のマスキング
+const maskedData = maskSensitiveData(logData)
+logger.info(maskedData)
+```
+
+### 長期的セキュリティ強化
+
+#### 8. データベース暗号化の実装
+- SQLiteファイルレベル暗号化
+- または暗号化対応データベースへの移行
+
+#### 9. API レート制限の強化
+```typescript
+app.use('/api/', rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分
+  max: 100 // リクエスト数制限
+}))
+```
+
+#### 10. 監査ログシステムの構築
+- セキュリティイベントの記録
+- 異常検知システムの導入
+
+---
+
+## 結論
+
+OWASP Juice Shopは教育目的の脆弱なアプリケーションとして、OWASP Top 10をはじめとする多くのセキュリティ脆弱性を意図的に含んでいます。この報告書で特定した64件の脆弱性は、実際のWebアプリケーション開発において**絶対に避けるべき**セキュリティ実装例です。
+
+**重要な学習ポイント**:
+1. **入力検証の重要性**: すべてのユーザー入力を検証・サニタイゼーション
+2. **適切な認証実装**: 強力なパスワードハッシュ化とセキュアなJWT管理
+3. **セキュリティヘッダーの活用**: CSP、HSTS等の実装
+4. **シークレット管理**: 環境変数による適切な機密情報管理
+5. **継続的セキュリティ監査**: 依存関係とコードの定期的な脆弱性チェック
+
+この報告書は、セキュアなWebアプリケーション開発のためのアンチパターン集として活用し、実際の開発では必ずセキュリティベストプラクティスに従うことを強く推奨します。
+
+---
+
+**生成日時**: 2025年1月19日
+**分析対象**: OWASP Juice Shop v18.0.0
+**分析ツール**: Claude Code による包括的セキュリティ監査
+````
+
+これで下準備は完了。
+
+## Git worktree の使い方
+
+[Git worktree](https://git-scm.com/docs/git-worktree) は、1 つの Git リポジトリに対して複数の作業ディレクトリを作成できる機能である。
+
+- `git checkout` や `git switch` でブランチを切り替える = 1 冊ずつ本を読み替える（しおりで場所を保存）
+- `git worktree` で複数のディレクトリを作る = 複数の本を同時に開いて読める
+
+みたいなイメージ。
+
+Mermaid に落とし込むと以下のようなグラフになる。
+
+```mermaid
+graph TD
+    subgraph "1 つのプロジェクト"
+        A["📚 プロジェクト"]
+    end
+
+    subgraph "作業場所 1"
+        B["📁 メイン機能<br/>ビルド中"]
+    end
+
+    subgraph "作業場所 2"
+        C["📁 ログイン機能<br/>開発中"]
+    end
+
+    subgraph "作業場所 3"
+        D["📁 バグ修正<br/>作業中"]
+    end
+
+    subgraph "作業場所 4"
+        E["📁 新UI実験<br/>テスト中"]
+    end
+
+    A --- B
+    A --- C
+    A --- D
+    A --- E
+```
+
+主な活用場面として以下があげられる。
+
+1. 複数ブランチでの並行作業（メインブランチでホットフィックス対応中に、別ブランチで新機能開発を継続）
+2. レビュー作業（自分のコードを別の worktree でテストしながら、メインの worktree で開発継続）
+3. 長時間のビルド・テスト（テスト実行中でも別の worktree で作業を続行）
+4. デプロイ用ディレクトリ（本番環境向けの特定ブランチを専用ディレクトリで管理）
+
+まさに Claude Code を並列で動かすにはうってつけの機能である。
+
+## 並列で Claude Code セッションを実行する
+
+以下が worktree を作成する実際の流れ。
+ブランチ名は各 worktree で一意でなければならない点に注意。
+
+```shell
+# worktrees 用のディレクトリを作る
+mkdir worktrees
+
+# worktrees ディレクトリを gitignore の対象に含める
+echo "worktrees" >> .gitignore
+
+# 新しいブランチで新しい worktree A を作成
+git worktree add worktrees/project-fix-a -b fix/a
+
+# 新しいブランチで新しい worktree B を作成
+git worktree add worktrees/project-fix-b -b fix/b
+
+# 新しいブランチで新しい worktree C を作成
+git worktree add worktrees/project-fix-c -b fix/c
+
+# worktree の一覧表示
+git worktree list
+/xxx/juice-shop                          5d0b7298a [master]
+/xxx/juice-shop/worktrees/project-fix-a  5d0b7298a [fix/a]
+/xxx/juice-shop/worktrees/project-fix-b  5d0b7298a [fix/b]
+/xxx/juice-shop/worktrees/project-fix-c  5d0b7298a [fix/c]
+
+# 各 worktree で Claude Code を起動
+cd worktrees/project-fix-a
+claude
+
+cd worktrees/project-fix-b
+claude
+
+cd worktrees/project-fix-c
+claude
+```
+
+各 worktree で Claude Code を起動できたので、それぞれに以下の指示を与える。
+
+````md title="worktree A に対する指示"
+SQL インジェクション経由の認証バイパスに関する問題を修正してください。
+
+修正前の問題：
+- 文字列連結で SQL インジェクション脆弱性
+- ユーザー入力を直接クエリに埋め込み
+
+修正要件：
+1. Sequelize の findOne メソッドまたはパラメータ化クエリに変更
+2. where オプションを使用してパラメータを安全に渡す
+3. 入力検証を追加
+4. エラーハンドリングを改善
+````
+
+````md title="worktree B に対する指示"
+JWT 秘密キー漏洩に関する問題を修正してください。
+
+修正前の問題：
+- JWT 秘密キーがソースコードにハードコード
+- 機密情報が Git リポジトリに含まれる
+- 鍵ローテーションが困難
+
+修正要件：
+1. 環境変数からJWT秘密キーを読み込み
+2. process.env.JWT_SECRET_KEY を使用
+3. 秘密キーが設定されていない場合のエラーハンドリング
+4. .env.example ファイルにサンプル設定を追加
+5. 既存の秘密キーは即座に無効化
+````
+
+````md title="worktree C に対する指示"
+脆弱なパスワードハッシュ化に関する問題を修正してください。
+
+修正前の問題：
+- MD5 は暗号学的に脆弱（高速すぎる、衝突耐性なし）
+- ソルトなしでレインボーテーブル攻撃に脆弱
+- 総当たり攻撃に対する耐性不足
+
+修正要件：
+1. bcrypt ライブラリを使用（npm install bcrypt @types/bcrypt）
+2. 適切なソルトラウンド数（12 以上推奨）
+3. 非同期処理対応
+4. パスワード比較関数も併せて実装
+````
+
+IDE やエディタを使っている場合は以下画像のように、画面分割すると進捗がわかりやすいのでおすすめ。
+
+![Claude Code を並列で実行中](./02.png)
+
+もしくは worktree ごとに別々の IDE ウィンドウを立ち上げるのも良いかもしれない。
+
+## 変更を取り込む流れ
+
+### 1. PR を作成して GitHub でマージ
+
+機能ごとに開発しているのであればこの方法がベストかもしれない。
+
+PR を使うメリット:
+
+- 各ブランチのレビューが個別にできる
+- CI が自動で走る
+- マージ後に履歴が明確
+
+### 2. worktree のブランチを main ブランチにマージ
+
+ちょっとした修正や機能追加であれば worktree で作成したブランチをそのまま main ブランチにマージで OK。
+
+```shell
+# main ブランチに切り替え
+git switch main
+
+# 2. fix/a をマージ
+git merge fix/a --no-ff -m "Merge fix/a"
+
+# 3. fix/b をマージ
+git merge fix/b --no-ff -m "Merge fix/b"
+```
+
+コンフリクトがあればその場で解決できる点が Good。
+コミット単位で整理したい場合は `--squash` を使っても良い。
+
+```mermaid
+gitGraph
+  commit id: "main"
+  branch fix/a
+  commit id: "fix/a commit"
+  checkout main
+  branch fix/b
+  commit id: "fix/b commit"
+  checkout main
+
+  merge fix/a tag: "Merge fix/a (local)"
+  merge fix/b tag: "Merge fix/b (local)"
+```
+
+## 改善が必要な点
+
+### アクションを求められたら通知音を鳴らす
+
+Claude Code ではシステムを変更する可能性のあるすべてのアクション（ファイルの書き込み、多くの bash コマンド、MCP ツールなど）に対して許可を求める。
+
+一応 `settings.json` にファイルに「これは勝手にやっていいよ」というリストを書いておけば、多少は楽になる（[My settings.json](https://github.com/kkhys/dotfiles/blob/main/.claude/settings.json)）。
+だが所詮は「多少」の話であって、完璧に自動化されるわけではない。
+結局のところ、AI が人間の許可を求める瞬間は残り続ける。
+
+困ったことに、複数の作業を同時並行でやっていると、どこかで AI が「すみません、確認お願いします」と手を挙げているのに気づかない確率が上がる。
+そうして貴重な時間が空転していく。
+そこで考えたのが、許可を求められた瞬間に音を鳴らすという、実にアナログな対処法だ。
+
+通知音は macOS に標準で入っているシステムサウンドを使う。
+
+```shell
+# システムサウンド一覧を表示
+ls /System/Library/Sounds
+
+Basso.aiff
+Blow.aiff
+Bottle.aiff
+Frog.aiff
+Funk.aiff
+Glass.aiff
+Hero.aiff
+Morse.aiff
+Ping.aiff
+Pop.aiff
+Purr.aiff
+Sosumi.aiff
+Submarine.aiff
+Tink.aiff
+```
+
+どの音が良いかは以下のコマンドを実行して確認できる。
+
+```shell
+afplay /System/Library/Sounds/Basso.aiff
+```
+
+通知音は Claude Code の [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) を使うことで鳴らせる。
+
+フックイベントは以下の 7 種類（今後も増えていくことが予想される）。
+
+- PreToolUse
+- PostToolUse
+- Notification
+- UserPromptSubmit
+- Stop
+- SubagentStop
+- PreCompact
+
+今回は `Notification`（ユーザにアクションを求める時）と `Stop`（処理が終了した時）をトリガーに通知音を鳴らす。
+
+以下のコードを `~/.claude/settings.json` に追加すれば通知音が鳴る。
+
+```json title="~/.claude/settings.json"
+{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Hero.aiff"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### そもそもアクションを自動承認したい
+
+指示を出したら処理が完了するまで放置しておきたい。
+しかし、たまにアクションを求められるので、定期的に様子を見に行く必要がある（前項で通知音を鳴らすようにはしたが、結局は耳を澄まして待機しなければならない）。
+
+そんな煩わしさから解放してくれる魔法の呪文が `--dangerously-skip-permissions` である。
+まさに YOLO（You Only Live Once）の精神を体現したオプション。
+
+Hooks や deny 機能を使えば危険なコマンドを事前にブロックできると主張している人もいるが、それでも自分の PC で使うには心許ない。
+
+極端な話、`rm -rf /*` なんてコマンドを実行されてしまったら、パソコンが文字通り消し飛んでしまう。
+AI が暴走して、デジタル世界の終末を迎えるという、SF 映画のような悪夢が現実になりかねない。
+
+そこで登場するのが [Dev Containers](https://containers.dev/) という救世主である。
+[公式のリファレンス実装](https://github.com/anthropics/claude-code/tree/main/.devcontainer)も用意されており、Claude Code も推奨している解決策だ。
+
+仮想的な箱庭の中で AI を自由に遊ばせることで、本当の世界への被害を防ぐという発想である。
+たとえファイルが全て消去されようが、システムが乗っ取られようが、所詮は隔離された世界での出来事に過ぎない。
+
+この記事では省略するが、今度は Dev Containers や [Apple Container](https://github.com/apple/container) で並列処理を行った様子を書こうと思う。
+
+## やってはないけど、やりたいこと
+
+### AI に下準備まで丸投げする
+
+今回は人間が worktree を作成してから Claude Code に指示を出したが、よく考えてみればこの作業も AI にやらせて構わないはずである。
+ブランチを切って、作業環境を整えて、最後は GitHub に Pull Request まで投げさせる。
+
+一連の流れを全て AI に委ねることができれば、人間はただ「この機能を作って PR まで投げといて」と言うだけで済む。
+
+### AI から AI に指揮させる
+
+以下の記事が興味深かったのだが、親分格の Claude が複数の子分 Claude に並列で作業を振り分けるという方法もあるらしいw
+
+https://zenn.dev/kazuph/articles/beb87d102bd4f5
+
+この記事を読んでいると、AI エージェントの組織論とでも呼ぶべき新しい分野が生まれつつあるのを感じる。
+人間が 1 つ 1 つの AI を管理するのではなく、AI 同士で勝手に役割分担をしてくれる世界。
+
+## さいごに
+
+Git worktree という昔からある仕組みと、 Claude Code という新しい技術の組み合わせというのが面白かった。
+
+ただし、今回紹介した並列処理の手法も、所詮は過渡期の技術に過ぎないだろう。
+数ヶ月後には、もっと洗練された仕組みが登場して、この記事も古い資料として扱われることになる。
+それでも、人間と AI が協働する現場の実情を記録しておくことには、それなりの価値があるはずである。
