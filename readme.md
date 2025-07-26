@@ -2,4 +2,4 @@
 
 ## Project Stats
 
-![📊](https://repobeats.axiom.co/api/embed/614fe7fd203975d86c460b30a42d58d07e31867e.svg 'Repobeats analytics image')
+![📊](https://repobeats.axiom.co/api/embed/5f5450aaa2a02196e3fd2390ae57865fc740db76.svg 'Repobeats analytics image')
