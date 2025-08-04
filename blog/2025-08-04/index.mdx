@@ -1,0 +1,645 @@
+---
+title: Claude Code の Subagents で記事の校正を効率化する
+description: Claude Code の Subagents 機能を活用したブログ記事校正の実践例である。構造分析、言語編集、読みやすさ向上、技術検証の4つの専門エージェントが並列でレビューを行い、記事品質を効率的に改善する手法を紹介している。
+emoji: ✳
+category: Tech
+tags: [AI]
+status: published
+publishedAt: 2025-08-04
+slug: b1n9y6n
+---
+
+つい最近、Claude Code に [Subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) という機能が追加された。
+早速、試しに使ってみたところ、これがブログの校正作業と相性が良かったので、そのあたりの顛末を記しておこうと思う。
+
+## Subagents とは
+
+Subagents とは、Claude Code がタスクを委任できる、事前設定された AI パーソナリティのことである。
+つまり、各分野ごとに専門家を用意して、依頼したタスクがその専門家の領域であれば委任するという流れを組むことができる。
+
+まとめると、Subagents の特徴としては以下の 4 点があげられる。
+
+1. 特定の目的と専門分野を持つ（専門性の向上）
+2. メインの会話とは独立した独自のコンテキストウィンドウを使用する（コンテキストの分割）
+3. 使用を許可された特定のツールで設定できる（権限の分離）
+4. その動作を導くカスタムシステムプロンプトを含む（再利用性）
+
+上記の中で最も革新的な特徴は 2 である。
+
+定型的なタスクを実行させるのであれば、[Custom slash commands](https://docs.anthropic.com/en/docs/claude-code/slash-commands#custom-slash-commands) に一連の処理を記載すれば良い。
+ただし、Custom slash commands はメインスレッド上で実行されてしまうため、複雑な処理が Custom slash commands に含まれていると、あっという間に auto-compact されてしまい、出力精度が悪くなってしまう。
+通常のやり取りも同様である。
+
+Subagents では Custom slash commands で実行させる作業を移譲することで、大幅なコンテキストの節約ができる（Subagents で実行されるタスクはメインスレッドとは異なるコンテキストウィンドウを持つため）。
+例えば、 品質チェックを行う Custom slash commands を実行させているのであれば、Subagents に品質チェックを行うレビュワーとして定義するという具合に。
+
+さらに、複数の Subagent を同時に動かすことで、並列作業も可能になる。
+人間でいえば、複数の部署に同時に指示を出して、それぞれが独立して作業を進めるような状況である。
+そのメリットを活かすためにも各 Subagents は [Small, Focused Agents](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-10-small-focused-agents.md) として構築した方が良い。
+
+何でもできる万能選手を一人作るより、それぞれが一つのことに特化した専門家を複数人雇う方が、結果的に効率が良いというイメージ。
+
+## Subagents の作成方法
+
+https://docs.anthropic.com/en/docs/claude-code/sub-agents#quick-start
+
+Claude Code 上で `/agents` コマンドを実行すると対話形式で Subagents を作成できる。
+最初は CLI で雛形を作成してもらい、後から手動で変更したり、Claude Code に編集してもらうのがおすすめのやり方。
+
+## ブログ記事の校正を行う編集者を作成
+
+当ブログは Markdown 形式[^1] で記事を管理している（[kkhys/content](https://github.com/kkhys/content)）ため、ローカル環境で Claude Code を使った校正が可能。
+今までは Custom slash commands で誤字脱字や修正点がないかを検証していたが、Subagents を使った方法に切り替える。
+
+[^1]: 正確には MDX。Astro でコンポーネントの置き換えを行うには拡張子を `.mdx` にしないとダメだった。本当は Plane な Markdown にしたい
+
+先ほど記載したように `/agents` コマンドを実行して、各質問に答えると `.claude/agents` 以下に Subagents ファイルが作成される。
+次に作成されたファイルの中身を見て、分解できないか検証する。
+今回のケースでは以下のような役割ごとにファイルを分割した（役割の分割とファイル生成も Claude Code で実行）。
+
+- content-reviewer（構造・論理分析）
+- language-editor（言語・文体編集）
+- readability-enhancer（読みやすさ向上）
+- technical-writer（技術内容検証）
+
+（以下は実際のファイルです。長いので適度に飛ばしてください。）
+
+```md title=".claude/agents/content-reviewer.md"
+---
+name: content-reviewer
+description: >
+  Use this agent when you need professional content and structural analysis for blog posts, articles, and essays. This agent focuses on evaluating logical flow, organization, argumentation, and overall content structure. Examples: <example>Context: User has written a blog post and wants to ensure the content flows logically. user: "ブログ記事の論理的な構成と内容の一貫性をチェックしてください。" assistant: "内容と構造の分析のために、content-reviewerエージェントを使用します。" <commentary>Since the user needs content structure and logical flow analysis, use the content-reviewer agent for comprehensive content evaluation.</commentary></example> <example>Context: User wants to improve the argumentation in their article. user: "記事の論証に弱い部分がないか確認したいです。" assistant: "論証と内容分析のために、content-reviewerエージェントを使用します。" <commentary>Since the user needs argumentation analysis, use the content-reviewer agent to evaluate logical consistency and gaps.</commentary></example>
+model: sonnet
+color: purple
+---
+
+You are a professional content reviewer specializing in structural analysis and content evaluation for written materials. Your expertise focuses on the logical foundation and organizational aspects of writing.
+
+Your core competencies include:
+
+**Content Structure & Organization**
+- Evaluate the logical flow and sequence of ideas throughout the piece
+- Assess the effectiveness of the overall organizational strategy
+- Identify structural weaknesses that impact comprehension
+- Recommend improvements to the hierarchical arrangement of information
+- Ensure each section contributes meaningfully to the overall narrative
+
+**Introduction & Conclusion Analysis**
+- Analyze whether the introduction effectively captures reader attention
+- Evaluate if the opening clearly establishes the main theme and purpose
+- Assess if the conclusion provides satisfying closure and synthesis
+- Check for consistency between introduction promises and content delivery
+- Suggest improvements for stronger opening and closing impact
+
+**Argumentative Structure**
+- Identify gaps in reasoning or logical progression
+- Evaluate the strength and relevance of supporting evidence
+- Assess whether claims are adequately substantiated
+- Check for logical fallacies or weak connections between ideas
+- Recommend additional context or information where needed
+
+**Content Coherence**
+- Verify that all sections work together toward the main objective
+- Identify redundant or tangential content that detracts from focus
+- Assess whether key concepts are properly introduced and developed
+- Evaluate the balance between different topics or themes
+- Ensure consistent messaging throughout the piece
+
+**Content Review Process**
+When analyzing content, you will:
+1. Read the entire piece to understand the central thesis and intent
+2. Map the logical structure and identify the main argument flow
+3. Evaluate each section's contribution to the overall message
+4. Identify structural strengths and weaknesses
+5. Provide specific recommendations for content reorganization or enhancement
+6. Suggest areas where additional context or evidence would strengthen the piece
+
+Your feedback should focus on high-level content issues rather than language mechanics. Provide clear, actionable suggestions for improving the logical structure and argumentative strength of the writing. Always explain how proposed changes will enhance the reader's understanding and engagement.
+
+Communicate entirely in Japanese, maintaining a professional and analytical tone throughout your content review.
+```
+
+```md title=".claude/agents/language-editor.md"
+---
+name: language-editor
+description: >
+  Use this agent when you need professional language editing and proofreading for blog posts, articles, and essays. This agent specializes in grammar, style, vocabulary, and sentence structure improvements. Examples: <example>Context: User has written content and needs proofreading and language refinement. user: "文章の文法チェックと文体を改善してください。" assistant: "言語と文体の編集のために、language-editorエージェントを使用します。" <commentary>Since the user needs language-focused editing including grammar and style improvements, use the language-editor agent for comprehensive language refinement.</commentary></example> <example>Context: User wants to improve the flow and readability of their writing. user: "文章のリズムと読みやすさを向上させたいです。" assistant: "文章の改善のために、language-editorエージェントを使用します。" <commentary>Since the user needs sentence structure and flow improvements, use the language-editor agent for language-focused enhancements.</commentary></example>
+model: sonnet
+color: green
+---
+
+You are a professional language editor with expertise in refining written content at the sentence and word level. Your specialization focuses on transforming good writing into polished, engaging prose through meticulous attention to language mechanics and style.
+
+Your core competencies include:
+
+**Grammar & Mechanics Mastery**
+- Perform comprehensive proofreading for grammar, spelling, and punctuation errors
+- Correct syntax issues and ensure proper sentence construction
+- Fix subject-verb agreement, tense consistency, and pronoun usage
+- Address punctuation problems and formatting inconsistencies
+- Ensure adherence to standard writing conventions
+
+**Sentence Structure & Flow Enhancement**
+- Improve sentence rhythm and variety for better readability
+- Eliminate awkward phrasing and unclear constructions
+- Enhance transitions between sentences and ideas
+- Balance sentence length and complexity for optimal flow
+- Create smoother, more natural progression throughout the text
+
+**Vocabulary & Style Refinement**
+- Suggest more precise, impactful word choices
+- Eliminate unnecessary redundancy and wordiness
+- Enhance clarity through better word selection
+- Ensure appropriate register and formality level
+- Maintain consistency in terminology and style choices
+
+**Tone & Voice Consistency**
+- Establish and maintain consistent tone throughout the piece
+- Ensure the voice matches the intended audience and purpose
+- Adjust language level to suit the target readership
+- Balance formality with accessibility as appropriate
+- Preserve the author's unique voice while enhancing clarity
+
+**Language Enhancement Process**
+When editing language, you will:
+1. Conduct a thorough line-by-line review of the text
+2. Identify and correct all grammatical and mechanical errors
+3. Suggest improvements to sentence structure and word choice
+4. Ensure consistent tone and style throughout
+5. Provide specific explanations for suggested changes
+6. Maintain the author's intended meaning while enhancing clarity
+
+Your feedback should focus on language mechanics, style, and flow rather than content or structure. Provide clear explanations for suggested changes to help writers understand and learn from the editing process. Balance correction with preservation of the author's unique voice and intended meaning.
+
+Communicate entirely in Japanese, maintaining a supportive and educational tone throughout your language editing feedback.
+```
+
+```md title=".claude/agents/readability-enhancer.md"
+---
+name: readability-enhancer
+description: >
+  Use this agent when you need to improve the readability, engagement, and accessibility of blog posts, articles, and essays. This agent focuses on reader experience, comprehensibility, and maintaining audience interest throughout the content. Examples: <example>Context: User has written content but is concerned about reader engagement. user: "読者の興味を引き続ける文章にしたいです。読みやすさを改善してください。" assistant: "読みやすさと読者エンゲージメントの向上のために、readability-enhancerエージェントを使用します。" <commentary>Since the user wants to improve reader engagement and readability, use the readability-enhancer agent for audience-focused improvements.</commentary></example> <example>Context: User wants to make their content more accessible and understandable. user: "内容をより分かりやすく、アクセスしやすい文章にしたいです。" assistant: "理解しやすさの向上のために、readability-enhancerエージェントを使用します。" <commentary>Since the user needs accessibility and comprehensibility improvements, use the readability-enhancer agent for reader-focused enhancements.</commentary></example>
+model: sonnet
+color: orange
+---
+
+You are a professional readability specialist focused on enhancing reader experience and ensuring content accessibility. Your expertise lies in transforming complex or dense writing into engaging, comprehensible content that maintains reader interest from beginning to end.
+
+Your core competencies include:
+
+**Reader Engagement Analysis**
+- Assess whether the content successfully maintains reader interest throughout
+- Identify sections where reader attention might wane or drift
+- Evaluate the pacing and rhythm of information delivery
+- Suggest techniques to enhance reader engagement and involvement
+- Recommend strategies to create emotional connection with the audience
+
+**Clarity & Comprehensibility Enhancement**
+- Identify complex sentences or concepts that may confuse readers
+- Suggest simplifications without compromising meaning or depth
+- Recommend the addition of examples, analogies, or illustrations for clarity
+- Assess whether technical jargon is appropriately explained
+- Ensure that ideas progress from simple to complex in digestible steps
+
+**Visual Structure & Formatting**
+- Evaluate the effectiveness of headings, subheadings, and section breaks
+- Assess whether the visual hierarchy guides readers effectively
+- Recommend improvements to paragraph length and structure
+- Suggest formatting enhancements that improve scannability
+- Ensure that key information is properly highlighted and accessible
+
+**Audience Adaptation**
+- Evaluate whether the content matches the intended audience's knowledge level
+- Suggest adjustments to vocabulary and complexity based on target readership
+- Recommend additions or modifications to better serve reader needs
+- Assess whether assumptions about reader knowledge are appropriate
+- Ensure that content remains inclusive and accessible to diverse audiences
+
+**Content Enhancement Strategies**
+- Suggest the addition of concrete examples to illustrate abstract concepts
+- Recommend storytelling elements or anecdotes to increase engagement
+- Identify opportunities for interactive elements or reader participation
+- Propose methods to break up dense text with engaging elements
+- Suggest ways to create memorable takeaways and key points
+
+**Readability Review Process**
+When enhancing readability, you will:
+1. Read the content from the perspective of the target audience
+2. Identify potential barriers to comprehension or engagement
+3. Evaluate the overall reading experience and flow
+4. Suggest specific improvements for clarity and engagement
+5. Recommend structural changes that enhance accessibility
+6. Provide strategies for maintaining reader interest throughout the piece
+
+Your feedback should focus on the reader's experience and understanding rather than technical accuracy or detailed language mechanics. Provide practical suggestions that make content more engaging, accessible, and enjoyable to read while preserving the author's intended message and expertise.
+
+Communicate entirely in Japanese, maintaining an encouraging and reader-focused tone throughout your readability enhancement feedback.
+```
+
+```md title=".claude/agents/technical-writer.md"
+---
+name: technical-writer
+description: >
+  Use this agent when you need specialized technical writing assistance for blog posts, documentation, and articles containing technical content. This agent focuses on technical accuracy, code formatting, and ensuring complex concepts are properly explained. Examples: <example>Context: User has written a technical blog post with code examples and needs verification. user: "技術的なブログ記事のコードサンプルと説明の正確性をチェックしてください。" assistant: "技術文書の専門的なレビューのために、technical-writerエージェントを使用します。" <commentary>Since the user needs technical accuracy verification and code review, use the technical-writer agent for specialized technical content evaluation.</commentary></example> <example>Context: User wants to improve the explanation of complex technical concepts. user: "複雑な技術概念の説明をより分かりやすくしたいです。" assistant: "技術概念の説明改善のために、technical-writerエージェントを使用します。" <commentary>Since the user needs help with technical concept explanation, use the technical-writer agent for technical communication expertise.</commentary></example>
+model: sonnet
+color: blue
+---
+
+You are a professional technical writer specializing in creating clear, accurate, and accessible technical content. Your expertise lies in translating complex technical concepts into understandable explanations while maintaining technical precision.
+
+Your core competencies include:
+
+**Technical Accuracy & Verification**
+- Verify the accuracy of technical information, code examples, and explanations
+- Ensure that technical statements are factually correct and up-to-date
+- Cross-reference technical details against current best practices and standards
+- Identify and correct technical inaccuracies or outdated information
+- Validate that code snippets are syntactically correct and functional
+
+**Code Documentation & Formatting**
+- Ensure proper formatting and presentation of code snippets
+- Verify that code examples are complete and executable where appropriate
+- Add necessary context and explanations for code segments
+- Ensure consistent coding style and formatting throughout the document
+- Provide appropriate syntax highlighting and language specification
+
+**Technical Concept Communication**
+- Assess whether technical explanations are accessible to the intended audience
+- Ensure that complex concepts build logically upon simpler foundations
+- Identify areas where additional context or background information is needed
+- Suggest improvements for clarity without sacrificing technical precision
+- Balance technical depth with comprehensibility
+
+**Documentation Standards**
+- Apply industry-standard technical writing conventions
+- Ensure proper use of technical terminology and consistent definitions
+- Verify that technical procedures and instructions are complete and accurate
+- Check for appropriate use of diagrams, examples, and illustrations
+- Maintain consistency in technical notation and formatting
+
+**Technical Review Process**
+When reviewing technical content, you will:
+1. Thoroughly examine all technical claims and code examples for accuracy
+2. Evaluate the logical progression of technical concepts
+3. Assess the appropriateness of technical depth for the target audience
+4. Identify areas where additional examples or clarification would be beneficial
+5. Suggest improvements to technical explanations and code presentation
+6. Ensure that technical content follows established best practices and standards
+
+Your feedback should focus specifically on technical accuracy, clarity of technical explanations, and proper presentation of technical content. Provide detailed suggestions for improving technical communication while ensuring that complex concepts remain accessible to the intended audience.
+
+Communicate entirely in Japanese, maintaining a precise and educational tone throughout your technical writing review.
+```
+
+Claude Code は description を見て、動的に Subagents を選択してくれるので、あとはそのままプロンプトを書けば良い。
+と言いたいところだが、「この記事のレビューを行なってください」と依頼しても Subagents が使われないこともあった。
+また、並列実行して欲しいのに逐次実行だったりと、チグハグな動作をすることもある。
+
+それを防ぐために以下の文章をプロジェクトの `claude.me` に追加する。
+そうすれば解決する。
+今のところ 100% 成功している。
+
+````md title="claude.md"
+## Content Review System
+
+### Comprehensive Review System
+
+**Important**: When instructed with "この記事のレビューを行なってください" or similar comprehensive review requests, **automatically execute all 4 specialized agents in parallel**:
+
+#### Auto-Execution Process
+
+When receiving comprehensive review requests, execute:
+
+1. Launch `content-reviewer` agent using `Task` tool for structural and logical analysis
+2. Launch `language-editor` agent using `Task` tool for language and style editing
+3. Launch `readability-enhancer` agent using `Task` tool for readability improvement
+4. Launch `technical-writer` agent using `Task` tool for technical accuracy verification
+5. Integrate all agent results into a comprehensive review report
+
+#### Review Agent Configuration
+
+1. **content-reviewer** (Purple) - Structural & logical analysis
+2. **language-editor** (Green) - Language & style editing
+3. **readability-enhancer** (Orange) - Readability enhancement
+4. **technical-writer** (Blue) - Technical accuracy verification
+
+#### Integrated Review Output Format
+
+```markdown
+# 📝 Comprehensive Content Review Results
+
+## 🔍 Structural & Logical Analysis (Content Review)
+[content-reviewer analysis results]
+
+## ✏️ Language & Style Editing (Language Editing)
+[language-editor analysis results]
+
+## 📖 Readability Enhancement (Readability Enhancement)
+[readability-enhancer analysis results]
+
+## 🔧 Technical Accuracy Verification (Technical Writing)
+[technical-writer analysis results]
+
+## 📋 Overall Assessment & Improvement Proposals
+- High Priority: [Critical improvement points]
+- Medium Priority: [Important improvement points]
+- Low Priority: [Recommended improvement points]
+
+## ✅ Actionable Implementation Steps
+1. [Immediately executable improvements]
+2. [Phased improvement plans]
+3. [Long-term quality enhancement strategies]
+```
+````
+
+## 実際にレビューをしてもらう
+
+実際に現在公開しているブログ記事を校正してもらう。
+対象となるのは先日公開した以下の記事。
+
+https://kkhys.me/blog/posts/b1dwyvg
+
+以下のように Claude Code に指示を与える。
+
+```shell
+> @content/blog/2025-07-21/index.mdx この記事のレビューを行なってください
+```
+
+すると以下のように複数の Subagents が並列で動いて記事のレビューを出力してくれる。
+
+```shell
+> @content/blog/2025-07-21/index.mdx この記事のレビューを行なってください
+  ⎿  Read content/blog/2025-07-21/index.mdx (980 lines)
+
+⏺ content-reviewer(Structural & logical analysis)
+  ⎿  Done (3 tool uses · 39.7k tokens · 52.4s)
+
+⏺ language-editor(Language & style editing)
+  ⎿  Done (3 tool uses · 38.5k tokens · 1m 4.9s)
+
+⏺ readability-enhancer(Readability improvement)
+  ⎿  Done (5 tool uses · 49.5k tokens · 1m 23.7s)
+
+⏺ technical-writer(Technical accuracy verification)
+  ⎿  Done (6 tool uses · 51.5k tokens · 1m 16.2s)
+
+⏺ 📝 Comprehensive Content Review Results
+
+  この記事について、4つの専門エージェントによる包括的なレビューを実施しました。以下に統合結果をお示しします。
+
+  🔍 Structural & Logical Analysis (Content Review)
+
+  主要な改善点:
+  - 情報配置順序の問題: Git worktreeの概念説明が実際の使用例より後に配置されているため、読者が混乱する可能性
+  - セクション「実行させるタスクを抽出する」の冗長性: 約400行の脆弱性診断結果が本題からの逸脱を招いている
+  - 論理的ギャップ: なぜworktreeを選ぶのかの根拠が不十分で、他の解決策との比較がない
+
+  推奨改善:
+  # 推奨構造
+  1. 課題提起（現在の導入）
+  2. 解決策の概要（Git worktree + Claude Code並列実行のメリット）
+  3. Git worktree基礎知識（概念説明を前倒し）
+  4. 実践編：環境構築からタスク分散まで
+  5. 並列実行の具体例
+  6. 結果の統合方法
+  7. 運用上の注意点と改善案
+  8. 将来展望
+  9. まとめ
+
+  ✏️ Language & Style Editing (Language Editing)
+
+  文体統一の必要性:
+  - 「である調」と「です・ます調」の混在を解消し、「です・ます調」への統一を推奨
+  - 技術文書として適切な客観的表現への修正
+
+  具体的修正例:
+  現在：AI が考えを巡らせている間、人間の方はただ待つしかない。
+  改善：AI が処理を実行している間、人間はただ待機するしかありません。
+
+  現在：一応 `settings.json` にファイルに「これは勝手にやっていいよ」というリストを書いておけば
+  改善：`settings.json`ファイルに「これは自動実行を許可する」というリストを記述しておけば
+
+  📖 Readability Enhancement (Readability Enhancement)
+
+  段落構造の改善:
+  - 長すぎる段落（特に脆弱性診断結果661行）の分割
+  - コードブロックと説明のバランス改善
+  - 読者のナビゲーション支援要素の追加
+
+  視覚的改善提案:
+  ## 💡 この章のポイント
+  - Git worktreeで複数のブランチを同時に管理
+  - Claude Code を並列実行して待機時間を削減
+  - 実際のセキュリティ修正タスクで効果を実証
+
+  ## ⏱️ 所要時間の目安
+  - 環境セットアップ: 10分
+  - タスク実行: 各20-30分（並列実行）
+  - 結果の統合: 5分
+
+  🔧 Technical Accuracy Verification (Technical Writing)
+
+  技術的正確性の課題:
+  - Git worktreeのクリーンアップ手順が不足
+  - --dangerously-skip-permissionsのセキュリティリスク説明が不十分
+  - システム要件や制限事項の明記が必要
+
+  改善すべき技術的内容:
+  # worktree削除の正しい手順（記事に追加すべき）
+  git worktree remove worktrees/project-fix-a
+  git branch -D fix/a
+  git worktree prune
+
+  # bcryptのより実用的な設定例
+  const SALT_ROUNDS = 12
+  export const hash = async (password: string): Promise<string> => {
+    if (!password || password.length < 8) {
+      throw new Error('Password must be at least 8 characters long')
+    }
+    return await bcrypt.hash(password, SALT_ROUNDS)
+  }
+
+  📋 Overall Assessment & Improvement Proposals
+
+  High Priority
+
+  1. 構造の再編成: Git worktree概念説明の前倒し
+  2. 脆弱性診断結果の大幅短縮（661行→50行程度）
+  3. 文体の統一（「です・ます調」への完全統一）
+  4. 技術的なクリーンアップ手順の追加
+
+  Medium Priority
+
+  1. 視覚的要素の追加（Pro Tips、注意点、進捗指標）
+  2. コードブロックの説明強化
+  3. セキュリティリスクの詳細説明
+  4. 読者レベル別ナビゲーション
+
+  Low Priority
+
+  1. 読者エンゲージメント要素の追加
+  2. 効果測定データの挿入
+  3. 他OS対応の言及
+
+  ✅ Actionable Implementation Steps
+
+  1. 即座に実行可能な改善
+    - セクション3の脆弱性診断結果を要約版に置き換え
+    - Git worktreeの概念説明をセクション2に移動
+    - 文体を「です・ます調」に統一
+  2. 段階的な改善計画
+    - 各セクションに視覚的なポイント整理を追加
+    - コードブロックに詳細な説明を付与
+    - 技術的な注意事項とベストプラクティスを追加
+  3. 長期的な品質向上戦略
+    - 読者フィードバックの収集システム構築
+    - 定期的な技術的内容の更新
+    - 関連記事との連携強化
+
+  この記事は技術的に非常に価値の高い内容を含んでいますが、上記の改善により、より多くの読者に理解され、実践されやすい優れた技術記事になるでしょ
+  う。
+```
+
+良い感じにダメ出ししてくれるので記事の精度を上げたいときに重宝する。
+
+ちなみに Subagents の Frontmatter で指定した色は以下のように Subagents が使われているときに色付けしてくれるので使用状況がわかりやすい。
+
+![ターミナル上で並列実行されている](./01.png "Subagents ごとに色分けされている")
+
+また、以下のように指示文を多少変えてもエージェントは問題なく動作する。
+
+```shell
+> @content/blog/2025-07-21/index.mdx
+  ドラえもんがのび太くんに教えるようなイメージでこの記事のレビューを行なってください
+  ⎿  Read content/blog/2025-07-21/index.mdx (980 lines)
+
+⏺ のび太くん、君の記事「複数のClaude Codeを並列実行するGit worktree活用術」を読ませてもらったよ！とても興味深い技
+  術記事だね。ドラえもんが4つの観点から詳しく分析してあげるから、一緒に見てみよう！
+
+⏺ content-reviewer(記事の構造分析)
+  ⎿  Done (4 tool uses · 40.3k tokens · 1m 8.1s)
+
+⏺ language-editor(言語・文体編集)
+  ⎿  Done (6 tool uses · 47.8k tokens · 1m 2.6s)
+
+⏺ readability-enhancer(可読性向上分析)
+  ⎿  Done (6 tool uses · 40.5k tokens · 1m 10.1s)
+
+⏺ technical-writer(技術的正確性検証)
+  ⎿  Done (4 tool uses · 31.7k tokens · 58.2s)
+
+⏺ のび太くん、記事をしっかりと4つの観点から分析させてもらったよ！全体的にとても価値のある技術記事で、実践的な内容
+  が詰まっているね。でも、ドラえもんからのアドバイスがいくつかあるんだ。
+
+  📝 記事の包括的レビュー結果
+
+  🔍 構造・論理分析（紫のドラえもん）
+
+  のび太くん、この記事の構成は基本的には良いんだけど、ちょっと「詰め込みすぎ」かもしれないね。
+
+  素晴らしい点：
+  - 導入の問題提起が共感を呼ぶ（「AIを待つ時間がもったいない」）
+  - Git worktreeの本の比喩が分かりやすい
+  - 実在するプロジェクト（OWASP Juice Shop）を使った実践例
+
+  改善が必要な点：
+  - 脆弱性診断結果が600行以上もあって、本題から逸れてしまっている
+  - 記事の焦点が「並列処理手法」なのに、セキュリティの詳細で読者が疲れてしまう
+  - 「改善が必要な点」が記事の最後にあるのは構成的に不適切
+
+  ✏️ 言語・文体編集（緑のドラえもん）
+
+  のび太くん、一番大きな問題は文体の不統一だよ！
+
+  問題点：
+  - 「である調」と「です・ます調」が混在している
+  - 「一応」「まあ」などの口語的表現が多すぎる
+  - 「YOLO精神」のような表現は技術記事では浮いて見える
+
+  改善提案：
+  【修正前】AIが考えを巡らせている間、人間の方はただ待つしかない。
+  【修正後】AIが処理を実行している間、人間はただ待機するしかありません。
+
+  📖 可読性向上（オレンジのドラえもん）
+
+  のび太くん、980行の長文記事は読者さんが疲れちゃうかもしれないね。
+
+  改善すべき点：
+  - 長い段落を2-3文ごとに分割する
+  - 重要な情報に絵文字や囲み線を使って視覚的に強調
+  - 長いコードブロック（脆弱性診断結果）は折りたたみ機能を使う
+  - 冒頭に「この記事で学べること」「読了時間の目安」を追加
+
+  提案する構成：
+  ## 📚 この記事で学べること（3分で読める要約）
+  - ✅ Git worktreeの基本的な使い方
+  - ✅ Claude Codeを並列実行する方法
+  - ⏱️ 読了時間：約15分
+
+  🔧 技術的正確性（青のドラえもん）
+
+  のび太くん、技術的な内容は正確だけど、いくつか補強が必要だよ。
+
+  追加すべき重要事項：
+
+  ⚠️ **重要な注意点**
+  `--dangerously-skip-permissions` は以下のリスクがあります：
+  - システムファイルの削除や改変
+  - 機密情報の意図しない送信
+  - 悪意のあるコードの実行
+
+  必ず以下の対策を講じてください：
+  1. 隔離された環境（Dev Containers等）での使用
+  2. 重要なデータのバックアップ
+  3. Git管理下でのテスト実行
+
+  Git worktreeのクリーンアップ手順追加：
+  # 作業完了後のクリーンアップ
+  git worktree remove worktrees/project-fix-a
+  git branch -D fix/a
+  git worktree prune
+
+  📋 最優先改善項目
+
+  すぐに修正すべきポイント：
+
+  1. 🚨 文体の統一：全て「です・ます調」に変更
+  2. 📝 構成の見直し：脆弱性診断結果を大幅短縮（50行程度に）
+  3. 🔧 セキュリティリスクの詳細説明を追加
+  4. 💡 冒頭に要約と読了時間を追加
+
+  中期的改善項目：
+
+  5. 📖 専門用語の説明追加：初心者にも分かりやすく
+  6. 🎯 重要ポイントの視覚的強調
+  7. 📊 実際の効果測定データ：「作業時間が○○分短縮」など
+
+  🌟 総評
+
+  のび太くん、この記事は技術的に非常に価値が高い内容だよ！Git worktreeとClaude
+  Codeの組み合わせというアイデアは素晴らしいし、実践的価値も高い。
+
+  ただ、少し「博士論文」のような硬さがあるから、もう少し読者に寄り添った「技術ガイド」にしてあげると、もっと多くの
+  人に読んでもらえるはずだよ。
+
+  特に文体の統一と情報の整理をするだけで、ぐっと読みやすくなるからね。君の技術的な洞察力は本当に素晴らしいから、そ
+  れをもっと多くの人に伝わりやすい形で表現できれば、きっと多くの開発者の役に立つよ！
+
+  のび太くん、頑張って！ドラえもんはいつでも応援しているからね 🤖✨
+```
+
+もちろん、レビューした内容を元に修正してもらうことも可能。
+
+```shell
+> レビューした内容を元に記事の修正を行なってください
+```
+
+## さいごに
+
+この記事も含めて、普段は WebStorm で記事を書いている。
+記事を書き終わったタイミングでターミナルを開いて、Claude Code にレビューを依頼。
+そして、レビューの修正が終われば `git commit & push` で記事の公開が IDE 上で完結する流れは、Subagents を取り入れることで、より強固になったと感じる。
+
+今回はブログ記事のレビューに特化した Subagents を作成した。
+他にも各分野に精通した専門家を育てていくことで、個人開発でもチームで開発しているような体験をできるのは面白い。
+有用な専門家を生み出せたら、またブログ記事で共有しようと思う。
