@@ -55,6 +55,7 @@ data:
     - title: "アプリで 10,000 ダウンロードを達成する"
   - lifestyle:
     - title: "結婚する"
+      completedAt: 2025-09-17
     - title: "ライカのカメラを買って写真を撮る"
     - title: "アーロンチェアを買う"
       description: "現在はセイルチェア。他のチェアになる可能性もある"
