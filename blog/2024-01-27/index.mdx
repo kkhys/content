@@ -1,6 +1,6 @@
 ---
 title: フォントのこだわり
-description: この Web サイトで使用している 5 種類のフォント（Noto Sans JP、Inter、Newsreader、JetBrains Mono、Noto Emoji）の特徴と選び方、Next.js での実装方法を詳しく解説している。
+description: このWebサイトで使用している5種類のフォント（Noto Sans JP、Inter、Newsreader、JetBrains Mono、Noto Emoji）の特徴と選び方、Next.jsでの実装方法を詳しく解説している。
 emoji: 🔠
 category: Tech
 tags: [Idea, Font]
@@ -10,10 +10,10 @@ slug: b1fw2ts
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直して、カスタムフォントは廃止しました。
+> この記事はNext.js版の内容です。現在はAstroで構築し直して、カスタムフォントは廃止しました。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
-この Web サイトで使用している 5 種類のフォントについて書き連ねていく。
+このWebサイトで使用している5種類のフォントについて書き連ねていく。
 フォントを変えるだけでサイトの雰囲気は大きく変わるため、選ぶのはとても楽しかった。
 
 ただ、フォントはあくまでもコンテンツを引き立てる役割なので、あまり派手なフォントは選ばずにベーシックなものをチョイスした。
@@ -22,25 +22,25 @@ slug: b1fw2ts
 
 https://fonts.google.com/noto/specimen/Noto+Sans+JP
 
-Google Fonts で日本語フォントを選ぶとなったらまず第一候補に上がるのが Noto Sans JP である。
+Google Fontsで日本語フォントを選ぶとなったらまず第一候補に上がるのがNoto Sans JPである。
 文字のバランスが素晴らしく、非の打ち所がない。逆に言えば、いろんなサイトで使われているので個性に欠ける点がデメリットではある。
 
-No more tofu から Noto と命名されたらしく、□（確かに豆腐に見える）はもうない = 全ての文字を網羅しているため、安心感があるのも大きい。
+No more tofuからNotoと命名されたらしく、□（確かに豆腐に見える）はもうない = 全ての文字を網羅しているため、安心感があるのも大きい。
 
 また、英数字も綺麗に表示されるため、このフォントだけでも十分なくらいだ。
-そのため、フォント名を明示的に指定しなければ Noto Sans JP が使われる設定にしてある。
+そのため、フォント名を明示的に指定しなければNoto Sans JPが使われる設定にしてある。
 
 ## Inter
 
 https://fonts.google.com/specimen/Inter
 
-英字フォントで一番好きなフォントが Inter。
+英字フォントで一番好きなフォントがInter。
 フォントを小さくしても可読性が高いのが特徴である。小さくコンパクトなデザインが好きな私にとっては非常に扱いやすい。
 
 このサイトでは英数字であることが確定している箇所で使用している。
 例えば、公開日時とかフッターのコピーライトとか。
 
-ちなみに Noto Sans JP と意外に似ているので注意して見ないとわからないかも。
+ちなみにNoto Sans JPと意外に似ているので注意して見ないとわからないかも。
 
 ## Newsreader
 
@@ -53,39 +53,39 @@ https://fonts.google.com/specimen/Newsreader
 
 https://fonts.google.com/specimen/JetBrains+Mono
 
-普段から [JetBrains](https://www.jetbrains.com/ja-jp) 製の IDE を愛用している。
-このサイトの開発であれば TypeScript がメインなので [WebStorm](https://www.jetbrains.com/ja-jp/webstorm) といった具合に。
+普段から [JetBrains](https://www.jetbrains.com/ja-jp) 製のIDEを愛用している。
+このサイトの開発であればTypeScriptがメインなので [WebStorm](https://www.jetbrains.com/ja-jp/webstorm) といった具合に。
 
-そんな JetBrains がオープンソースとして開発した等幅フォントが [JetBrains Mono](https://www.jetbrains.com/ja-jp/lp/mono) である。
+そんなJetBrainsがオープンソースとして開発した等幅フォントが [JetBrains Mono](https://www.jetbrains.com/ja-jp/lp/mono) である。
 開発者には嬉しい特徴が満載なので、好みはあると思うがかなりおすすめ。
 
 特徴的なのはリガチャ（合字）に対応していることだ。
-例えば =/= は `=/=` になり、=> は `=>` になる。
+例えば =/= は`=/=`になり、=> は`=>`になる。
 初めて見る人は混乱するだろうが、慣れれば見やすいと思う。
 
-このサイトでは JetBrains Mono をコードブロックやインラインコードで使用している。
+このサイトではJetBrains Monoをコードブロックやインラインコードで使用している。
 
 ## Noto Emoji
 
 https://fonts.google.com/noto/specimen/Noto+Emoji
 
 記事のアイキャッチには絵文字を使用している。
-そのままではポップ過ぎてこのサイトのモノクロなイメージに合わないので、良い感じの絵文字がないか探していたときに見つけたのが Noto Emoji である。
+そのままではポップ過ぎてこのサイトのモノクロなイメージに合わないので、良い感じの絵文字がないか探していたときに見つけたのがNoto Emojiである。
 
-ただ、Safari や iOS で見た場合になぜかフォントが反映されない。
-代わりに Apple デフォルトの絵文字を表示させるようにしている。
+ただ、SafariやiOSで見た場合になぜかフォントが反映されない。
+代わりにAppleデフォルトの絵文字を表示させるようにしている。
 原因は調査中。早いうちに解決したい。
 
-### 20240519 追記
+### 20240519追記
 
 [こちらの記事](/blog/posts/b15e6x7) に解決方法を記載。
 
-## Next.js と Tailwind で使う
+## Next.jsとTailwindで使う
 
-Next.js というフレームワークでこのサイトは作られているが、Next.js には [Font Optimization](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) という機能がある。
+Next.jsというフレームワークでこのサイトは作られているが、Next.jsには [Font Optimization](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) という機能がある。
 
 この機能を使うことでビルド時にフォントファイルをダウンロードし、他の静的アセットとともにホストできる。
-そうすることでユーザが Web サイトにアクセスしたときに、パフォーマンスに影響を与えるような、フォントに対する追加のネットワーク要求を行わない。
+そうすることでユーザがWebサイトにアクセスしたときに、パフォーマンスに影響を与えるような、フォントに対する追加のネットワーク要求を行わない。
 
 また、読み込み時のフォントのずれを防止してくれるので、[CLS](https://web.dev/articles/cls?hl=ja) の低下も見込める。
 
@@ -130,9 +130,9 @@ export const notoEmoji = Noto_Emoji({
 });
 ```
 
-`variable` を設定すると CSS 変数として利用できる。
+`variable`を設定するとCSS変数として利用できる。
 
-次に `<html>` 要素にフォントを追加する。
+次に`<html>`要素にフォントを追加する。
 そうすることでサイト全体に反映される。
 
 ```tsx title="app/layout.tsx" showLineNumbers {5}
@@ -147,10 +147,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
 )
 ```
 
-プライマリフォントである Noto Sans JP だけ `className` を呼び出していることに注意。
-それ以外は先ほど設定した `variable`（CSS 変数）を指定する。
+プライマリフォントであるNoto Sans JPだけ`className`を呼び出していることに注意。
+それ以外は先ほど設定した`variable`（CSS変数）を指定する。
 
-最後に Tailwind CSS の設定を行う。
+最後にTailwind CSSの設定を行う。
 
 ```ts title="tailwind.config.ts" showLineNumbers
 import type { Config } from 'tailwindcss';
@@ -170,10 +170,10 @@ export default {
 } satisfies Config;
 ```
 
-もしカスタムフォントの読み込みに失敗したときのために Tailwind CSS のデフォルトフォントを設定しておく。
+もしカスタムフォントの読み込みに失敗したときのためにTailwind CSSのデフォルトフォントを設定しておく。
 これでフォントの設定は完了した。
 
-個別にフォントを呼び出したいときは以下のように `className` を指定するだけで良い。
+個別にフォントを呼び出したいときは以下のように`className`を指定するだけで良い。
 
 ```tsx
 <p className='font-mono'>Whereas disregard and contempt for human rights have resulted.</p>
