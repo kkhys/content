@@ -1,6 +1,6 @@
 ---
-title: "v1.10.0 リリースノート: お問い合わせ機能の追加"
-description: エンジニアの個人サイトにお問い合わせ機能を実装した記録。Google フォームではなく独自実装を選択し、IP 制限・レートリミット・reCAPTCHA による Bot 対策から、Google Sheets・Gmail・LINE を使った通知システムまで幅広く構築した開発体験である。
+title: "v1.10.0リリースノート: お問い合わせ機能の追加"
+description: エンジニアの個人サイトにお問い合わせ機能を実装した記録。Googleフォームではなく独自実装を選択し、IP制限・レートリミット・reCAPTCHAによるBot対策から、Google Sheets・Gmail・LINEを使った通知システムまで幅広く構築した開発体験である。
 emoji: 🚀
 category: Tech
 tags: ["Release note"]
@@ -10,13 +10,13 @@ slug: b143t9d
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
 一方的にコンテンツを積み上げていく単方向的なアプローチから脱却すべく、重い腰をあげてお問い合わせ機能を実装した。
-特にこだわりがないのであればリッチな UI を標準装備した Google フォームを使えば面倒な機能を実装せずに、はい終わりである。
+特にこだわりがないのであればリッチなUIを標準装備したGoogleフォームを使えば面倒な機能を実装せずに、はい終わりである。
 
-しかし、エンジニアの個人サイトのお問い合わせフォームが Google フォームというのはちょっと寂しい。
+しかし、エンジニアの個人サイトのお問い合わせフォームがGoogleフォームというのはちょっと寂しい。
 せっかくなので自分が理想とするお問い合わせフォームを作ってみることにした。
 一から実装するとなるとボット対策や自動返信メール、管理者（私）への通知をどうするかなど意外と考えることがあって面倒だったが楽しかった。
 
@@ -140,23 +140,23 @@ sequenceDiagram
 エラーの箇所を省いて簡単に流れを箇条書きすると以下のようになる。
 
 1. ユーザがお問い合わせページにアクセスする
-2. Vercel Edge Config からブロックしている IP アドレスリストを取得して判定する
+2. Vercel Edge ConfigからブロックしているIPアドレスリストを取得して判定する
 3. お問い合わせページを表示する
 4. ユーザがお問い合わせフォームに入力して送信する
-5. クライアント側で reCAPTCHA トークンを取得する
-6. バックエンド側に 5 を含むリクエストを送信する
-7. Upstash でレートリミットを確認する
-8. reCAPTCHA にリクエストの判定を依頼する
-9. Google API OAuth 2.0 を利用してアクセストークンを取得する
-10. Google Sheets にお問い合わせ内容を記録する
-11. Google Apps Script が確認メールの送信を Gmail にリクエストする
-12. Gmail から管理者へメールが送信される
-13. LINE から管理者へメッセージが送信される
-14. ユーザが確認メールの送信を希望する場合は Resend からメールを送信する
+5. クライアント側でreCAPTCHAトークンを取得する
+6. バックエンド側に5を含むリクエストを送信する
+7. Upstashでレートリミットを確認する
+8. reCAPTCHAにリクエストの判定を依頼する
+9. Google API OAuth 2.0を利用してアクセストークンを取得する
+10. Google Sheetsにお問い合わせ内容を記録する
+11. Google Apps Scriptが確認メールの送信をGmailにリクエストする
+12. Gmailから管理者へメールが送信される
+13. LINEから管理者へメッセージが送信される
+14. ユーザが確認メールの送信を希望する場合はResendからメールを送信する
 15. ユーザに成功メッセージを表示する
-16. お問い合わせ内容が不適切だった場合は手動で Vercel Edge Config のブロック IP アドレスリストに登録する
+16. お問い合わせ内容が不適切だった場合は手動でVercel Edge ConfigのブロックIPアドレスリストに登録する
 
-## IP アドレス制限
+## IPアドレス制限
 
 ```mermaid
 sequenceDiagram
@@ -176,11 +176,11 @@ sequenceDiagram
 ```
 
 あまり考えたくないが、お問い合わせフォームを使って嫌がらせが行われる可能性は万が一にもある。
-そうなってからコードを書いて対応するのは面倒くさいのであらかじめ IP アドレス制限機能を追加しておく。
+そうなってからコードを書いて対応するのは面倒くさいのであらかじめIPアドレス制限機能を追加しておく。
 
-悪意のある IP アドレスを毎回ビルドに組み込むのでは待ち時間が長く即効性に欠けるので Vercel のグローバルデータストアである [Edge Config](https://vercel.com/docs/storage/edge-config) を利用する。
+悪意のあるIPアドレスを毎回ビルドに組み込むのでは待ち時間が長く即効性に欠けるのでVercelのグローバルデータストアである [Edge Config](https://vercel.com/docs/storage/edge-config) を利用する。
 
-以下のように JSON 形式で記述できる。
+以下のようにJSON形式で記述できる。
 
 ```json
 {
@@ -188,7 +188,7 @@ sequenceDiagram
 }
 ```
 
-上記で設定した値を Next.js のアクション実行前に読み取って適切なルーティングを行う。
+上記で設定した値をNext.jsのアクション実行前に読み取って適切なルーティングを行う。
 具体的にはリクエスト完了前にコードを実行可能な [Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware) に処理を追加する。
 
 ```ts title="src/middleware.ts" showLineNumbers
@@ -209,14 +209,14 @@ export const middleware = async (request: NextRequest) => {
 };
 ```
 
-8 行目で Edge Config からブロックしている IP アドレスリストを取得して、9 行目でリクエスト時の IP アドレスを取得している。
-リクエスト時の IP アドレスがブロック対象の IP アドレスリストに含まれる場合は `/forbidden` ページに飛ばす。
+8行目でEdge ConfigからブロックしているIPアドレスリストを取得して、9行目でリクエスト時のIPアドレスを取得している。
+リクエスト時のIPアドレスがブロック対象のIPアドレスリストに含まれる場合は`/forbidden`ページに飛ばす。
 
-![forbidden ページ](./01.png)
+![forbiddenページ](./01.png)
 
 嫌がらせをしてくるような人にはびっくり系のブラクラを用意してあげても良いのだが、それはちょっとやりすぎなのでシンプルなページを表示するに留めた。
 
-ちなみに Edge Config を利用してメンテナンスモードの実装も行っている（なかなか使う機会がないけど）。
+ちなみにEdge Configを利用してメンテナンスモードの実装も行っている（なかなか使う機会がないけど）。
 
 ## 入力値のバリデーション
 
@@ -253,11 +253,11 @@ sequenceDiagram
 とはいえ、あくまでお問い合わせフォームなので特に複雑なバリデーションは施していない。
 
 今回はスキーマ宣言とバリデーション定義を一度に行える [Zod](https://zod.dev) を利用した。
-昔は似たようなライブラリの [Yup](https://github.com/jquense/yup) を使ったこともあるが、今はスキーマファーストなバリデーションを実装したければ Zod を選ぶ方が無難かも[^1]。
+昔は似たようなライブラリの [Yup](https://github.com/jquense/yup) を使ったこともあるが、今はスキーマファーストなバリデーションを実装したければZodを選ぶ方が無難かも[^1]。
 
-[^1]: npm trend では 2023 年 7 月ごろに Zod が Yup を抜き去っている（[参考](https://npmtrends.com/yup-vs-zod)）
+[^1]: npm trendでは2023年7月ごろにZodがYupを抜き去っている（[参考](https://npmtrends.com/yup-vs-zod)）
 
-定義したスキーマ（以下参照）はクライアントだけではなく tRPC でのサーバ側バリデーションやメール送信時の型定義まで幅広く使っている。
+定義したスキーマ（以下参照）はクライアントだけではなくtRPCでのサーバ側バリデーションやメール送信時の型定義まで幅広く使っている。
 
 ```ts title="packages/validators/src/contact.ts" showLineNumbers
 import { z } from 'zod';
@@ -284,21 +284,21 @@ export const ContactSchema = z.object({
 });
 ```
 
-Next.js を使っていることだし、プログレッシブエンハンスメントなフォームを実現できる Server Actions を使おうと思ったが、shadcn/ui が react-hook-form に依存しているため今回は見送った。
-react-hook-form でも Server Actions への対応は進みつつあるようだが、もうしばらく時間がかかりそう[^2]。
+Next.jsを使っていることだし、プログレッシブエンハンスメントなフォームを実現できるServer Actionsを使おうと思ったが、shadcn/uiがreact-hook-formに依存しているため今回は見送った。
+react-hook-formでもServer Actionsへの対応は進みつつあるようだが、もうしばらく時間がかかりそう[^2]。
 
 [^2]: [GitHub Issue: Support Server Actions](https://github.com/react-hook-form/react-hook-form/pull/11061)
 
 [useActionState](https://ja.react.dev/reference/react/useActionState) を使った実装に書き換えようと試みてはみたものの、思いの外複雑な実装になったため止めた。
-shadcn/ui を使っていなかったらスムーズに導入できたと思うが、いかんせん便利すぎるので離れられない。
+shadcn/uiを使っていなかったらスムーズに導入できたと思うが、いかんせん便利すぎるので離れられない。
 
-App Router がリリースされて早くも 1 年近く経過したにもかかわらず、未だにベストプラクティスとなるバリデーションの実装方法が確立されていないので毎回悩む。
-納得できる実装方法が見つかれば、Server Actions を使うように修正する予定。
+App Routerがリリースされて早くも1年近く経過したにもかかわらず、未だにベストプラクティスとなるバリデーションの実装方法が確立されていないので毎回悩む。
+納得できる実装方法が見つかれば、Server Actionsを使うように修正する予定。
 
-クライアント側のバリデーションが終わったら reCAPTCHA にトークンのリクエストを行う。
+クライアント側のバリデーションが終わったらreCAPTCHAにトークンのリクエストを行う。
 このトークンはバックエンド側で使うのでリクエストボディに含めておく。
 
-reCAPTCHA トークンの取得には [react-google-recaptcha-v3](https://github.com/t49tran/react-google-recaptcha-v3) を利用している。
+reCAPTCHAトークンの取得には [react-google-recaptcha-v3](https://github.com/t49tran/react-google-recaptcha-v3) を利用している。
 
 ## レートリミット
 
@@ -316,12 +316,12 @@ sequenceDiagram
     end
 ```
 
-このお問い合わせフォームは複数の外部 API を無料枠の範囲で使っているため、大量のリクエストが送信されるとすぐに無料枠をオーバーしてしまう。
-それは避けたいので [Upstash](https://upstash.com) の Redis を使ってレートリミットを実装した。
+このお問い合わせフォームは複数の外部APIを無料枠の範囲で使っているため、大量のリクエストが送信されるとすぐに無料枠をオーバーしてしまう。
+それは避けたいので [Upstash](https://upstash.com) のRedisを使ってレートリミットを実装した。
 
-IP アドレスをキーとして 1 分間に 1 回までフォームの送信を可能にしてある。
+IPアドレスをキーとして1分間に1回までフォームの送信を可能にしてある。
 
-使用方法をイメージしやすいように 1 つのファイルにまとめてみた。
+使用方法をイメージしやすいように1つのファイルにまとめてみた。
 
 ```ts showLineNumbers
 import { Ratelimit } from '@upstash/ratelimit';
@@ -361,13 +361,13 @@ export const contactRouter = {
 };
 ```
 
-Upstash には `@upstash/ratelimit` という便利なライブラリがあるのでシンプルに実装が可能。
-他の API でも利用しやすいように関数 `rateLimiter` として汎用化している。
-また、念の為 IP アドレスは SHA-256 でハッシュ化してから Redis に保存している。
+Upstashには`@upstash/ratelimit`という便利なライブラリがあるのでシンプルに実装が可能。
+他のAPIでも利用しやすいように関数`rateLimiter`として汎用化している。
+また、念の為IPアドレスはSHA-256でハッシュ化してからRedisに保存している。
 
-お問い合わせフォームを送信してから 1 分以内に再度お問い合わせを送信すると「お問い合わせの送信回数が上限に達しました。しばらくしてから再度お試しください。」とエラーが表示される。
+お問い合わせフォームを送信してから1分以内に再度お問い合わせを送信すると「お問い合わせの送信回数が上限に達しました。しばらくしてから再度お試しください。」とエラーが表示される。
 
-## Bot からの保護
+## Botからの保護
 
 ```mermaid
 sequenceDiagram
@@ -383,31 +383,31 @@ sequenceDiagram
     end
 ```
 
-機械的に POST できる窓口を設けている以上、ボット対策を考えなければならない。
-レートリミットを設定しているとはいっても 1 分ごとに送信するみたいな設定をされたら 1 時間に 60 回リクエストを投げられてしまう（そう考えるとレートリミットのコードを公開しているのは悪手だ）。
+機械的にPOSTできる窓口を設けている以上、ボット対策を考えなければならない。
+レートリミットを設定しているとはいっても1分ごとに送信するみたいな設定をされたら1時間に60回リクエストを投げられてしまう（そう考えるとレートリミットのコードを公開しているのは悪手だ）。
 さすがに何の利益もないのでそのようなことはあるはずもないのだが心配性なので念には念を入れておく。
 
-Bot 対策として Google の [reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise?hl=ja) を導入した。
-先ほどクライアント側の処理で reCAPTCHA トークンを取得していたが、それをサーバ側で利用する。
+Bot対策としてGoogleの [reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise?hl=ja) を導入した。
+先ほどクライアント側の処理でreCAPTCHAトークンを取得していたが、それをサーバ側で利用する。
 
-サーバ側から reCAPTCHA にリクエストを投げると 0.0 ~ 1.0 の判定結果が返ってくる[^3]。
+サーバ側からreCAPTCHAにリクエストを投げると0.0 ~ 1.0の判定結果が返ってくる[^3]。
 値が低くなるほどボットの可能性があるリクエストということになる。
-ひとまずスコアが 0.7 未満であればエラーメッセージを返すようにしている。
+ひとまずスコアが0.7未満であればエラーメッセージを返すようにしている。
 
-[^3]: デフォルトで使用できるスコアレベルは、0.1、0.3、0.7、0.9 の 4 つのみ（[ソース](https://cloud.google.com/recaptcha-enterprise/docs/interpret-assessment-website?hl=ja)）。
-全てのスコアを使いたければ Google のセールスチームに連絡が必要。面倒なのでしていない
+[^3]: デフォルトで使用できるスコアレベルは、0.1、0.3、0.7、0.9の4つのみ（[ソース](https://cloud.google.com/recaptcha-enterprise/docs/interpret-assessment-website?hl=ja)）。
+全てのスコアを使いたければGoogleのセールスチームに連絡が必要。面倒なのでしていない
 
-当初はスコアを取得するために Google から提供されている [@google-cloud/recaptcha-enterprise](https://github.com/googleapis/google-cloud-node/tree/main/packages/google-cloud-recaptchaenterprise) を利用しようとした。
+当初はスコアを取得するためにGoogleから提供されている [@google-cloud/recaptcha-enterprise](https://github.com/googleapis/google-cloud-node/tree/main/packages/google-cloud-recaptchaenterprise) を利用しようとした。
 
-前提として当サイトの tRPC 経由の API 作成には Next.js の Edge Runtime を使っている。
-Edge Runtime はパフォーマンスに優れているが Node.js API を全てサポートしていない[^4]。
-そのため、パッケージ内部において Edge Runtime でサポートされていない API を利用しているとエラーが発生してしまう。
+前提として当サイトのtRPC経由のAPI作成にはNext.jsのEdge Runtimeを使っている。
+Edge Runtimeはパフォーマンスに優れているがNode.js APIを全てサポートしていない[^4]。
+そのため、パッケージ内部においてEdge RuntimeでサポートされていないAPIを利用しているとエラーが発生してしまう。
 
-[^4]: [Edge Runtime でサポートされている API](https://nextjs.org/docs/app/api-reference/edge)
+[^4]: [Edge RuntimeでサポートされているAPI](https://nextjs.org/docs/app/api-reference/edge)
 
 今回は不幸にもそのエラーに当たってしまった。
-そうなった場合は Web 標準の [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API) を使って処理を自分で書く必要がある。
-あくまでも SDK は REST API のラッパーに過ぎないため記述量は多くなるが何とかなる。
+そうなった場合はWeb標準の [fetch API](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API) を使って処理を自分で書く必要がある。
+あくまでもSDKはREST APIのラッパーに過ぎないため記述量は多くなるが何とかなる。
 以下がその処理。
 
 ```ts title="packages/api/src/services/google/recaptcha.ts" showLineNumbers
@@ -447,7 +447,7 @@ export const verifyRecaptcha = async ({
 
 これでスコアを取得できる。
 
-## Google Sheets にお問い合わせ内容を記録
+## Google Sheetsにお問い合わせ内容を記録
 
 ```mermaid
 sequenceDiagram
@@ -471,16 +471,16 @@ sequenceDiagram
     end
 ```
 
-ユーザから送信されたお問い合わせ内容は Google Sheets（スプレッドシート）に保存する。
-RDBMS に保存しても良かったが、確認用の API と UI を作成しなければならず面倒だ。
+ユーザから送信されたお問い合わせ内容はGoogle Sheets（スプレッドシート）に保存する。
+RDBMSに保存しても良かったが、確認用のAPIとUIを作成しなければならず面倒だ。
 
-Google Sheets であればソートや絞り込みができたり、後述する GAS（Google Apps Script）と連携できるので色々とデータ活用の幅が広がる。
+Google Sheetsであればソートや絞り込みができたり、後述するGAS（Google Apps Script）と連携できるので色々とデータ活用の幅が広がる。
 
-Node.js からお手軽に API を扱える [google-api-nodejs-client](https://github.com/googleapis/google-api-nodejs-client) を使って一旦実装してみたが、reCAPTCHA と同様に Edge Runtime に起因するエラーが発生した。
-面倒だが直接 REST API を叩く実装に書き換えた。
+Node.jsからお手軽にAPIを扱える [google-api-nodejs-client](https://github.com/googleapis/google-api-nodejs-client) を使って一旦実装してみたが、reCAPTCHAと同様にEdge Runtimeに起因するエラーが発生した。
+面倒だが直接REST APIを叩く実装に書き換えた。
 
-はまりどころとして Google Sheets にアクセスするためには [JWT トークン](https://jwt.io/)が必要になる。
-このトークンは、サービスアカウントの秘密鍵で署名する必要があったので Edge Runtime でも使用可能な [jose](https://github.com/panva/jose) を使って生成した。
+はまりどころとしてGoogle Sheetsにアクセスするためには [JWTトークン](https://jwt.io/)が必要になる。
+このトークンは、サービスアカウントの秘密鍵で署名する必要があったのでEdge Runtimeでも使用可能な [jose](https://github.com/panva/jose) を使って生成した。
 
 ```ts title="packages/api/src/services/google/token.ts" showLineNumbers
 import { importPKCS8, SignJWT } from 'jose';
@@ -557,8 +557,8 @@ export const authenticate = async () => {
 };
 ```
 
-これで API に必要な認証用トークンを取得できた。
-次に Google Sheets に追加するための処理を書いていく。
+これでAPIに必要な認証用トークンを取得できた。
+次にGoogle Sheetsに追加するための処理を書いていく。
 
 ```ts title="packages/api/src/services/google/sheets.ts" showLineNumbers
 import { env } from '../../../env';
@@ -598,11 +598,11 @@ export const appendGoogleSheets = async ({ sheetName, values }: { sheetName: str
 };
 ```
 
-Google Sheets の 1 行目にはカラム名を設定するため 2 行目から下に追加していく。
+Google Sheetsの1行目にはカラム名を設定するため2行目から下に追加していく。
 本当は降順になるようにしたかったが、そのようなオプションはなかった。
-毎回全ての行を取得して降順に成形してから API を投げるのはデータが多くなってきたときの処理が重そうなので止めた。
+毎回全ての行を取得して降順に成形してからAPIを投げるのはデータが多くなってきたときの処理が重そうなので止めた。
 
-## Gmail で確認メールを管理者に送信
+## Gmailで確認メールを管理者に送信
 
 ```mermaid
 sequenceDiagram
@@ -622,14 +622,14 @@ sequenceDiagram
     end
 ```
 
-後述する LINE にも通知メッセージを送信するようにしているが、仮に LINE API が機能しなかった場合、お問い合わせが来ていることに気づかずビッグチャンスを逃す可能性がある。
-そうならないためにも Google Sheets にデータが登録されたタイミングで管理者（私）にお問い合わせ内容が記載されたメールを送信されるようにした。
+後述するLINEにも通知メッセージを送信するようにしているが、仮にLINE APIが機能しなかった場合、お問い合わせが来ていることに気づかずビッグチャンスを逃す可能性がある。
+そうならないためにもGoogle Sheetsにデータが登録されたタイミングで管理者（私）にお問い合わせ内容が記載されたメールを送信されるようにした。
 
-実装方法としては GAS を使用する。
-GAS にはブラウザで記述可能なエディタが付属しているけど TypeScript が使えなかったり、モジュール化できなかったりと使いずらい。
-なので Vite でトランスパイルしてから [clasp](https://github.com/google/clasp) を使って GAS にデプロイする方法をとることにした。
+実装方法としてはGASを使用する。
+GASにはブラウザで記述可能なエディタが付属しているけどTypeScriptが使えなかったり、モジュール化できなかったりと使いずらい。
+なのでViteでトランスパイルしてから [clasp](https://github.com/google/clasp) を使ってGASにデプロイする方法をとることにした。
 
-`@google/clasp` をインストールすれば型補完が効いて書き心地が良いので必ず入れておきたい。
+`@google/clasp`をインストールすれば型補完が効いて書き心地が良いので必ず入れておきたい。
 実装内容は以下のとおりでシンプルにまとめてある。
 
 ```ts title="packages/google-apps-script/src/services/contact.ts" showLineNumbers
@@ -688,14 +688,14 @@ ${content}
 };
 ```
 
-Google Sheets と GAS を連携される際の注意点として、変更をトリガーに処理を行いたい場合は `LockService.getScriptLock` を使って排他制御を行う必要がある。
+Google SheetsとGASを連携される際の注意点として、変更をトリガーに処理を行いたい場合は`LockService.getScriptLock`を使って排他制御を行う必要がある。
 でないと、データが追加されたときに複数回トリガーが発火する可能性がある。
 
-デプロイ後は GAS 側でトリガーを設定する。
-仮に GAS の実行に失敗した場合でもエラー通知を送信できるので、不具合に気づかず日々過ごしていくという心配はない。
+デプロイ後はGAS側でトリガーを設定する。
+仮にGASの実行に失敗した場合でもエラー通知を送信できるので、不具合に気づかず日々過ごしていくという心配はない。
 
 
-## LINE で確認メッセージを管理者に送信
+## LINEで確認メッセージを管理者に送信
 
 ```mermaid
 sequenceDiagram
@@ -709,13 +709,13 @@ sequenceDiagram
 ```
 
 残念ながらメールをすぐに確認する習慣は今までの人生で身に付かなかった。
-最も早く反応できるサービスを考えると LINE 一択である。
-そのため、お問い合わせがあった場合は LINE に通知メッセージを送信する。
+最も早く反応できるサービスを考えるとLINE一択である。
+そのため、お問い合わせがあった場合はLINEに通知メッセージを送信する。
 
-Gmail はサブで LINE をメインとして運用していく。
+GmailはサブでLINEをメインとして運用していく。
 
-LINE にも [line-bot-sdk-nodejs](https://github.com/line/line-bot-sdk-nodejs) という便利なライブラリがあるが、ご多分に漏れず Edge Runtime では使えなかった。
-そのため、今までと同様に fetch API を使って実装した。
+LINEにも [line-bot-sdk-nodejs](https://github.com/line/line-bot-sdk-nodejs) という便利なライブラリがあるが、ご多分に漏れずEdge Runtimeでは使えなかった。
+そのため、今までと同様にfetch APIを使って実装した。
 
 ```ts title="packages/api/src/services/line.ts" showLineNumbers
 export const sendLineMessage = async ({ message }: { message: string }) => {
@@ -745,9 +745,9 @@ export const sendLineMessage = async ({ message }: { message: string }) => {
 ```
 
 お問い合わせ用のお一人様チャネルを作成してそこにメッセージを送信している。
-仮に送信に失敗しても Gmail は送信されているため、catch ブロックでエラーを捕捉してエラーログを出力するに留めている。
+仮に送信に失敗してもGmailは送信されているため、catchブロックでエラーを捕捉してエラーログを出力するに留めている。
 
-## Resend で確認メールをユーザに送信
+## Resendで確認メールをユーザに送信
 
 ```mermaid
 sequenceDiagram
@@ -779,12 +779,12 @@ sequenceDiagram
 お問い合わせしたユーザが入力内容確認メールの返信を希望する場合は [Resend](https://resend.com) を使ってメールを送信している。
 自動返信メールはスパムに利用される可能性もあるため、導入するか迷ったが、ユーザの利便性を考えてオプトインできるようにした。
 
-大抵の場合、お問い合わせフォームを悪用したスパムは bot から行われるので reCAPTCHA を実装しておけば大丈夫だろうと思っている。
-人力で送信されたら IP アドレスでブロックする。
+大抵の場合、お問い合わせフォームを悪用したスパムはbotから行われるのでreCAPTCHAを実装しておけば大丈夫だろうと思っている。
+人力で送信されたらIPアドレスでブロックする。
 今回は実装していないが、海外からの不正なリクエストがあればお問い合わせ可能な地域を日本だけにするとか色々と考えないといけないことが多くて面白い。
 
 閑話休題。
-Resend は幸いにも Edge Runtime にも対応していたため非常に楽に実装できた。
+Resendは幸いにもEdge Runtimeにも対応していたため非常に楽に実装できた。
 
 ```ts title="packages/api/src/services/email.ts" showLineNumbers
 import { Resend } from 'resend';
@@ -826,28 +826,28 @@ export const sendEmail = async ({
 };
 ```
 
-メールヘッダに `X-Entity-Ref-ID` を付与しているのは Gmail のスレッド化を防ぐためである。
+メールヘッダに`X-Entity-Ref-ID`を付与しているのはGmailのスレッド化を防ぐためである。
 お問い合わせフォームなら何度も送ることはないと思うのでなくても問題ないが。
 
-メール本文には HTML とプレーンテキストの両方を設定している（[マルチパートメール](https://sendgrid.kke.co.jp/blog/?p=8262)）。
-これらを作成するのは面倒だが、[react-email](https://react.email) というライブラリを使うことで TSX と Tailwind CSS を使いつつ楽に実装できた。
-1 つのソースから HTML とプレーンテキストの両方を出力可能なのは素晴らしい。
+メール本文にはHTMLとプレーンテキストの両方を設定している（[マルチパートメール](https://sendgrid.kke.co.jp/blog/?p=8262)）。
+これらを作成するのは面倒だが、[react-email](https://react.email) というライブラリを使うことでTSXとTailwind CSSを使いつつ楽に実装できた。
+1つのソースからHTMLとプレーンテキストの両方を出力可能なのは素晴らしい。
 開発サーバを立ち上げてプレビューもできる。
 
-![HTML メール](./02.png "HTML メール")
+![HTMLメール](./02.png "HTMLメール")
 
 ![プレーンテキスト](./03.png "プレーンテキストメール")
 
-そもそもユーザにも Gmail を使ってメールを送信すれば良いじゃないという意見もあると思う。
-しかし、Resend の管理画面の使いやすさやトラッキングできる点を考えると外部に送信するメールであれば Resend を使っていく方がベターだ。
+そもそもユーザにもGmailを使ってメールを送信すれば良いじゃないという意見もあると思う。
+しかし、Resendの管理画面の使いやすさやトラッキングできる点を考えると外部に送信するメールであればResendを使っていく方がベターだ。
 
 最後にクライアントからユーザに成功メッセージを返せば一連の流れは完了する。
 仮に自動返信メールの送信に失敗した場合は、「お問い合わせは成功したが、メールの送信には失敗した」旨を伝えるエラーメッセージを表示する。
 ここでお問い合わせ自体が失敗したとエラーメッセージを表示させたらユーザが何度も送信しないといけない羽目になるので注意。
 
-もし、不適切なお問い合わせがあった場合は IP アドレスを Google Sheets に保存しているため、それを Edge Config に登録する。
+もし、不適切なお問い合わせがあった場合はIPアドレスをGoogle Sheetsに保存しているため、それをEdge Configに登録する。
 そうすれば、このサイトにリクエストがあった段階で弾ける。
 
 ## さいごに
 
-気軽に実装する機能にしては重かったが、色々な API を使うのは楽しい。
+気軽に実装する機能にしては重かったが、色々なAPIを使うのは楽しい。
