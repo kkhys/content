@@ -1,6 +1,6 @@
 ---
-title: Mac を買ったらやっておくべき初期設定（エンジニア向け）
-description: Mac mini を購入したので、エンジニア向けの初期設定をまとめてみた。
+title: Macを買ったらやっておくべき初期設定（エンジニア向け）
+description: Mac miniを購入したので、エンジニア向けの初期設定をまとめてみた。
 emoji: ⚙️
 category: Tech
 tags: ["Environment"]
@@ -9,23 +9,23 @@ publishedAt: 2025-03-23
 slug: b19rm7z
 ---
 
-Mac mini を購入した話は、こちらの記事にまとめてある。
+Mac miniを購入した話は、こちらの記事にまとめてある。
 
 https://kkhys.me/blog/posts/b1r3zrr
 
-さて、今回のテーマは Mac の設定についてである。
+さて、今回のテーマはMacの設定についてである。
 工場出荷時のまま使いこなす猛者もいるが、多くの人は自分なりの設定があるはずだ。
 せっかくの新マシン。
 ここで一度、自分の設定をまとめておくことにした。
 
-**自分のベストな設定方法が固まっているのであれば、Time Machine を使って、そっくりそのまま移行すればそれで済む話。**
-ただ、意外と設定を全部見る機会は少ないし、非効率的だが、一から PC をセットアップしていくのは楽しい。
-以前は知らなかった機能にも今回出会えたので、PC を購入するたびにセットアップし直すのも悪くない。
+**自分のベストな設定方法が固まっているのであれば、Time Machineを使って、そっくりそのまま移行すればそれで済む話。**
+ただ、意外と設定を全部見る機会は少ないし、非効率的だが、一からPCをセットアップしていくのは楽しい。
+以前は知らなかった機能にも今回出会えたので、PCを購入するたびにセットアップし直すのも悪くない。
 
 とはいえ、完璧に便利な環境を作り上げたつもりはない。
 今回はこれだけ設定すればひとまず快適に使える、というレベルにはなっているはずだ。
 
-なお、Mac の設定は OS のバージョンによって変わるので、あくまで参考程度に。
+なお、Macの設定はOSのバージョンによって変わるので、あくまで参考程度に。
 
 そして何より大事なのは、すべてを鵜呑みにしないこと。
 自分に必要なものだけを選んでカスタマイズしてほしい。
@@ -35,14 +35,14 @@ https://kkhys.me/blog/posts/b1r3zrr
 - できるだけデフォルトの設定を維持する
 - 少しでも不要だと感じたものは削除する
 - 組み込みの機能で対応できるなら、それを優先する
-- 可能なら GUI ではなく CLI から設定する
+- 可能ならGUIではなくCLIから設定する
 
 ## システム設定関連
 
 ### 1. ファイアウォールを設定
 
 ファイアウォールは外部ネットワークからの通信を制御し、不要なアクセスをブロックする。
-特に公共の Wi-Fi を使う場合や、セキュリティリスクが不明なネットワークに接続する際は有効にしておいたほうが良い。
+特に公共のWi-Fiを使う場合や、セキュリティリスクが不明なネットワークに接続する際は有効にしておいたほうが良い。
 オンにして困ることは今までなかったので、**深く考えずにオンにしておくのが無難。**
 
 ```shell
@@ -51,34 +51,34 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
 
 ### 2. Spotlight
 
-Spotlight は Mac の検索機能で、アプリケーションやファイルを素早く見つけるのに便利。
+SpotlightはMacの検索機能で、アプリケーションやファイルを素早く見つけるのに便利。
 ただ、デフォルトのままだと検索結果に不要な項目が多いため、必要なものだけが表示されるように設定する。
 
 自分の場合はアプリケーションのみを表示するようにしている。
-また、Apple の検索機能の改善に協力する必要はないのでオフにする。
+また、Appleの検索機能の改善に協力する必要はないのでオフにする。
 
 - システム設定 → Spotlight
   - 検索結果: 「アプリケーション」のみを選択
-  - Apple の検索機能の改善に協力: 「オフ」に設定
+  - Appleの検索機能の改善に協力: 「オフ」に設定
 
-![Spotlight を設定](./01.png)
+![Spotlightを設定](./01.png)
 
-Spotlight の代わりに [Alfred](https://www.alfredapp.com) や [Raycast](https://www.raycast.com) をランチャーとして使用するのもアリ。
-調べた感じだと Raycast が良さそうなので、今度試してみる予定。
+Spotlightの代わりに [Alfred](https://www.alfredapp.com) や [Raycast](https://www.raycast.com) をランチャーとして使用するのもアリ。
+調べた感じだとRaycastが良さそうなので、今度試してみる予定。
 
 ### 3. Mission Control
 
-**デスクトップや Dock の設定は作業効率に大きく影響するため、使いながら自分に合うように調整するのがおすすめ。**
-自分はアプリを基本的にフルスクリーンで使うことが多いため、Mission Control をよく活用している。
+**デスクトップやDockの設定は作業効率に大きく影響するため、使いながら自分に合うように調整するのがおすすめ。**
+自分はアプリを基本的にフルスクリーンで使うことが多いため、Mission Controlをよく活用している。
 
-Mission Control を使うことで目的のアプリをすぐに見つけられるようになり、作業効率が上がる。
+Mission Controlを使うことで目的のアプリをすぐに見つけられるようになり、作業効率が上がる。
 また、仮想デスクトップ（Spaces）を使えば、プロジェクトごとに作業スペースを分けることができ、整理しやすくなる。
 
-![Mission Control の一例](./02.png "Mission Control の一例")
+![Mission Controlの一例](./02.png "Mission Controlの一例")
 
-Mission Control の設定では、以下の項目を変更している。
+Mission Controlの設定では、以下の項目を変更している。
 
-- システム設定 → デスクトップと Dock
+- システム設定 → デスクトップとDock
   - 最新の使用状況に基づいて操作スペースを自動的に並び替える: 「オフ」に設定
     - 勝手に並び替えられると、使いたいアプリを見失う原因になるため
   - ウインドウをアプリケーションごとにグループ化: 「オン」に設定
@@ -86,19 +86,19 @@ Mission Control の設定では、以下の項目を変更している。
   - ディスプレイごとに個別の操作スペース
     - マルチディスプレイを使う場合、それぞれに独立した操作スペースがあったほうが快適
 
-![Mission Control の設定](./03.png)
+![Mission Controlの設定](./03.png)
 
 ### 4. ホットコーナー
 
-ホットコーナーを設定し、右上にカーソルを持っていくと Launchpad が表示されるようにしている。
+ホットコーナーを設定し、右上にカーソルを持っていくとLaunchpadが表示されるようにしている。
 
-Launchpad は以下のような画面で、アプリ一覧を表示できる。
+Launchpadは以下のような画面で、アプリ一覧を表示できる。
 
 ![Launchpad](./04.png)
 
 ホットコーナーにはクイックメモやスリープ機能を割り当てることもできるが、**右上以外に設定すると誤って触れてしまうことが多いため、右上のみにしている。**
 
-- システム設定 → デスクトップと Dock → ホットコーナー
+- システム設定 → デスクトップとDock → ホットコーナー
   - 右上: 「Launchpad」を選択
   - 他のホットコーナーは「オフ」に設定
 
@@ -127,25 +127,25 @@ defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
 
 ![スクロールバーの設定](./06.png)
 
-## その他の Mac 設定関連
+## その他のMac設定関連
 
-### 7. Finder 設定
+### 7. Finder設定
 
-![Finder の設定](./07.png "サイドバーも整理している")
+![Finderの設定](./07.png "サイドバーも整理している")
 
-Finder はパスバーがあると便利なので、以下のコマンドを実行して常時表示させる。
+Finderはパスバーがあると便利なので、以下のコマンドを実行して常時表示させる。
 
 ```shell
 defaults write com.apple.finder ShowPathbar -bool true
 ```
 
-### 8. Finder アプリを終了可能にする
+### 8. Finderアプリを終了可能にする
 
-Finder アプリは通常、終了できない仕様だが、それが何とも落ち着かない。
+Finderアプリは通常、終了できない仕様だが、それが何とも落ち着かない。
 開いている必要がないときくらい自分の意思で閉じられたほうが精神衛生上良い。
-そこで、Finder を終了可能にする設定を採用している。
+そこで、Finderを終了可能にする設定を採用している。
 
-もちろん、Finder は開きっぱなしでも支障なく設計されているのだろう。
+もちろん、Finderは開きっぱなしでも支障なく設計されているのだろう。
 しかし、選択の自由があること自体が心の余裕につながる。
 
 ```shell
@@ -157,7 +157,7 @@ killall Finder
 ### 9. ファイル拡張子
 
 ファイルの正体を一目で分かるようにするため、ファイル拡張子は常に表示する設定にしている。
-`jpg` か `png` かといった違いは、瞬時に判断したい。
+`jpg`か`png`かといった違いは、瞬時に判断したい。
 
 ```shell
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
@@ -186,16 +186,16 @@ killall SystemUIServer
 
 ### 11. キーのリピート入力を有効化
 
-Vim で上下左右に移動するときなど、キーのリピート入力は必須である。
+Vimで上下左右に移動するときなど、キーのリピート入力は必須である。
 デフォルトでは、キーのリピート入力が無効になっているが、以下のコマンドを実行することで有効化できる。
 
 ```shell
 defaults write -g ApplePressAndHoldEnabled -bool false
 ```
 
-### 12. Mac デフォルトのディレクトリ名を英語表示にする
+### 12. Macデフォルトのディレクトリ名を英語表示にする
 
-Mac のホームディレクトリにあるディレクトリ（「アプリケーション」や「デスクトップ」）が日本語表記になっているのは好ましくないため、英語表記に変更する。
+Macのホームディレクトリにあるディレクトリ（「アプリケーション」や「デスクトップ」）が日本語表記になっているのは好ましくないため、英語表記に変更する。
 以下のコマンドを実行することで、英語表記に変更できる。
 くれぐれも直接ディレクトリ名を変更しないように。
 
@@ -221,7 +221,7 @@ rm ~/Library/.localized
 
 ### 13. ミュージックアプリが勝手に起動しないようにする
 
-AirPods の再生アクションを行った際に、ミュージックアプリが勝手に起動するのはストレスになるため、以下のコマンドを実行して無効化する。
+AirPodsの再生アクションを行った際に、ミュージックアプリが勝手に起動するのはストレスになるため、以下のコマンドを実行して無効化する。
 
 ```shell
 launchctl disable gui/"$(id -u)"/com.apple.rcd
@@ -239,9 +239,9 @@ launchctl disable gui/"$(id -u)"/com.apple.rcd
 
 特に重要な設定:
 - 左右のコマンドキー（`⌘`）単体押しで、左は英数・右はかな切り替え
-- `⌘+Q` を 2 回連続で押さないとアプリが閉じないようにする保護機能
+- `⌘+Q`を2回連続で押さないとアプリが閉じないようにする保護機能
 
-**高速でタイピングしているときに、誤って `⌘+Q` を押してしまい、保存していないデータを失った経験から、この 2 連打設定は非常に役立っている。**
+**高速でタイピングしているときに、誤って`⌘+Q`を押してしまい、保存していないデータを失った経験から、この2連打設定は非常に役立っている。**
 多少の不便さはあるが、データ損失を防ぐため、設定する価値は十分にある。
 
 以下のルールセットをインストールすることで簡単に設定可能。
@@ -252,7 +252,7 @@ https://ke-complex-modifications.pqrs.org/#ei-kana-cmd
 
 高機能なマウス [Logicool MX Master 3s](https://amzn.to/4i2JYAk) を活用するために、専用ソフトウェアの [Logi Options+](https://www.logicool.co.jp/ja-jp/software/logi-options-plus.html) を導入している。
 
-このソフトウェアの最大の魅力は、マウスのジェスチャーボタンをカスタマイズして、Mission Control を直感的に操作できる点だ。
+このソフトウェアの最大の魅力は、マウスのジェスチャーボタンをカスタマイズして、Mission Controlを直感的に操作できる点だ。
 デスクトップの切り替えや複数のウィンドウを一覧表示する機能が、マウスの動きだけで実行できるため、作業効率が格段に向上する。
 
 マウスの持つ本来の可能性を最大限に引き出すために、このソフトウェアの導入は必須。
@@ -263,7 +263,7 @@ https://ke-complex-modifications.pqrs.org/#ei-kana-cmd
 
 ここから先はエンジニア向けの設定なので一般の方はスルーしてもらっても問題ない。
 
-### 16. Command Line Tools のインストール
+### 16. Command Line Toolsのインストール
 
 まずはこれがないと始まらない。
 
@@ -271,49 +271,49 @@ https://ke-complex-modifications.pqrs.org/#ei-kana-cmd
 xcode-select --install
 ```
 
-ちなみに、**Xcode をインストールするなら Command Line Tools のインストールはいらない**（同梱されているため）。
+ちなみに、**XcodeをインストールするならCommand Line Toolsのインストールはいらない**（同梱されているため）。
 
-### 17. Homebrew のインストール
+### 17. Homebrewのインストール
 
-[Homebrew](https://brew.sh) は、Mac のパッケージマネージャであり、さまざまなソフトウェアを簡単にインストールできるため、非常に便利である。
+[Homebrew](https://brew.sh) は、Macのパッケージマネージャであり、さまざまなソフトウェアを簡単にインストールできるため、非常に便利である。
 以下のコマンドを実行することでインストールは完了する。
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-**個人的には `cask` を使用して GUI アプリをインストールするのはやめた方が良いと思っている。**
-毎回 CLI から全てのアプリを一括でアップグレードするなら楽だが、意外と面倒で忘れてしまいがちである。
+**個人的には`cask`を使用してGUIアプリをインストールするのはやめた方が良いと思っている。**
+毎回CLIから全てのアプリを一括でアップグレードするなら楽だが、意外と面倒で忘れてしまいがちである。
 
-そんなときに GUI アプリのアップデート通知からアプリをアップデートすると、アプリによってはバグが発生することがある。
+そんなときにGUIアプリのアップデート通知からアプリをアップデートすると、アプリによってはバグが発生することがある。
 そうなると、けっこう面倒なことになる。
 
-### 18. Vim のインストール
+### 18. Vimのインストール
 
-Vim は Mac にデフォルトでインストールされているが、バージョンが古いため、Homebrew でインストールし直したほうが良い。
+VimはMacにデフォルトでインストールされているが、バージョンが古いため、Homebrewでインストールし直したほうが良い。
 
 ```shell
 brew install vim
 ```
 
-### 19. Git のインストール
+### 19. Gitのインストール
 
-Git も同様に Mac デフォルトのバージョンは古いため、 Homebrew でインストールし直す。
+Gitも同様にMacデフォルトのバージョンは古いため、 Homebrewでインストールし直す。
 
 ```shell
 brew install git
 ```
 
-### 20. zsh の設定
+### 20. zshの設定
 
-`.zshrc` にお気に入りの設定をインポートしておく。
-こういったファイルは `dotfiles` として GitHub などに保存しておくと便利である。
+`.zshrc`にお気に入りの設定をインポートしておく。
+こういったファイルは`dotfiles`としてGitHubなどに保存しておくと便利である。
 
-一応、私も dotfiles を GitHub に保存している（ただ、あまり更新はしていない）。
+一応、私もdotfilesをGitHubに保存している（ただ、あまり更新はしていない）。
 
 https://github.com/kkhys/dotfiles
 
-以下は `.zshrc` の一例。
+以下は`.zshrc`の一例。
 
 ```text title="~/.zshrc"
 # alias
@@ -345,14 +345,14 @@ export LANG=ja_JP.UTF-8
 export LC_CTYPE=ja_JP.UTF-8
 ```
 
-### 21. SSH の設定
+### 21. SSHの設定
 
-SSH は、GitHub や GitLab などのリモートリポジトリや VPS サーバにアクセスするために必要である。
-SSH 公開鍵と秘密鍵を移行元の Mac からエクスポートして、移行先の Mac にインポートする（くれぐれも安全に）。
+SSHは、GitHubやGitLabなどのリモートリポジトリやVPSサーバにアクセスするために必要である。
+SSH公開鍵と秘密鍵を移行元のMacからエクスポートして、移行先のMacにインポートする（くれぐれも安全に）。
 
-`.ssh/config` などの設定も同様にインポートしておくと便利。
+`.ssh/config`などの設定も同様にインポートしておくと便利。
 
-以下は `.ssh/config` の一例。
+以下は`.ssh/config`の一例。
 
 ```text title="~/.ssh/config"
 Include ~/.ssh/hosts
@@ -378,9 +378,9 @@ Host vps
   IdentityFile ~/.ssh/id_ed25519_xxx
 ```
 
-### 22. Git の設定
+### 22. Gitの設定
 
-`.gitconfig` も移行元の PC もしくは dotfiles からインポートしておく。
+`.gitconfig`も移行元のPCもしくはdotfilesからインポートしておく。
 
 以下はその一例。
 
@@ -448,11 +448,11 @@ Host vps
 	insteadOf = git://
 ```
 
-### 23. GPG の設定
+### 23. GPGの設定
 
-Git コミットの署名に GPG を使用しているため、移行元の PC から GPG 公開鍵 / 秘密鍵をエクスポートして、移行先の PC にインポートする。
+Gitコミットの署名にGPGを使用しているため、移行元のPCからGPG公開鍵 / 秘密鍵をエクスポートして、移行先のPCにインポートする。
 
-以下は移行元の PC で実行する。
+以下は移行元のPCで実行する。
 
 ```shell
 # GPG 鍵の一覧を表示
@@ -466,7 +466,7 @@ gpg --export {keyid} > pub.key
 gpg --export-secret-keys {keyid} > sec.key
 ```
 
-以下は移行先の PC で実行する。
+以下は移行先のPCで実行する。
 
 ```shell
 # macOS で GPG を使うためのセットアップ
@@ -484,64 +484,64 @@ gpg --import sec.key
 gpg --edit-key {keyid} trust quit
 ```
 
-以上の設定を行うことで、コミット時に GPG を使用した署名が可能になる。
+以上の設定を行うことで、コミット時にGPGを使用した署名が可能になる。
 
 ### 24. お好みの等幅フォントをインストール
 
 こだわりのあるエンジニアであれば、お気に入りの等幅フォント（monospaced font）があるはずである。
 私は [JetBrains Mono](https://www.jetbrains.com/ja-jp/lp/mono) を愛用している。
 
-~~このブログのコードブロックにも JetBrains Mono を使用しているし、~~ IDE やターミナル系のアプリでも使用している。
-この段階でインストールして、Mac の Font Book に登録しておくと後々便利である。
+~~このブログのコードブロックにもJetBrains Monoを使用しているし、~~ IDEやターミナル系のアプリでも使用している。
+この段階でインストールして、MacのFont Bookに登録しておくと後々便利である。
 
 ![Font Book](./09.png)
 
 ### 25. お好みのターミナルエミュレータをインストール
 
 以前はターミナルエミュレータに [Alacritty](https://alacritty.org) を使っていたが、最近は [Warp](https://warp.dev) を使用している。
-Warp の良いところは、プラグインを追加しなくてもデフォルトで必要な機能が揃っている点。
-AI による補完機能もあるが、あまり使っていない。
+Warpの良いところは、プラグインを追加しなくてもデフォルトで必要な機能が揃っている点。
+AIによる補完機能もあるが、あまり使っていない。
 
-Alacritty では見た目のカスタマイズに [Starship](https://starship.rs) を使っていたが、Warp ではデフォルトのテーマをそのまま使用。
+Alacrittyでは見た目のカスタマイズに [Starship](https://starship.rs) を使っていたが、Warpではデフォルトのテーマをそのまま使用。
 デフォルトでも十分に美しく、特に変更する必要はないと感じている。
 
-また、以前は Zsh プラグインマネージャとして [Sheldon](https://sheldon.cli.rs) を使い、[zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) のようなプラグインを追加していたが、Warp ではこれらも不要。
+また、以前はZshプラグインマネージャとして [Sheldon](https://sheldon.cli.rs) を使い、[zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) のようなプラグインを追加していたが、Warpではこれらも不要。
 
-![Warp](./10.png "Warp のシンプルな UI")
+![Warp](./10.png "WarpのシンプルなUI")
 
 他にも機能が豊富で、これまでのターミナルエミュレータとは一線を画す存在。
 
-### 26. JetBrains Toolbox App をインストール
+### 26. JetBrains Toolbox Appをインストール
 
-現在は JetBrains 製の IDE を使用しているため [JetBrains Toolbox App](https://www.jetbrains.com/ja-jp/toolbox-app) をインストール。
-JetBrains Toolbox App から IntelliJ IDEA や WebStorm をインストールする。
+現在はJetBrains製のIDEを使用しているため [JetBrains Toolbox App](https://www.jetbrains.com/ja-jp/toolbox-app) をインストール。
+JetBrains Toolbox AppからIntelliJ IDEAやWebStormをインストールする。
 
-### 27. VSCode と Cursor のインストール
+### 27. VSCodeとCursorのインストール
 
-JetBrains 製の IDE を使っているが、昨今の AI 補完機能の進化に JetBrains が追いつけていない印象がある。
+JetBrains製のIDEを使っているが、昨今のAI補完機能の進化にJetBrainsが追いつけていない印象がある。
 
 そのため、[VSCode](https://code.visualstudio.com) や [Cursor](https://cursor.so) へ乗り換えるべく徐々に慣らしているところ。
-やはり、[Cline](https://github.com/cline/cline) や [Roo Code](https://github.com/RooVetGit/Roo-Code) のような AI コーディングアシスタントは活用していきたい。
+やはり、[Cline](https://github.com/cline/cline) や [Roo Code](https://github.com/RooVetGit/Roo-Code) のようなAIコーディングアシスタントは活用していきたい。
 
-ただ、JVM 系言語の開発では IntelliJ IDEA が依然として優位なため、併用している。
+ただ、JVM系言語の開発ではIntelliJ IDEAが依然として優位なため、併用している。
 
-### 28. Docker のインストール
+### 28. Dockerのインストール
 
 [Docker](https://www.docker.com/ja-jp) は大抵のプロジェクトで必要になるため、あらかじめインストールしておく。
 
-### 29. Xcode のインストール
+### 29. Xcodeのインストール
 
 [Xcode](https://apps.apple.com/jp/app/xcode/id497799835?mt=12) は必要になったときに入れると時間がかかりすぎるため、この段階でインストールしておく。
 
 ### 30. iStat Menus
 
-[iStat Menus](https://bjango.com/mac/istatmenus) は、Mac の CPU やメモリ、ディスクの使用状況を監視するためのアプリ。
-Mac 標準ではメニューバーに CPU 使用率やメモリ使用量を表示できないため、iStat Menus を使ってこれらの情報を可視化している。
+[iStat Menus](https://bjango.com/mac/istatmenus) は、MacのCPUやメモリ、ディスクの使用状況を監視するためのアプリ。
+Mac標準ではメニューバーにCPU使用率やメモリ使用量を表示できないため、iStat Menusを使ってこれらの情報を可視化している。
 
 アクティビティモニタを開かずに詳細な情報を確認できるのは便利。
 
-価格は約 2,000 円だが、買い切りなので長く使うなら十分に元が取れる。
-試用期間が 14 日間あるため、まずは試してみるのもあり。
+価格は約2,000円だが、買い切りなので長く使うなら十分に元が取れる。
+試用期間が14日間あるため、まずは試してみるのもあり。
 
 ![iStat Menus](./11.png)
 
@@ -549,7 +549,7 @@ Mac 標準ではメニューバーに CPU 使用率やメモリ使用量を表�
 
 各プログラミング言語と、それをインストールするためのパッケージマネージャは移り変わりが激しいため、ここでは省略する。
 
-Node.js に関しては、以前は [nodenv](https://github.com/nodenv/nodenv) を使っていたが、最近は [Volta](https://volta.sh) や [Proto](https://github.com/moonrepo/proto) が人気のようだ。
+Node.jsに関しては、以前は [nodenv](https://github.com/nodenv/nodenv) を使っていたが、最近は [Volta](https://volta.sh) や [Proto](https://github.com/moonrepo/proto) が人気のようだ。
 このように、各言語のパッケージマネージャは流行り廃りがあるため、最新の情報を調べてからインストールするのが良い。
 
 ## アプリ関連
@@ -574,13 +574,13 @@ Node.js に関しては、以前は [nodenv](https://github.com/nodenv/nodenv) �
 ## さいごに
 
 設定項目をすべてまとめようとしたが、さすがに大変だったので重要そうなところだけ整理した。
-**Apple がすべての設定を CLI から変更できるように整備してくれたら、もっと楽になるのだが。**
+**Appleがすべての設定をCLIから変更できるように整備してくれたら、もっと楽になるのだが。**
 
-文中にも書いたが、以前 Mac をセットアップしたときよりも便利な機能が増えていて、毎回新しい発見がある。
+文中にも書いたが、以前Macをセットアップしたときよりも便利な機能が増えていて、毎回新しい発見がある。
 システムアップデートのたびにリリースノートを確認し、継続的に新機能を取り入れていきたい。
 
-## 2024-04-12 追記
+## 2024-04-12追記
 
 https://macos-defaults.com
 
-上記のサイトに、macOS の設定を変更するためのコマンドがまとめられている。便利。
+上記のサイトに、macOSの設定を変更するためのコマンドがまとめられている。便利。
