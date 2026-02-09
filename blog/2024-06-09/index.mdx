@@ -1,5 +1,5 @@
 ---
-title: "v1.8.0 リリースノート: グローバルナビゲーションの追加など"
+title: "v1.8.0リリースノート: グローバルナビゲーションの追加など"
 description: サイトの使い勝手向上を目指し、グローバルナビゲーションやページネーション、ヘッダーアニメーションなどの機能を追加した開発の記録である。
 emoji: 🚀
 category: Tech
@@ -10,20 +10,20 @@ slug: b1c8jpk
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
-最近、知り合いにこの Web サイトを見てもらう機会があった。
+最近、知り合いにこのWebサイトを見てもらう機会があった。
 その際にサイトの回遊がしにくいという率直なフィードバックをもらったので早速改善することにした。
 
 以前のバージョンではグローバルナビゲーション[^1]は設置していなかった。
-というのも、[KISS の原則](https://w.wiki/48rd) に則って、可能な限りシンプルにサイトを構築していきたいと考えていたからである。
+というのも、[KISSの原則](https://w.wiki/48rd) に則って、可能な限りシンプルにサイトを構築していきたいと考えていたからである。
 
 [^1]: 全ページに共通して表示するメニューのこと
 
 だが、機能をシンプルにし過ぎて使い勝手が悪いのは本末転倒だ。
 やっぱり、サイトのデザインにおいてシンプルであっても多くの人が慣れ親しんだパターンから外れると途端に違和感を感じさせてしまう。
-そのギリギリを攻めるのが UI/UX デザイナーの腕の見せどころなのだろうなあ。
+そのギリギリを攻めるのがUI/UXデザイナーの腕の見せどころなのだろうなあ。
 
 このサイトではそこまで攻めたことはしない方針なので [ヤコブの法則](https://soiya.co.jp/soiya-post-0001) を参考に、世間一般に広く使われているデザインを落とし込んでみた。
 
@@ -32,18 +32,18 @@ https://github.com/kkhys/me.v2/releases/tag/v1.8.0
 ## グローバルナビゲーション（とヘッダ）
 
 ヘッダに表示されているメニューがいわゆるグローバルナビゲーションである。
-今のところメニューにはブログしかないのでシンプルだが、時間があるときにお問い合わせフォームや vlog などを追加していく予定である。
+今のところメニューにはブログしかないのでシンプルだが、時間があるときにお問い合わせフォームやvlogなどを追加していく予定である。
 
 基本的にはシンプルな実装だが、いくつかポイントがあるのでメモ書き程度にまとめてみる。
 ここではついでにヘッダの実装についての説明も含む。
 
 ### サイトロゴをコードで生成する
 
-サイトロゴは Illustrator や Canva で作るのが一般的だと思うが、意外と手間なのと、ちょっとした変更が履歴として残らない点がイマイチに感じているのでコードで生成することにした。
+サイトロゴはIllustratorやCanvaで作るのが一般的だと思うが、意外と手間なのと、ちょっとした変更が履歴として残らない点がイマイチに感じているのでコードで生成することにした。
 今後オリジナリティ溢れるロゴを作る機会があれば変えるかもしれない。
 
 基本的な考え方は [前回の記事](/blog/posts/b15e6x7) と同じである。
-以下のコードを Next.js の Route Handlers に設置することで画像を生成できる。
+以下のコードをNext.jsのRoute Handlersに設置することで画像を生成できる。
 
 ```ts title="apps/web/src/app/api/site-logo/route.tsx" showLineNumbers
 import type { NextRequest } from 'next/server';
@@ -101,8 +101,8 @@ export const GET = async (request: NextRequest) => {
 };
 ```
 
-当初はこれをそのまま img タグから呼び出せば大丈夫だろうと思っていたが、このサイトはダークモードに対応しているため、うまくロゴの色が反転しないという問題が発生した。
-そこで生成された SVG をコンポーネント化して呼び出すことにした。
+当初はこれをそのままimgタグから呼び出せば大丈夫だろうと思っていたが、このサイトはダークモードに対応しているため、うまくロゴの色が反転しないという問題が発生した。
+そこで生成されたSVGをコンポーネント化して呼び出すことにした。
 
 ```tsx title="apps/web/src/ui/global/icons/index.tsx" showLineNumbers
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -120,15 +120,15 @@ export const Icons = {
 };
 ```
 
-サイトロゴ自体は静的なので API から呼び出すよりも上記のようにコンポーネントする方が結局は良かった。
+サイトロゴ自体は静的なのでAPIから呼び出すよりも上記のようにコンポーネントする方が結局は良かった。
 
 ### 選択中のカテゴリにアクセントカラーを
 
-記事一覧ページにおいてブログメニュー内の選択中のカテゴリを色付けするようにした（PC 限定の機能。モバイルはドロワーメニューにした）。
-これは URL に含まれるクエリパラメータを読み取ることで実現している機能である。
+記事一覧ページにおいてブログメニュー内の選択中のカテゴリを色付けするようにした（PC限定の機能。モバイルはドロワーメニューにした）。
+これはURLに含まれるクエリパラメータを読み取ることで実現している機能である。
 
-Next.js ではクエリパラメータの取り扱いについては注意が必要で、そのことは以前記事にまとめた（[こちら](/blog/posts/b1srf75)）。
-今回は `useSearchParams` を使うことでカテゴリを取得している。
+Next.jsではクエリパラメータの取り扱いについては注意が必要で、そのことは以前記事にまとめた（[こちら](/blog/posts/b1srf75)）。
+今回は`useSearchParams`を使うことでカテゴリを取得している。
 以下がそのコード。
 
 ```tsx title="apps/web/src/ui/global/main-navigation/index.tsx" showLineNumbers
@@ -173,8 +173,8 @@ export const MainNavigation = () => {
 };
 ```
 
-もし `pathname` が `/posts` でカテゴリが見つからない場合は即ち All Posts ということになる。
-`useSearchParams` を使う場合は以下のように親要素から `Suspense` でラップしなければならない点に注意が必要（[参考](https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout)）
+もし`pathname`が`/posts`でカテゴリが見つからない場合は即ちAll Postsということになる。
+`useSearchParams`を使う場合は以下のように親要素から`Suspense`でラップしなければならない点に注意が必要（[参考](https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout)）
 
 ```tsx title="apps/web/src/ui/global/header/index.tsx" showLineNumbers
 export const Header = ({ className }: { className?: string }) => {
@@ -189,7 +189,7 @@ export const Header = ({ className }: { className?: string }) => {
 ```
 
 ページをリロードした際のチラつきを防止するためにちゃんとフォールバックを設定する。
-当初は `Blog` という文字列も `pathname` が `/posts` であればハイライトするようにしていたが、チラつきの問題を解決できなかったので止めた。
+当初は`Blog`という文字列も`pathname`が`/posts`であればハイライトするようにしていたが、チラつきの問題を解決できなかったので止めた。
 
 https://github.com/kkhys/me.v2/issues/1076
 
@@ -198,8 +198,8 @@ https://github.com/kkhys/me.v2/issues/1076
 ヘッダをページ上部に固定しているサイトを多く見かけるが、ブログのようなコンテンツがメインのサイトにおいては没入感を妨げる要素になり得てしまう。
 とはいえ、記事の途中までスクロールしたときに別のページが見たくなることも考えられる。
 
-何か良い方法がないか考えるときにまずすることは同様のサービスがどのような UI をしているか調査することである。
-Medium や Note を見てみると、両方とも下にスクロールしたときはヘッダが隠れて、上にスクロールしたときはヘッダが現れるような仕様になっていた。
+何か良い方法がないか考えるときにまずすることは同様のサービスがどのようなUIをしているか調査することである。
+MediumやNoteを見てみると、両方とも下にスクロールしたときはヘッダが隠れて、上にスクロールしたときはヘッダが現れるような仕様になっていた。
 
 この方法は記事を読むときの人間の動きを考えた良いデザインだと思う。
 ヤコブの法則的に考えてもそこまで違和感を感じさせることもなさそうなので実装してみた。
@@ -256,9 +256,9 @@ export const useHeaderAnimation = () => {
 };
 ```
 
-`animationState` は `headerFrom` または `headerTo` であり、ヘッダがどの位置に移動するべきかの情報を返す。
-`headerRef` は React の ref でヘッダ要素の参照を保持している。
-この ref を使ってヘッダ要素の高さを取得したり、他の DOM 操作を行ったりしている。
+`animationState`は`headerFrom`または`headerTo`であり、ヘッダがどの位置に移動するべきかの情報を返す。
+`headerRef`はReactのrefでヘッダ要素の参照を保持している。
+このrefを使ってヘッダ要素の高さを取得したり、他のDOM操作を行ったりしている。
 
 続いて、カスタムフック化したロジックを見た目部分の実装に落とし込んでいく。
 
@@ -279,8 +279,8 @@ export const Header = ({ className }: { className?: string }) => {
 };
 ```
 
-ここでは motion コンポーネントを使ってアニメーションの動きを制御している。
-`[0.1, 0.25, 0.3, 1]` はカスタムのイージング関数を示している。
+ここではmotionコンポーネントを使ってアニメーションの動きを制御している。
+`[0.1, 0.25, 0.3, 1]`はカスタムのイージング関数を示している。
 この辺は少しずつ微調整しながら良い感じの（としか言いようがない）数値を探していく。
 
 https://github.com/kkhys/me.v2/issues/1113
@@ -292,12 +292,12 @@ https://github.com/kkhys/me.v2/issues/1113
 次にページネーションを追加したのでその説明を書き留めていく。
 
 今までは記事数が少なかったのもあり、ページネーションは必要なかった。
-だが、この記事を書く前の時点で 18 記事あるためそろそろ追加することにした。
+だが、この記事を書く前の時点で18記事あるためそろそろ追加することにした。
 
-ページネーションの他に X のような無限スクロールを実装するという選択肢もあったが、ある程度探したいコンテンツが決まっているブログのようなサービスには向いていないため今回は見送った。
+ページネーションの他にXのような無限スクロールを実装するという選択肢もあったが、ある程度探したいコンテンツが決まっているブログのようなサービスには向いていないため今回は見送った。
 
 ページネーションと言ってもただ単に分割すれば良いというわけではなく意外と考えることが多い。
-今回は Amazon の商品一覧ページのような ellipsis（`...`）付きのページネーションを作っていく。
+今回はAmazonの商品一覧ページのようなellipsis（`...`）付きのページネーションを作っていく。
 以下がその例。
 
 ```text
@@ -366,10 +366,10 @@ export const usePagination = (data: Post[], itemsPerPage = 10) => {
 };
 ```
 
-SNS でシェアされることも考えてクエリパラメータにページ数を保持できるようにしてある。
-例えば `https://kkhys.me/posts?category=tech&page=2` のような URL であれば Tech カテゴリの 2 ページ目が表示される。
+SNSでシェアされることも考えてクエリパラメータにページ数を保持できるようにしてある。
+例えば`https://kkhys.me/posts?category=tech&page=2`のようなURLであればTechカテゴリの2ページ目が表示される。
 
-次にページネーションの UI コンポーネントを作成していく。
+次にページネーションのUIコンポーネントを作成していく。
 
 ```tsx title="apps/web/src/ui/post/pagination/index.tsx" showLineNumbers
 export const Pagination = ({
@@ -432,11 +432,11 @@ export const Pagination = ({
 };
 ```
 
-表示するページや ellipsis は配列で管理するのがポイント。
+表示するページやellipsisは配列で管理するのがポイント。
 ページネーション自体のスタイリングは [shadcn/ui](https://ui.shadcn.com) を使っている。
-ここではコンポーネント名を見れば大体何が書いてあるのかわかると思うので割愛する（そこが shadcn/ui の優れている点でもある）。
+ここではコンポーネント名を見れば大体何が書いてあるのかわかると思うので割愛する（そこがshadcn/uiの優れている点でもある）。
 
-最後にカスタムフックと UI コンポーネントを呼び出せば完成。
+最後にカスタムフックとUIコンポーネントを呼び出せば完成。
 
 ```tsx title="apps/web/src/ui/post/article-list/index.tsx" showLineNumbers
 export const ArticleList = ({
@@ -463,28 +463,28 @@ https://github.com/kkhys/me.v2/issues/315
 
 ## 画像のズーム機能
 
-v1.8.0 最後の機能追加として画像のズーム機能を条件付きで追加した。
-ブラウザが Chrome かつディスプレイの横幅が 768px 以上の場合のみ以下の画像がズームできる。
+v1.8.0最後の機能追加として画像のズーム機能を条件付きで追加した。
+ブラウザがChromeかつディスプレイの横幅が768px以上の場合のみ以下の画像がズームできる。
 
 ![スペースマウンテン](./01.jpg)
 
-Framer Motion の [Shared layout animations](https://www.framer.com/motion/layout-animations/#shared-layout-animations) を使うことで状態を変える際に連続性のある画面遷移アニメーションを行える。
-Web 標準の機能で実装する場合は [View Transitions API](https://developer.mozilla.org/ja/docs/Web/API/View_Transitions_API) を使えば同様のことができるが Chrome と Edge にしか対応していないなど、まだ実験段階なので様子を見ている。
+Framer Motionの [Shared layout animations](https://www.framer.com/motion/layout-animations/#shared-layout-animations) を使うことで状態を変える際に連続性のある画面遷移アニメーションを行える。
+Web標準の機能で実装する場合は [View Transitions API](https://developer.mozilla.org/ja/docs/Web/API/View_Transitions_API) を使えば同様のことができるがChromeとEdgeにしか対応していないなど、まだ実験段階なので様子を見ている。
 
-Next.js でも Astro のように公式で View Transition をサポートしてくれれば良いのだが（[動作例](https://astro-records.pages.dev)）しばらくは代わりの方法で実装するしかないということで Framer Motion を使ったというわけである[^2]。
+Next.jsでもAstroのように公式でView Transitionをサポートしてくれれば良いのだが（[動作例](https://astro-records.pages.dev)）しばらくは代わりの方法で実装するしかないということでFramer Motionを使ったというわけである[^2]。
 
-[^2]: 近い将来 Next.js でも View Transition はサポートされそう？（[ソース](https://github.com/vercel/next.js/discussions/46300#discussioncomment-6836049)）
+[^2]: 近い将来Next.jsでもView Transitionはサポートされそう？（[ソース](https://github.com/vercel/next.js/discussions/46300#discussioncomment-6836049)）
 
-一応実装してみたのだが、画像をクリックやタップしたときに一瞬 Blur 画像が表示されてちょっと許容できなかったので唯一影響の少なかった Chrome の PC 版のみリリースした（Chrome でも若干 flickering があるけど）。
-推測だが、Framer Motion には関係ない next/image が原因のような気がしている。
-修正に時間がかかりそうなので他のブラウザについては一旦 Pending としている。
-View Transition についての根本的な理解を深めてから再度リリースしようと思う。
+一応実装してみたのだが、画像をクリックやタップしたときに一瞬Blur画像が表示されてちょっと許容できなかったので唯一影響の少なかったChromeのPC版のみリリースした（Chromeでも若干flickeringがあるけど）。
+推測だが、Framer Motionには関係ないnext/imageが原因のような気がしている。
+修正に時間がかかりそうなので他のブラウザについては一旦Pendingとしている。
+View Transitionについての根本的な理解を深めてから再度リリースしようと思う。
 その際に原因について書ければ。
 
-ちなみにただ画像をズームするだけならすぐにリリースできるが、ここはせっかくだから View Transition にこだわりたい。
-このアイデア自体は Medium から持ってきている。
+ちなみにただ画像をズームするだけならすぐにリリースできるが、ここはせっかくだからView Transitionにこだわりたい。
+このアイデア自体はMediumから持ってきている。
 
-View Transition API が安定版になれば今後の Web のトレンドになると思うので習得して積極的に使っていきたいところだ。
+View Transition APIが安定版になれば今後のWebのトレンドになると思うので習得して積極的に使っていきたいところだ。
 
 https://github.com/kkhys/me.v2/issues/1115
 
@@ -492,7 +492,7 @@ https://github.com/kkhys/me.v2/issues/1115
 
 今は日曜日の夜なので取り急ぎまとめてみた。
 ちょっと雑になってしまったかも。
-それぞれの機能についてはまるまる 1 本記事にかけるくらいこだわれば奥が深い部分である。
-まだ UX の部分で満足はできていないのでちょっとずつ修正していく予定。
+それぞれの機能についてはまるまる1本記事にかけるくらいこだわれば奥が深い部分である。
+まだUXの部分で満足はできていないのでちょっとずつ修正していく予定。
 
-文中にも書いたが窓口として早いうちにコンタクトフォームと About ページは追加したい。
+文中にも書いたが窓口として早いうちにコンタクトフォームとAboutページは追加したい。
