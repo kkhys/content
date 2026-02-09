@@ -1,6 +1,6 @@
 ---
-title: Vultr + Arch Linux で Mastodon を構築する
-description: 個人用 Mastodon インスタンスを Arch Linux と Vultr で構築する技術ガイド。
+title: Vultr + Arch LinuxでMastodonを構築する
+description: 個人用MastodonインスタンスをArch LinuxとVultrで構築する技術ガイド。
 emoji: 🦣
 category: Tech
 tags: [Mastodon, Linux]
@@ -11,24 +11,24 @@ slug: b1ffkqq
 
 以前から自分専用のマイクロブログを立ち上げたいと思っていた。
 
-X や Facebook、Instagram といったみんながよく使っている、いわゆる中央集権型 SNS はどうも投稿し続けていくには気乗りがしない。
+XやFacebook、Instagramといったみんながよく使っている、いわゆる中央集権型SNSはどうも投稿し続けていくには気乗りがしない。
 その原因を考えるに、**全てのデータが運営会社に管理される部分が気に入らない**のだと思う。
 
 買収や破綻したときに全てのデータが失われてしまうリスクがあるので、ライフログとしては向かない。
 自由な意見を書き込めば場合によっては、アカウントが凍結されるかもしれない。
 
-そういった問題を解決するための仕組みとして、分散型 SNS の [Fediverse](https://ja.wikipedia.org/wiki/Fediverse) という仕組みがある。
+そういった問題を解決するための仕組みとして、分散型SNSの [Fediverse](https://ja.wikipedia.org/wiki/Fediverse) という仕組みがある。
 
-Fediverse は、共通のプロトコルを使用して、異なるソフトウェアやサービスが互いに通信できるように設計されている。
-最も一般的なプロトコルは Mastodon や Misskey が採用している [ActivityPub](https://www.w3.org/TR/activitypub) である。
+Fediverseは、共通のプロトコルを使用して、異なるソフトウェアやサービスが互いに通信できるように設計されている。
+最も一般的なプロトコルはMastodonやMisskeyが採用している [ActivityPub](https://www.w3.org/TR/activitypub) である。
 
-**ActivityPub を使用することで、異なるサーバやプラットフォームに所属するユーザ同士がフォロー、メッセージ送信、投稿の共有などを行うことが可能になる。**
+**ActivityPubを使用することで、異なるサーバやプラットフォームに所属するユーザ同士がフォロー、メッセージ送信、投稿の共有などを行うことが可能になる。**
 
 これがまさに私の求めていたもので、自由に発信し、ライフログとしての役割を果たすための最適なプラットフォームとなり得ると考えた。
 
-Fediverse を使えば、自分専用のマイクロブログを立ち上げ、それを自分で管理できる。
+Fediverseを使えば、自分専用のマイクロブログを立ち上げ、それを自分で管理できる。
 これにより、コンテンツの所有権を完全に保持し、外部の制約やリスクから解放される。
-また、他の Fediverse ユーザーと繋がりながらも、自分のペースで投稿し続けることができるのも素晴らしい。
+また、他のFediverseユーザーと繋がりながらも、自分のペースで投稿し続けることができるのも素晴らしい。
 
 かくして、私は自分専用のマイクロブログを立ち上げる決意を固めた。
 
@@ -40,88 +40,88 @@ https://mastodon.kkhys.me/@kkhys
 
 ### どのソフトウェアを使うか
 
-Fediverse の構成要素の 1 つとなるソフトウェアを選定するにあたって、[FLOSS](https://ja.wikipedia.org/wiki/FLOSS) であることは前提条件である。
+Fediverseの構成要素の1つとなるソフトウェアを選定するにあたって、[FLOSS](https://ja.wikipedia.org/wiki/FLOSS) であることは前提条件である。
 
-その上で、プロトコルを選んでいくわけだが、現在 Fediverse で最も広く採用されているプロトコルである ActivityPub を選ぶのが自然の流れだと思う。
-最近では Threads も ActivityPub に対応したし（ベータ版だが）、Tumblr も今後対応する予定なので将来性もある。
+その上で、プロトコルを選んでいくわけだが、現在Fediverseで最も広く採用されているプロトコルであるActivityPubを選ぶのが自然の流れだと思う。
+最近ではThreadsもActivityPubに対応したし（ベータ版だが）、Tumblrも今後対応する予定なので将来性もある。
 
-ActivityPub を採用しているソフトウェアはたくさんあるが、消去法で Mastodon にした。
-Misskey も選択肢の 1 つだったが、破壊的変更が多いのと、独特の文化が合わないと感じたので止めた。
+ActivityPubを採用しているソフトウェアはたくさんあるが、消去法でMastodonにした。
+Misskeyも選択肢の1つだったが、破壊的変更が多いのと、独特の文化が合わないと感じたので止めた。
 
-他にもバックエンドが Elixir で書かれた [Pleroma](https://pleroma.social) といった技術的興味を惹かれるソフトウェアもある。
-今後、移行する可能性もあるが、ひとまず Mastodon を使って構築していく。
+他にもバックエンドがElixirで書かれた [Pleroma](https://pleroma.social) といった技術的興味を惹かれるソフトウェアもある。
+今後、移行する可能性もあるが、ひとまずMastodonを使って構築していく。
 
 ### どのサーバを使うか
 
-Mastodon のホスティングには、以前から興味があった [Vultr](https://www.vultr.com) を選択した。
-**Vultr は基本的な料金が安いのに加え、東京にデータセンターがあることが大きな魅力だ。**
+Mastodonのホスティングには、以前から興味があった [Vultr](https://www.vultr.com) を選択した。
+**Vultrは基本的な料金が安いのに加え、東京にデータセンターがあることが大きな魅力だ。**
 特に、低価格なプランが豊富で、プロジェクトの規模に応じた柔軟な選択が可能な点が気に入っている。
 
-肝心のメモリは 2GB にした。
-Mastodon はメモリ消費が多いことがデメリットだが、おひとり様インスタンスであればメモリ使用量を監視しながら適切にチューニングすることで、問題なく運用できると考えている。
+肝心のメモリは2GBにした。
+Mastodonはメモリ消費が多いことがデメリットだが、おひとり様インスタンスであればメモリ使用量を監視しながら適切にチューニングすることで、問題なく運用できると考えている。
 
-**Vultr はプランの多様性も魅力の一つで、必要に応じてリソースを増やせる柔軟性がある。**
-今回選択したのは High Frequency プランである。
-ストレージは 64GB の NVMe で、高速なデータ転送が可能だ。
-CPU は 3GHz 以上の Intel Xeon の 1 コアを選んだ。
-AMD の CPU も選べるが、シングルスレッドの性能では Intel が依然として強いイメージがあり、その信頼性に基づいて Intel を選択した。
+**Vultrはプランの多様性も魅力の一つで、必要に応じてリソースを増やせる柔軟性がある。**
+今回選択したのはHigh Frequencyプランである。
+ストレージは64GBのNVMeで、高速なデータ転送が可能だ。
+CPUは3GHz以上のIntel Xeonの1コアを選んだ。
+AMDのCPUも選べるが、シングルスレッドの性能ではIntelが依然として強いイメージがあり、その信頼性に基づいてIntelを選択した。
 
-Mastodon にアップロードした画像は [Cloudflare R2](https://www.cloudflare.com/ja-jp/developer-platform/r2) に保存する。
-AWS の S3 が推奨される方法であるが、できるだけ料金を抑えたいので R2 にした。
+Mastodonにアップロードした画像は [Cloudflare R2](https://www.cloudflare.com/ja-jp/developer-platform/r2) に保存する。
+AWSのS3が推奨される方法であるが、できるだけ料金を抑えたいのでR2にした。
 
-### どの OS を使うか
+### どのOSを使うか
 
-Mastodon の[公式ドキュメント](https://docs.joinmastodon.org/admin/install) では、主に Ubuntu や Debian といったディストリビューションが推奨されている。
+Mastodonの[公式ドキュメント](https://docs.joinmastodon.org/admin/install) では、主にUbuntuやDebianといったディストリビューションが推奨されている。
 これらは広く使われており、サポートやドキュメントが充実しているため、特にサーバ環境においては非常に安定している選択肢だ。
 しかし、個人的に慣れている軽量かつシンプルな [Arch Linux](http://www.archlinux.jp) を使うことに決めた。
 
-**本来、Arch Linux はサーバ用途としてはあまり向いていないとされている。**
+**本来、Arch Linuxはサーバ用途としてはあまり向いていないとされている。**
 その理由は、主にローリングリリースモデルの特性によるもので、頻繁な更新によって予期せぬトラブルや互換性の問題が発生するリスクがあるからだ。
 例えば、システムの更新が原因で依存関係が崩れたり、サービスが一時的に停止したりする可能性がある。
 これについては、以下の動画で詳しく解説されている。
 
 https://www.youtube.com/watch?v=_n9uwYRzDZQ
 
-それにもかかわらず、Arch Linux を使う理由は、単純に「[Arch は最高](https://wiki.archlinux.jp/index.php/Arch_%E3%81%AF%E6%9C%80%E9%AB%98)」と思っているからに他ならない。
-Arch のミニマルなアプローチ、シンプルな構成、そして何よりもカスタマイズの自由度は、他のディストリビューションでは得られないものだ。
+それにもかかわらず、Arch Linuxを使う理由は、単純に「[Archは最高](https://wiki.archlinux.jp/index.php/Arch_%E3%81%AF%E6%9C%80%E9%AB%98)」と思っているからに他ならない。
+Archのミニマルなアプローチ、シンプルな構成、そして何よりもカスタマイズの自由度は、他のディストリビューションでは得られないものだ。
 
 とはいえ、基本的な考え方や操作は、どのディストリビューションでも共通している部分が多い。
-Mastodon のようなオープンソースのソフトウェアは、様々な環境で動作するよう設計されているため、特定のディストリビューションに依存することなく自由に選ぶことができる。
+Mastodonのようなオープンソースのソフトウェアは、様々な環境で動作するよう設計されているため、特定のディストリビューションに依存することなく自由に選ぶことができる。
 プライベートなインスタンスであれば、好きなのを使えば良いと思う。
 
 ### 肝心の料金
 
-Vultr でサーバを 1 ヶ月間、24 時間フル稼働させた場合、基本料金として $12 かかる。
-現在の為替レートを考慮すると、円安の影響で $1 はおよそ ¥145 となり、月額の費用は約 1,750 円になる。
+Vultrでサーバを1ヶ月間、24時間フル稼働させた場合、基本料金として $12かかる。
+現在の為替レートを考慮すると、円安の影響で $1はおよそ ¥145となり、月額の費用は約1,750円になる。
 
-画像等のアップロード先である R2 では従量課金制が採用されているが、特筆すべきはエグレス料金が無料であることだ。
+画像等のアップロード先であるR2では従量課金制が採用されているが、特筆すべきはエグレス料金が無料であることだ。
 エグレス料金とは、データをストレージから外部に出す際に発生する費用のことで、他のクラウドサービスプロバイダでは一般的に発生する料金である。
-しかし、R2 ではこのエグレス料金がかからないため、コストを大幅に抑えることができる。
+しかし、R2ではこのエグレス料金がかからないため、コストを大幅に抑えることができる。
 
-特に、個人で運用する Mastodon のインスタンスにおいては、ユーザが大量に画像を投稿しない限り、R2 の無料利用枠内で十分にやりくりすることが可能だ。
-ドメイン代を除いて、実質 Vultr の料金しかかからない。
+特に、個人で運用するMastodonのインスタンスにおいては、ユーザが大量に画像を投稿しない限り、R2の無料利用枠内で十分にやりくりすることが可能だ。
+ドメイン代を除いて、実質Vultrの料金しかかからない。
 毎月払うにはまあまあ高い金額だが、これより低い金額のサーバだと満足できるスペックがないから仕方ない。
 
-## Mastodon の構築方法
+## Mastodonの構築方法
 
-早速 Mastodon を構築していく。
-実行環境は macOS。
+早速Mastodonを構築していく。
+実行環境はmacOS。
 
-まずは SSH を使ってリモートサーバに接続する。
+まずはSSHを使ってリモートサーバに接続する。
 
 ```shell
 ssh root@123.456.78.90
 ```
 
-Vultr から発行された root パスワードを念の為、変更しておく。
+Vultrから発行されたrootパスワードを念の為、変更しておく。
 
 ```shell
 passwd
 ```
 
 次に、リモートサーバとの接続を切って、ローカルシェルに戻る。
-そして、新しい SSH キーを生成する。
-最後に、作成した SSH キーの公開鍵をリモートサーバに追加して、公開鍵認証を追加する。
+そして、新しいSSHキーを生成する。
+最後に、作成したSSHキーの公開鍵をリモートサーバに追加して、公開鍵認証を追加する。
 
 ```shell
 exit
@@ -134,7 +134,7 @@ ssh-copy-id -i ~/.ssh/id_ed25519_vultr.pub root@123.456.78.90
 これで、今後リモートサーバにログインする際に、パスワードを入力する代わりに公開鍵認証を使えるようになる。
 これは、セキュリティの向上や利便性のために必ず行わなければならないルーティンである。
 
-必要に応じて、以下のように `.ssh/config` を変更しておくと後々の作業が楽になる。
+必要に応じて、以下のように`.ssh/config`を変更しておくと後々の作業が楽になる。
 
 ```text title=".ssh/config" showLineNumbers
 Host vultr
@@ -150,7 +150,7 @@ Host vultr
 ssh vultr
 ```
 
-Vultr の Arch Linux の状態を確認しておく。
+VultrのArch Linuxの状態を確認しておく。
 
 まずは、メモリ使用状況から。
 
@@ -163,7 +163,7 @@ Swap:        6451196           0     6451196
 
 ```
 
-ありがたいことに、初めからスワップが 6GB 設定されている。
+ありがたいことに、初めからスワップが6GB設定されている。
 
 次に、カーネルバージョンを確認する。
 
@@ -484,12 +484,12 @@ zlib 1:1.3.1-2
 zstd 1.5.6-1
 ```
 
-Arch Linux といえば、最初は何も入っていないイメージだったが、親切にも必要最低限のパッケージがインストール済みである。
+Arch Linuxといえば、最初は何も入っていないイメージだったが、親切にも必要最低限のパッケージがインストール済みである。
 正直なところ、ありがた迷惑。
 
 次に日付の設定を行っていく。
 
-デフォルトのタイムゾーンは UTC なので、これを JST（日本標準時）に変更する。
+デフォルトのタイムゾーンはUTCなので、これをJST（日本標準時）に変更する。
 
 ```shell
 date
@@ -502,8 +502,8 @@ Tue Aug 13 03:12:01 PM JST 2024
 ```
 
 次にロケールを変更する。
-デフォルトでは `en_US` が設定されている。
-また、システムで利用可能なロケールには `ja_JP` がないため、`/etc/locale.gen` に追加が必要。
+デフォルトでは`en_US`が設定されている。
+また、システムで利用可能なロケールには`ja_JP`がないため、`/etc/locale.gen`に追加が必要。
 
 ```shell
 echo $LANG
@@ -522,7 +522,7 @@ vim /etc/locale.gen
 + ja_JP.UTF-8 UTF-8
 ```
 
-`locale-gen` でシステムで利用できるロケールを作成する。
+`locale-gen`でシステムで利用できるロケールを作成する。
 
 ```shell
 locale-gen
@@ -535,9 +535,9 @@ ja_JP.utf8
 POSIX
 ```
 
-`locale -a` を実行すると `ja_JP` が追加されていることを確認できる。
+`locale -a`を実行すると`ja_JP`が追加されていることを確認できる。
 
-次に、デフォルトのロケールを変更するために `/etc/locale.conf` を修正する。
+次に、デフォルトのロケールを変更するために`/etc/locale.conf`を修正する。
 
 ```shell
 vim /etc/locale.conf
@@ -561,8 +561,8 @@ echo $LANG
 ja_JP.UTF-8
 ```
 
-root に直接ログインするのは好ましくないので mastodon というユーザを作成して、パスワードを設定する。
-作成したユーザは管理者グループ wheel に所属させる。
+rootに直接ログインするのは好ましくないのでmastodonというユーザを作成して、パスワードを設定する。
+作成したユーザは管理者グループwheelに所属させる。
 
 [systemd-homed](https://wiki.archlinux.jp/index.php/Systemd-homed) という新しいユーザ管理方法もあるが、ここでは慣れている古典的な方法でユーザを作成した。
 
@@ -572,27 +572,27 @@ useradd -mg wheel mastodon
 passwd mastodon
 ```
 
-wheel グループのユーザが sudo コマンドを使用して、一時的に特権を得られるようにするために、`/etc/sudoers` ファイルの編集を行う。
+wheelグループのユーザがsudoコマンドを使用して、一時的に特権を得られるようにするために、`/etc/sudoers`ファイルの編集を行う。
 
 ```shell
 EDITOR=vim visudo
 ```
 
-`sudo` を利用するときに、パスワード入力を要求されないほうが使いやすいので、セキュリティ的には弱くなるが、パスワード入力なしで `sudo` コマンドを使用できるように設定しておく。
+`sudo`を利用するときに、パスワード入力を要求されないほうが使いやすいので、セキュリティ的には弱くなるが、パスワード入力なしで`sudo`コマンドを使用できるように設定しておく。
 
 ```diff title="/etc/sudoers"
 - # %wheel ALL=(ALL:ALL) NOPASSWD: ALL
 + %wheel ALL=(ALL:ALL) NOPASSWD: ALL
 ```
 
-次は SSH 接続時の設定を変更する。
+次はSSH接続時の設定を変更する。
 
 ```shell
 vim /etc/ssh/sshd_config
 ```
 
-`PermitRootLogin no` と設定することで、root ユーザが直接リモートログインすることを禁止している。
-また、`PasswordAuthentication no` でパスワードを使ったログインを無効にし、公開鍵などの認証方式を用いることを強制してセキュリティを強化した。
+`PermitRootLogin no`と設定することで、rootユーザが直接リモートログインすることを禁止している。
+また、`PasswordAuthentication no`でパスワードを使ったログインを無効にし、公開鍵などの認証方式を用いることを強制してセキュリティを強化した。
 これは公開鍵を紛失したら二度とサーバにログインできないことを意味する。
 
 ```diff title="/etc/ssh/sshd_config"
@@ -603,7 +603,7 @@ vim /etc/ssh/sshd_config
 + PasswordAuthentication no
 ```
 
-最後に SSH サーバを有効化して上記の設定を反映させる。
+最後にSSHサーバを有効化して上記の設定を反映させる。
 
 ```shell
 systemctl restart sshd
@@ -615,7 +615,7 @@ systemctl restart sshd
 pacman -S fail2ban
 ```
 
-fail2ban の設定ファイルは、一般的に `jail.conf` にデフォルトの設定が記述されており、ユーザが変更を加える場合は `jail.local` というファイルに設定をコピーし、そのコピーを編集するのが推奨されているのでそれに倣う。
+fail2banの設定ファイルは、一般的に`jail.conf`にデフォルトの設定が記述されており、ユーザが変更を加える場合は`jail.local`というファイルに設定をコピーし、そのコピーを編集するのが推奨されているのでそれに倣う。
 
 ```shell
 cp /etc/fail2ban/jail.{conf,local}
@@ -623,7 +623,7 @@ cp /etc/fail2ban/jail.{conf,local}
 vim /etc/fail2ban/jail.local
 ```
 
-以下の編集をして、SSH サーバの監視を有効にしている。
+以下の編集をして、SSHサーバの監視を有効にしている。
 
 ```text title="/etc/fail2ban/jail.local"
 [sshd]
@@ -631,14 +631,14 @@ enabled = true
 mode = aggressive
 ```
 
-以下のコマンドで fail2ban サービスを即座に起動し、さらにシステム起動時に自動的に開始するように設定する。
+以下のコマンドでfail2banサービスを即座に起動し、さらにシステム起動時に自動的に開始するように設定する。
 
 
 ```shell
 systemctl enable --now fail2ban
 ```
 
-現在 fail2ban がシステム上でどのように動作しているかを確認する。
+現在fail2banがシステム上でどのように動作しているかを確認する。
 
 ```shell
 fail2ban-client status
@@ -648,9 +648,9 @@ Status
 `- Jail list:   sshd
 ```
 
-SSH デーモンに対して監視と保護を行っていることを確認できる。
+SSHデーモンに対して監視と保護を行っていることを確認できる。
 
-インスタンス作成から 1 週間ぐらい経ったので、どれくらい効果があったのか確かめてみる。
+インスタンス作成から1週間ぐらい経ったので、どれくらい効果があったのか確かめてみる。
 
 ```shell
 fail2ban-client status sshd
@@ -666,18 +666,18 @@ Status for the jail: sshd
    - Banned IP list:   xxx.xxx.xxx.xxx
 ```
 
-要点だけ確認すると、fail2ban が稼働している期間中に、SSH 接続が失敗した回数の合計が 8,110 回、811 の IP アドレスがブロックされたということである。
+要点だけ確認すると、fail2banが稼働している期間中に、SSH接続が失敗した回数の合計が8,110回、811のIPアドレスがブロックされたということである。
 思っていたよりも多い。
 
-IP アドレスがブロックされたときに、自分宛に通知メールを送信することもできるが、あまりに件数が多いため有効にしていない。
+IPアドレスがブロックされたときに、自分宛に通知メールを送信することもできるが、あまりに件数が多いため有効にしていない。
 
-fail2ban では一度ブロックされた IP アドレスは、設定された時間が経過すると自動的に解除される。
+fail2banでは一度ブロックされたIPアドレスは、設定された時間が経過すると自動的に解除される。
 この時間は細かく変更可能。
-永久にブロックすることも可能なので、頻繁に同じ IP アドレスが攻撃を試みている場合は、対応した方が良いかもしれない。
+永久にブロックすることも可能なので、頻繁に同じIPアドレスが攻撃を試みている場合は、対応した方が良いかもしれない。
 
-次に nftables を使って、パケットフィルタリングを行なっていく。
+次にnftablesを使って、パケットフィルタリングを行なっていく。
 
-Vultr で立ち上げた Arch Linux には、あらかじめ nftables と iptables-nft がインストールされていた。
+Vultrで立ち上げたArch Linuxには、あらかじめnftablesとiptables-nftがインストールされていた。
 以下のコマンドで現在定義されているすべてのテーブルをリストアップする。
 
 ```shell
@@ -687,7 +687,7 @@ table ip filter
 table ip6 filter
 ```
 
-iptables-nft は使わないため、nftables の設定ファイルである `/etc/nftables.conf` を編集して、自分でルールを設定していく。
+iptables-nftは使わないため、nftablesの設定ファイルである`/etc/nftables.conf`を編集して、自分でルールを設定していく。
 
 ```shell
 vim /etc/nftables.conf
@@ -751,13 +751,13 @@ table inet filter {
 }
 ```
 
-以下のコマンドで nftables サービスを即座に起動し、さらにシステム起動時に自動的に開始するように設定する。
+以下のコマンドでnftablesサービスを即座に起動し、さらにシステム起動時に自動的に開始するように設定する。
 
 ```shell
 systemctl enable --now nftables
 ```
 
-nftables の設定が正しく行われているかテストしていく。
+nftablesの設定が正しく行われているかテストしていく。
 まずは構文チェックから。
 
 ```shell
@@ -771,7 +771,7 @@ nft -c -f /etc/nftables.conf
 nft list ruleset
 ```
 
-先ほど設定した内容が反映されていれば OK。
+先ほど設定した内容が反映されていればOK。
 
 次にログが記録されているか確認する。
 
@@ -783,7 +783,7 @@ dmesg | grep "nftables denied:"
 
 上記のような形式のログが出力されていれば正常に設定がされている。
 
-これで nftables の設定は完了である。
+これでnftablesの設定は完了である。
 
 次に必要なパッケージをインストールしていく。
 
@@ -791,16 +791,16 @@ dmesg | grep "nftables denied:"
 pacman -S imagemagick ffmpeg postgresql postgresql-libs redis yaml-cpp libxml2 libxslt protobuf pkg-config jemalloc nginx certbot certbot-nginx libidn
 ```
 
-以降の処理は mastodon ユーザにログインしてから行う。
+以降の処理はmastodonユーザにログインしてから行う。
 
 ```shell
 su - mastodon
 ```
 
-Arch Linux に標準で付属しているパッケージマネージャである pacman は公式リポジトリのみ対応している。
+Arch Linuxに標準で付属しているパッケージマネージャであるpacmanは公式リポジトリのみ対応している。
 公式リポジトリに存在しないパッケージを扱うために [AUR](https://aur.archlinux.org)（Arch User Repository）というユーザコミュニティによって提供される非公式リポジトリが存在する。
 
-AUR のパッケージを効率的に管理するため、[paru](https://github.com/Morganamilo/paru) という Rust 製の AUR ヘルパーを使用していく。
+AURのパッケージを効率的に管理するため、[paru](https://github.com/Morganamilo/paru) というRust製のAURヘルパーを使用していく。
 以下はそのインストール方法。
 
 ```shell
@@ -819,10 +819,10 @@ rm -rf paru
 sudo pacman -Rs rust
 ```
 
-paru のインストールとビルドが完了したら、ビルド用ファイルは不要なので削除する。
-Rust は今後使うことはないため、アンインストールしておく。
+paruのインストールとビルドが完了したら、ビルド用ファイルは不要なので削除する。
+Rustは今後使うことはないため、アンインストールしておく。
 
-続いて、Ruby のパッケージマネージャである [rbenv](https://github.com/rbenv/rbenv) を AUR からインストールする。
+続いて、Rubyのパッケージマネージャである [rbenv](https://github.com/rbenv/rbenv) をAURからインストールする。
 
 ```shell
 paru -S rbenv ruby-build
@@ -840,25 +840,25 @@ rbenv global 3.2.3
 gem install bundler --no-document
 ```
 
-Ruby のインストール時は高性能なメモリアロケータである [jemalloc](https://jemalloc.net) を指定しておく。
-jemalloc が使用されることで実行時のメモリ管理が改善され、特に高負荷の環境でのパフォーマンスが向上する[^1]。
+Rubyのインストール時は高性能なメモリアロケータである [jemalloc](https://jemalloc.net) を指定しておく。
+jemallocが使用されることで実行時のメモリ管理が改善され、特に高負荷の環境でのパフォーマンスが向上する[^1]。
 
-[^1]: [Ruby × jemalloc のすすめ](https://tech.medpeer.co.jp/entry/ruby-jemalloc)
+[^1]: [Ruby × jemallocのすすめ](https://tech.medpeer.co.jp/entry/ruby-jemalloc)
 
-次にデータベースの設定を行うので、postgres ユーザとして新しいシェルを開く。
+次にデータベースの設定を行うので、postgresユーザとして新しいシェルを開く。
 
 ```shell
 sudo -iu postgres
 ```
 
-postgres ユーザに切り替えたら、PostgreSQL データベースクラスタを初期化していく。
-環境変数 `$LANG` には先ほど設定した `ja_JP.UTF-8` が使用される。
+postgresユーザに切り替えたら、PostgreSQLデータベースクラスタを初期化していく。
+環境変数`$LANG`には先ほど設定した`ja_JP.UTF-8`が使用される。
 
 ```shell
 initdb --locale $LANG -E UTF8 -D '/var/lib/postgres/data'
 ````
 
-続いて、PostgreSQL のデータベースサーバのパフォーマンスをチューニングしていく。
+続いて、PostgreSQLのデータベースサーバのパフォーマンスをチューニングしていく。
 具体的には、サーバのハードウェアリソースと使用ケースに基づいて、最適なパラメータを調整することでデータベースの動作を最適化する。
 
 以下のサイトにてサーバの構成に基づいた入力を行うと設定ファイルが出力される。
@@ -891,7 +891,7 @@ min_wal_size = 1GB
 max_wal_size = 4GB
 ```
 
-これを PostgreSQL の設定ファイルである `postgresql.conf` にペーストする。
+これをPostgreSQLの設定ファイルである`postgresql.conf`にペーストする。
 
 ```shell
 vim /var/lib/postgres/data/postgresql.conf
@@ -907,9 +907,9 @@ CREATE USER mastodon CREATEDB;
 \q
 ```
 
-PostgreSQL では、データベースユーザを作成する際にクライアント側のユーザ名と同じ名前にするのがおすすめ。
+PostgreSQLでは、データベースユーザを作成する際にクライアント側のユーザ名と同じ名前にするのがおすすめ。
 
-これにより、[ident 認証](https://www.postgresql.jp/docs/11/auth-ident.html) を活用することができ、ユーザ名が一致していればパスワードの入力が不要になるため接続がよりスムーズになる。
+これにより、[ident認証](https://www.postgresql.jp/docs/11/auth-ident.html) を活用することができ、ユーザ名が一致していればパスワードの入力が不要になるため接続がよりスムーズになる。
 
 ```shell
 exit
@@ -917,12 +917,12 @@ exit
 systemctl enable --now redis
 ```
 
-次に、一旦 postgres ユーザからログアウトして、admin ユーザに戻る。
-そして、 先ほどインストールした Redis を起動する。
+次に、一旦postgresユーザからログアウトして、adminユーザに戻る。
+そして、 先ほどインストールしたRedisを起動する。
 
-再度 mastodon ユーザに切り替えて、JavaScript のツールマネージャである [Volta](https://volta.sh) を使って Node.js や Yarn をインストールし、開発環境を整える。
+再度mastodonユーザに切り替えて、JavaScriptのツールマネージャである [Volta](https://volta.sh) を使ってNode.jsやYarnをインストールし、開発環境を整える。
 
-もちろん、直接 curl で Node.js をダウンロードしてビルドしても良いのだが、長期運用していく上でバージョンを上げなければならないときは必ず来るわけで、そのときのために Volta を入れておいた方が良い（[nodenv](https://github.com/nodenv/nodenv) でも良いけど）。
+もちろん、直接curlでNode.jsをダウンロードしてビルドしても良いのだが、長期運用していく上でバージョンを上げなければならないときは必ず来るわけで、そのときのためにVoltaを入れておいた方が良い（[nodenv](https://github.com/nodenv/nodenv) でも良いけど）。
 
 ```shell
 su - mastodon
@@ -937,7 +937,7 @@ volta install node
 volta install yarn@1
 ```
 
-そして、ようやく Mastodon 本体のソースコードをクローンする。
+そして、ようやくMastodon本体のソースコードをクローンする。
 
 ```shell
 git clone https://github.com/mastodon/mastodon.git live && cd live
@@ -946,7 +946,7 @@ git clone https://github.com/mastodon/mastodon.git live && cd live
 git checkout $(git tag -l | grep '^v[0-9.]*$' | sort -V | tail -n 1)
 ```
 
-次に Mastodon の Ruby および JavaScript 依存パッケージをインストールするための設定と実行を行う。
+次にMastodonのRubyおよびJavaScript依存パッケージをインストールするための設定と実行を行う。
 
 ```shell
 # Gemfile に指定されている依存関係が読み取り専用でインストールされ、開発環境用のオプションは適用されない
@@ -964,7 +964,7 @@ bundle install -j$(getconf _NPROCESSORS_ONLN)
 yarn install --pure-lockfile
 ```
 
-Mastodon のセットアップコマンドを実行する前に R2 で CORS ポリシーを設定しておく。
+Mastodonのセットアップコマンドを実行する前にR2でCORSポリシーを設定しておく。
 
 ```json
 [
@@ -992,9 +992,9 @@ Mastodon のセットアップコマンドを実行する前に R2 で CORS ポ�
 ]
 ```
 
-次に Mastodon を本番環境で設定するためのコマンドを実行する。
+次にMastodonを本番環境で設定するためのコマンドを実行する。
 このコマンドを実行すると、データベース、Redis、およびファイルストレージの設定を対話形式で行える。
-直接、環境変数ファイルを変更しても良いけど、特に理由がなければこのコマンドで OK。
+直接、環境変数ファイルを変更しても良いけど、特に理由がなければこのコマンドでOK。
 
 ```shell
 RAILS_ENV=production bundle exec rake mastodon:setup
@@ -1069,7 +1069,7 @@ E-mail: xxx
 You can login with the password: xxx
 ```
 
-先ほど設定できなかった R2 に関する環境変数を変更する。
+先ほど設定できなかったR2に関する環境変数を変更する。
 
 ```shell
 vim /home/mastodon/live/.env.production
@@ -1082,11 +1082,11 @@ vim /home/mastodon/live/.env.production
 + S3_PERMISSION=private
 ```
 
-Mastodon の最低限の設定は以上で終わり。
+Mastodonの最低限の設定は以上で終わり。
 
-続いて、Nginx 関連の設定を行なっていく。
+続いて、Nginx関連の設定を行なっていく。
 
-SSL/TLS 証明書は [Let's Encrypt](https://letsencrypt.org/ja) から入手するが、その際に Let's Encryptの公式クライアントである [certbot](https://certbot.eff.org) を使用する。
+SSL/TLS証明書は [Let's Encrypt](https://letsencrypt.org/ja) から入手するが、その際にLet's Encryptの公式クライアントである [certbot](https://certbot.eff.org) を使用する。
 
 ```shell
 # 管理者ユーザに切り替え
@@ -1106,7 +1106,7 @@ mkdir -p /etc/nginx/sites-{available,enabled} /etc/nginx/conf.d
 cat /etc/nginx/nginx.conf
 ```
 
-初期状態の Nginx 設定ファイルは以下のようになっている。
+初期状態のNginx設定ファイルは以下のようになっている。
 
 ```text title="/etc/nginx/nginx.conf" showLineNumbers
 #user http;
@@ -1227,7 +1227,7 @@ http {
 }
 ```
 
-これを Mastodon 向けに編集していく。
+これをMastodon向けに編集していく。
 
 ```shell
 vim /etc/nginx/nginx.conf
@@ -1267,7 +1267,7 @@ http {
 }
 ```
 
-次に Mastodon 側で用意された Nginx 設定ファイルを読み込ませるための処理を行う。
+次にMastodon側で用意されたNginx設定ファイルを読み込ませるための処理を行う。
 
 ```shell
 # Mastodon のための Nginx 設定ファイルを、Nginx の設定用ディレクトリにコピーする
@@ -1465,7 +1465,7 @@ server {
 }
 ```
 
-Nginx の設定は完了したので、以下のコマンドを実行して起動させる。
+Nginxの設定は完了したので、以下のコマンドを実行して起動させる。
 
 ```shell
 chmod 701 /home/mastodon
@@ -1478,7 +1478,7 @@ killall nginx
 systemctl enable --now nginx
 ```
 
-最後に Mastodon サービスを Systemd に設定して起動する。
+最後にMastodonサービスをSystemdに設定して起動する。
 
 ```shell
 # Mastodon の Systemd サービスファイルをコピーする
@@ -1492,39 +1492,39 @@ systemctl daemon-reload
 systemctl enable --now mastodon-{web,sidekiq,streaming}
 ```
 
-これで Mastodon インスタンスの構築は完了。
-URL にアクセスすると正常にページが表示されるはず。
+これでMastodonインスタンスの構築は完了。
+URLにアクセスすると正常にページが表示されるはず。
 
-忙しい人はここまででも十分 Mastodon ライフを楽しめるので離脱しても問題ない。
+忙しい人はここまででも十分Mastodonライフを楽しめるので離脱しても問題ない。
 ただし、より良い機能をユーザに提供したい人や今後発生するであろう問題をあらかじめ片付けておきたい人は以下の作業も併せて行っておくと良いです。
 
 ## そのほかにやっておいた方が良いこと
 
-### ImageMagick から libvips に切り替える
+### ImageMagickからlibvipsに切り替える
 
-[v4.3.0](https://github.com/mastodon/mastodon/releases/tag/v4.3.0) で ImageMagick サポートが廃止され、libvips が採用されたのでその対応を行う。
+[v4.3.0](https://github.com/mastodon/mastodon/releases/tag/v4.3.0) でImageMagickサポートが廃止され、libvipsが採用されたのでその対応を行う。
 
-本来なら上述した説明に組み込むべきであるが、あくまで記事には履歴として残しておきたいのでこのような形式をとっている（記事を書いている途中で v4.3.0 がリリースされた）。
+本来なら上述した説明に組み込むべきであるが、あくまで記事には履歴として残しておきたいのでこのような形式をとっている（記事を書いている途中でv4.3.0がリリースされた）。
 
-まずは pacman で libvips をインストールする。
+まずはpacmanでlibvipsをインストールする。
 
 ```shell
 sudo pacman -S libvips
 ```
 
-libvips の提案パッケージもついでにインストールしておく（後々 warning が出るので）。
+libvipsの提案パッケージもついでにインストールしておく（後々warningが出るので）。
 
 ```shell
 sudo pacman -S libheif imagemagick openslide poppler-glib
 ```
 
-次に `.env.production` を編集して以下の環境変数を追加する。
+次に`.env.production`を編集して以下の環境変数を追加する。
 
 ```diff title=".env/production"
 + MASTODON_USE_LIBVIPS=true
 ```
 
-最後に Mastodon サービスを再起動すれば完了。
+最後にMastodonサービスを再起動すれば完了。
 
 ```shell
 sudo systemctl restart mastodon-{web,sidekiq,streaming}
@@ -1532,7 +1532,7 @@ sudo systemctl restart mastodon-{web,sidekiq,streaming}
 
 ### 全文検索機能の追加
 
-Mastodon では、ユーザが投稿を効率的に検索できるように全文検索機能を追加できる。
+Mastodonでは、ユーザが投稿を効率的に検索できるように全文検索機能を追加できる。
 この機能により、トゥートやユーザ、ハッシュタグなどを容易に検索でき、より快適な利用体験の提供が可能となる。
 
 以下の手順に従って、全文検索機能を追加するための設定を行う。
@@ -1547,10 +1547,10 @@ exit
 paru -S elasticsearch7
 ```
 
-Mastodon では全文検索エンジンに [Elasticsearch](https://www.elastic.co/jp/elasticsearch) を使うことが推奨されているので、それに従う。
-Mastodon は Elasticsearch のバージョン 7 でテストされているため、ここでは 7 をインストールしている（最新版はバージョン 8）。
+Mastodonでは全文検索エンジンに [Elasticsearch](https://www.elastic.co/jp/elasticsearch) を使うことが推奨されているので、それに従う。
+MastodonはElasticsearchのバージョン7でテストされているため、ここでは7をインストールしている（最新版はバージョン8）。
 
-Elasticsearch を有効化するために環境変数を追加する。
+Elasticsearchを有効化するために環境変数を追加する。
 
 ```shell
 vim /home/mastodon/live/.env.production
@@ -1563,7 +1563,7 @@ vim /home/mastodon/live/.env.production
 + ES_PRESET=single_node_cluster
 ```
 
-次に Elasticsearch の設定ファイルにセキュリティとノード構成のオプションを追加する。
+次にElasticsearchの設定ファイルにセキュリティとノード構成のオプションを追加する。
 
 ```shell
 vim /etc/elasticsearch/elasticsearch.yml
@@ -1577,12 +1577,12 @@ vim /etc/elasticsearch/elasticsearch.yml
 + discovery.type: single-node
 ```
 
-続いて、Elasticsearch のセキュリティ設定とユーザパスワードの初期設定を行う。
+続いて、Elasticsearchのセキュリティ設定とユーザパスワードの初期設定を行う。
 
-**パスワードを設定していない Elasticsearch に外部ユーザがアクセスする場合、認証なしで HTTP リクエストを直接送信するだけでアクセスが可能である。**
-この場合、Elasticsearch のデータに対して完全に無防備な状態となり、誰でもデータを閲覧・操作できるため、セキュリティ上の大きなリスクがある。
+**パスワードを設定していないElasticsearchに外部ユーザがアクセスする場合、認証なしでHTTPリクエストを直接送信するだけでアクセスが可能である。**
+この場合、Elasticsearchのデータに対して完全に無防備な状態となり、誰でもデータを閲覧・操作できるため、セキュリティ上の大きなリスクがある。
 
-ただ、iptables でポートを制限しているため、ポート 9200 にアクセスしたとしても弾かれる。
+ただ、iptablesでポートを制限しているため、ポート9200にアクセスしたとしても弾かれる。
 そのため、必ずしもパスワードを設定しないといけないわけではないが、万が一のために設定しておいた方が良い。
 
 ```shell
@@ -1617,7 +1617,7 @@ Changed password for user elastic
 PASSWORD elastic = xxx
 ```
 
-次に Mastodon 専用のユーザとロールを作成する。
+次にMastodon専用のユーザとロールを作成する。
 
 ```shell
 # mastodon_full_access という名前のロールを作成する
@@ -1642,9 +1642,9 @@ curl -X POST -u elastic:xxx "localhost:9200/_security/user/mastodon?pretty" -H '
 '
 ```
 
-なお、curl のオプションに `-u` を指定することで、Basic 認証を使ったリクエストを行える。
+なお、curlのオプションに`-u`を指定することで、Basic認証を使ったリクエストを行える。
 
-Elasticsearch に mastodon ユーザを作成したので、Mastodon アプリの環境変数にユーザ名とパスワードを設定する。
+Elasticsearchにmastodonユーザを作成したので、Mastodonアプリの環境変数にユーザ名とパスワードを設定する。
 
 ```shell
 vim /home/mastodon/live/.env.production
@@ -1655,7 +1655,7 @@ vim /home/mastodon/live/.env.production
 + ES_PASS=xxx
 ```
 
-Elasticsearch の設定は完了したため、次に Mastodon 関連のサービスを再起動させてから全文検索のインデックスを作成する。
+Elasticsearchの設定は完了したため、次にMastodon関連のサービスを再起動させてから全文検索のインデックスを作成する。
 
 ```shell
 systemctl restart mastodon-sidekiq
@@ -1669,10 +1669,10 @@ cd live
 RAILS_ENV=production bin/tootctl search deploy
 ```
 
-`tootctl search deploy` でインデックスを作成した後は、Mastodon が自動的にインデックスを更新してくれるので手動で更新する必要はない。
+`tootctl search deploy`でインデックスを作成した後は、Mastodonが自動的にインデックスを更新してくれるので手動で更新する必要はない。
 
 ここまでの作業で問題なく検索できることを確認できるはず。
-だが、このままでは負荷が大きい検索処理を行うと、2GB の小さいメモリでは Elasticsearch が稀に落ちてしまう。
+だが、このままでは負荷が大きい検索処理を行うと、2GBの小さいメモリではElasticsearchが稀に落ちてしまう。
 
 それを防ぐために初期ヒープサイズと最大ヒープサイズを制限しておく。
 
@@ -1680,7 +1680,7 @@ RAILS_ENV=production bin/tootctl search deploy
 
 https://github.com/felx/mastodon-documentation/blob/master/Running-Mastodon/Elasticsearch-guide.md
 
-2GB の場合は 512MB が適切なサイズということになる。
+2GBの場合は512MBが適切なサイズということになる。
 
 ```shell
 vim /etc/elasticsearch/jvm.options.d/ram.options
@@ -1691,7 +1691,7 @@ vim /etc/elasticsearch/jvm.options.d/ram.options
 -Xmx512m
 ```
 
-Elasticsearch サービスを再起動して、適切にヒープサイズが設定されているかを確認してみる。
+Elasticsearchサービスを再起動して、適切にヒープサイズが設定されているかを確認してみる。
 
 ```shell
 systemctl restart elasticsearch
@@ -1714,26 +1714,26 @@ curl -X GET -u elastic:xxx "localhost:9200/_nodes?pretty"
 
 上記のようになっていれば問題なし。
 
-次に、日本語検索を最適化するために Elasticsearch の日本語形態素解析用プラグイン [Kuromoji](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html) をインストールする。
-後述する理由により結局 Kuromoji のインストールは止めるけど、メモとして作業内容は残しておく。
+次に、日本語検索を最適化するためにElasticsearchの日本語形態素解析用プラグイン [Kuromoji](https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-kuromoji.html) をインストールする。
+後述する理由により結局Kuromojiのインストールは止めるけど、メモとして作業内容は残しておく。
 
-Kuromoji の代わりに、後発の [Sudachi](https://github.com/WorksApplications/elasticsearch-sudachi) を使用する選択肢もある。
+Kuromojiの代わりに、後発の [Sudachi](https://github.com/WorksApplications/elasticsearch-sudachi) を使用する選択肢もある。
 ただし、検索対象に特殊な業務ドメインがない場合は、どちらを選んでも大差はない[^2]。
-導入が簡単な Kuromoji の方がおすすめ。
+導入が簡単なKuromojiの方がおすすめ。
 
-[^2]: [検索基盤チームのElasticsearch×Sudachi移行戦略と実践](https://www.m3tech.blog/entry/sudachi-es)。この記事のようなドメインを扱うのであれば Sudachi の方が向いているかもしれない
+[^2]: [検索基盤チームのElasticsearch×Sudachi移行戦略と実践](https://www.m3tech.blog/entry/sudachi-es)。この記事のようなドメインを扱うのであればSudachiの方が向いているかもしれない
 
-Kuromoji を使うとどのような利点があるかは以下の記事が参考になる。
+Kuromojiを使うとどのような利点があるかは以下の記事が参考になる。
 
 https://techblog.zozo.com/entry/elasticsearch-mapping-config-for-japanese-search
 
-まずは Elasticsearch に付属するプラグイン管理ツールを使って Kuromoji プラグインをインストールする。
+まずはElasticsearchに付属するプラグイン管理ツールを使ってKuromojiプラグインをインストールする。
 
 ```shell
 sudo /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-kuromoji
 ```
 
-Elasticsearch を再起動して、プラグインがちゃんとインストールされたか確認する。
+Elasticsearchを再起動して、プラグインがちゃんとインストールされたか確認する。
 
 ```shell
 sudo systemctl restart elasticsearch
@@ -1748,10 +1748,10 @@ vultr analysis-kuromoji 7.17.18
 
 問題なくインストールされている。
 
-この状態で Elasticsearch を再起動して、検索のテストをしてみたが思った結果が返ってこない。
-調べると、Ruby では Elasticsearch クライアントに [chewy](https://github.com/toptal/chewy) というライブラリが使用されており、Kuromoji を有効化するためには chewy の設定ファイルを直接編集する必要がある。
+この状態でElasticsearchを再起動して、検索のテストをしてみたが思った結果が返ってこない。
+調べると、RubyではElasticsearchクライアントに [chewy](https://github.com/toptal/chewy) というライブラリが使用されており、Kuromojiを有効化するためにはchewyの設定ファイルを直接編集する必要がある。
 
-Mastodon では以下のインデックスが存在する。
+Mastodonでは以下のインデックスが存在する。
 
 ```shell
 curl -X GET -u elastic:xxx "localhost:9200/_cat/indices?v"
@@ -1767,18 +1767,18 @@ green  open   public_statuses      xxx   5   0        295            0    287.1k
 green  open   tags                 xxx   1   0         22            0      7.2kb          7.2kb
 ```
 
-Mastodon は主に以下のインデックスを使用する。
+Mastodonは主に以下のインデックスを使用する。
 
 - statuses: 投稿の検索に使用
 - accounts: ユーザアカウントの検索に使用
 - public_statuses: 公開トゥートの検索に使用
 - tags: ハッシュタグの検索に使用
-- instances: 他の Mastodon インスタンス情報の検索や管理に使用
+- instances: 他のMastodonインスタンス情報の検索や管理に使用
 
-chewy に Kuromoji のマッピングを定義すれば Kuromoji は使えるようになるけど、今回の Mastodon インスタンス建設の前提として、持続的に楽をして運営していきたいと思っているので、コンフリクトが起こりそうな変更はなるべくしたくない。
-その結果、迷ったけど Kuromoji の導入は見送った。
+chewyにKuromojiのマッピングを定義すればKuromojiは使えるようになるけど、今回のMastodonインスタンス建設の前提として、持続的に楽をして運営していきたいと思っているので、コンフリクトが起こりそうな変更はなるべくしたくない。
+その結果、迷ったけどKuromojiの導入は見送った。
 
-以下のコマンドで Kuromoji をアンインストールする。
+以下のコマンドでKuromojiをアンインストールする。
 
 ```shell
 sudo /usr/share/elasticsearch/bin/elasticsearch-plugin remove analysis-kuromoji
@@ -1789,14 +1789,14 @@ sudo /usr/share/elasticsearch/bin/elasticsearch-plugin remove analysis-kuromoji
 
 ログインせずに検索機能を使える方法も必ずあるとはわかっているけど、ソースコードはできるだけ弄りたくないからどうするか考えている。
 
-Mastodon は検索機能を重視せずにハッシュタグ偏重の思想というのはなんとなくわかった。
+Mastodonは検索機能を重視せずにハッシュタグ偏重の思想というのはなんとなくわかった。
 逆にいえば、昔の投稿を掘り返されたりしないから良いのか？
 
 ### ログローテーション
 
 ログの容量を制限しないと無限に増え続けて、ディスク容量を圧迫してしまうため対策をしておく。
 
-以下がログを 1 ヶ月放置し続けた結果である。
+以下がログを1ヶ月放置し続けた結果である。
 
 ```shell
 du -h -d1 /var/log
@@ -1812,9 +1812,9 @@ du -h -d1 /var/log
 1.2G    /var/log
 ```
 
-ログファイルの合計サイズが 1.2GB とかなり大きくなっている。
+ログファイルの合計サイズが1.2GBとかなり大きくなっている。
 
-システムのログ管理とサイズ制御のために、logrotate をインストールし、設定ファイルを編集してログのローテーションを設定する。
+システムのログ管理とサイズ制御のために、logrotateをインストールし、設定ファイルを編集してログのローテーションを設定する。
 
 ```shell
 pacman -S logrotate
@@ -1822,7 +1822,7 @@ pacman -S logrotate
 vim /etc/logrotate.conf
 ```
 
-`/etc/logrotate.conf` にベースとなる設定を追加する。
+`/etc/logrotate.conf`にベースとなる設定を追加する。
 
 ```text title="/etc/logrotate.conf" showLineNumbers
 # ログファイルを毎日ローテーションする
@@ -1856,8 +1856,8 @@ tabooext + .pacorig .pacnew .pacsave
 include /etc/logrotate.d
 ```
 
-`/etc/logrotate.d` ディレクトリ以下にログファイルごとの個別設定を追加する。
-ここではファイルサイズが大きくなりがちな nginx のみ設定することとする。
+`/etc/logrotate.d`ディレクトリ以下にログファイルごとの個別設定を追加する。
+ここではファイルサイズが大きくなりがちなnginxのみ設定することとする。
 
 ```text title="/etc/logrotate.d/nginx" showLineNumbers
 /var/log/nginx/*log {
@@ -1872,14 +1872,14 @@ include /etc/logrotate.d
 }
 ```
 
-`logrotate` コマンドを手動で強制実行し、`/etc/logrotate.conf` の設定に従って即座にローテーションを行う。
+`logrotate`コマンドを手動で強制実行し、`/etc/logrotate.conf`の設定に従って即座にローテーションを行う。
 ここで指定したとおりにファイルサイズが小さくなっているかを確認しておくこと。
 
 ```shell
 logrotate -f /etc/logrotate.conf
 ```
 
-journald のログファイルは、logrotate で管理するのではなく、journald 自体の設定ファイル（`/etc/systemd/journald.conf`）で設定していく。
+journaldのログファイルは、logrotateで管理するのではなく、journald自体の設定ファイル（`/etc/systemd/journald.conf`）で設定していく。
 
 ```shell
 vim /etc/systemd/journald.conf
@@ -1897,7 +1897,7 @@ SystemMaxUse=200M
 MaxRetentionSec=2weeks
 ```
 
-システムログを収集・管理する systemd-journald デーモンを再起動して、設定変更を反映させる。
+システムログを収集・管理するsystemd-journaldデーモンを再起動して、設定変更を反映させる。
 
 ```shell
 systemctl restart systemd-journald
@@ -1919,14 +1919,14 @@ du -h -d1 /var/log
 152M    /var/log
 ```
 
-ログファイルの合計サイズが 152MB になっていることを確認できた。
+ログファイルの合計サイズが152MBになっていることを確認できた。
 
-### SSL 証明書の自動更新
+### SSL証明書の自動更新
 
-SSL 証明書には期限があるため、定期的に更新が必要である。
+SSL証明書には期限があるため、定期的に更新が必要である。
 毎回手動で実行するのは面倒くさいし、必ず忘れてしまうので自動で更新されるように設定していく。
 
-まずは SSL 証明書を更新するためのサービスの動作を定義していく。
+まずはSSL証明書を更新するためのサービスの動作を定義していく。
 
 ```shell
 systemctl edit --full --force certbot-renewal
@@ -1947,7 +1947,7 @@ ExecStart=/usr/bin/certbot renew
 PrivateTmp=true
 ```
 
-次に certbot-renewal.timer というタイマーを定義する。
+次にcertbot-renewal.timerというタイマーを定義する。
 
 ```shell
 sudoedit /etc/systemd/system/certbot-renewal.timer
@@ -1969,7 +1969,7 @@ Persistent=true
 WantedBy=timers.target
 ```
 
-最後に `certbot-renewal.timer` を自動的に起動するように設定する。
+最後に`certbot-renewal.timer`を自動的に起動するように設定する。
 
 ```shell
 systemctl daemon-reload
@@ -1988,7 +1988,7 @@ Sun 2024-10-27 00:00:00 JST  51min Sat 2024-10-26 12:00:00 JST       11h ago cer
 
 問題なし。
 
-念の為、定期的に SSL 証明書の有効期限を確認しておくと安心。
+念の為、定期的にSSL証明書の有効期限を確認しておくと安心。
 
 ```shell
 certbot certificates
@@ -2011,13 +2011,13 @@ Found the following certs:
 
 時間と金銭的な余裕があれば以下の作業をしたいと思っている。
 
-- Tor を通じてオニオンサービスとして提供する
-- データベースを Neon などの Saas に分離させる
+- Torを通じてオニオンサービスとして提供する
+- データベースをNeonなどのSaasに分離させる
 
 ## さいごに
 
-Mastodon は思っていたよりもドキュメントが充実しているし、機能も豊富で、善意で成り立ったソフトウェアとは思えない完成度だ。
+Mastodonは思っていたよりもドキュメントが充実しているし、機能も豊富で、善意で成り立ったソフトウェアとは思えない完成度だ。
 良い意味で枯れているから、突然メンテナンスされなくなったりする危険性がないのは安心できる。
 
 周りの知り合いにアカウントを持っている人が少ないのが難点、というよりも一番の問題だけど、逆に誰にも見られていないから気楽につぶやけて心地よい。
-今後、Mastodon の行方はゆるく観測していく。
+今後、Mastodonの行方はゆるく観測していく。
