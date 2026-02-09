@@ -1,6 +1,6 @@
 ---
-title: Mermaid を泳がせる
-description: Mermaid を使った思考の視覚化とブログへの実装方法について解説。rehype-mermaid ライブラリで MDX 内にダイアグラムを組み込み、ビルド時 SVG 生成によるパフォーマンス向上とカスタムスタイリングの実装を紹介する。
+title: Mermaidを泳がせる
+description: Mermaidを使った思考の視覚化とブログへの実装方法について解説。rehype-mermaidライブラリでMDX内にダイアグラムを組み込み、ビルド時SVG生成によるパフォーマンス向上とカスタムスタイリングの実装を紹介する。
 emoji: 🧜‍♀️
 category: Tech
 tags: [Mermaid, React]
@@ -10,7 +10,7 @@ slug: b1eemm6
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
 文字だけで見ると難しそうなことでも、図に起こしてみることで構造を単純化できることは多々ある。
@@ -19,15 +19,15 @@ slug: b1eemm6
 そんなときに有効なツールとして [Mermaid](https://mermaid.js.org) がある。
 フローチャートやシーケンス図など様々なダイアグラムの生成をサポートしている。
 
-[draw.io](https://www.drawio.com) のような作図ツールとは違い、Markdown と同様にテキストからダイアグラムを生成できるのが特徴である。
-もちろん、GUI で作図するのとは異なり、スタイルのリッチさでは劣るが抽象的に考えるにはそのほうがむしろ好都合なこともある。
+[draw.io](https://www.drawio.com) のような作図ツールとは違い、Markdownと同様にテキストからダイアグラムを生成できるのが特徴である。
+もちろん、GUIで作図するのとは異なり、スタイルのリッチさでは劣るが抽象的に考えるにはそのほうがむしろ好都合なこともある。
 
-Mermaid が何より素晴らしいのは、図を更新するために GUI を開いて、エクスポートしてといった煩わしい作業に時間を取られない点だろう。
+Mermaidが何より素晴らしいのは、図を更新するためにGUIを開いて、エクスポートしてといった煩わしい作業に時間を取られない点だろう。
 テキストを数文字変えるだけで済む。
 あとは、ちょっと線がずれたりしてストレスが溜まるといったこともない。
 
 さて、このブログではロジカルな部分はできるだけ図や表にしてわかりやすくしたい。
-そこで MDX ファイル内で Mermaid 記法を使えるようにした（v1.4.10）。
+そこでMDXファイル内でMermaid記法を使えるようにした（v1.4.10）。
 
 https://github.com/kkhys/me.v2/issues/493
 
@@ -35,13 +35,13 @@ https://github.com/kkhys/me.v2/issues/493
 
 [rehype-mermaid](https://github.com/remcohaszing/rehype-mermaid) というドンピシャなライブラリを使った。
 
-このライブラリの良いところはインライン SVG の生成をビルド時に行ってくれることである。
+このライブラリの良いところはインラインSVGの生成をビルド時に行ってくれることである。
 内部的に [Playwright](https://playwright.dev) のヘッドレスブラウザを使っているようだ。
 
-Mermaid の描画は通常クライアント（ブラウザ）側で行われるが、その際にノードの数が多くなればなるほど負荷が高くなってしまう。
-リンクカードのときもそうだったが、可能な限り SSG でページを生成してパフォーマンスを良くしたい。
+Mermaidの描画は通常クライアント（ブラウザ）側で行われるが、その際にノードの数が多くなればなるほど負荷が高くなってしまう。
+リンクカードのときもそうだったが、可能な限りSSGでページを生成してパフォーマンスを良くしたい。
 
-とりあえず使うだけなら以下のように `rehypePlugins` に追加するだけで良い。
+とりあえず使うだけなら以下のように`rehypePlugins`に追加するだけで良い。
 この際の注意点として、[rehype-pretty-code](https://github.com/rehype-pretty/rehype-pretty-code) などのシンタックスハイライト系のプラグインを使っている場合は、それよりも前に定義する必要がある。
 
 ```ts title="contentlayer.config.ts" showLineNumbers {6}
@@ -58,12 +58,12 @@ export default makeSource({
 
 デフォルトの機能だけでも十分だが、デザイン面で気に入らない部分があったので調整した。
 
-`rehype-mermaid` の設定は変更していない。
-変更したのは Mermaid 公式の設定のみ。
+`rehype-mermaid`の設定は変更していない。
+変更したのはMermaid公式の設定のみ。
 
 https://mermaid.js.org/config/schema-docs/config.html
 
-公式ドキュメントを見てもいまいちオプションが分からなかったが、幸いにも TypeScript の型定義がされていたのでそれを元に以下のように設定ファイルを書いた。
+公式ドキュメントを見てもいまいちオプションが分からなかったが、幸いにもTypeScriptの型定義がされていたのでそれを元に以下のように設定ファイルを書いた。
 
 ```ts title="src/lib/mdx/rehype-mermaid.ts" showLineNumbers
 import type { RehypeMermaidOptions } from 'rehype-mermaid';
@@ -90,20 +90,20 @@ export const rehypeMermaidOptions = {
 } satisfies RehypeMermaidOptions;
 ```
 
-`fontFamily` には本当は Inter を使いたかったが、`next/font` を使っている都合上、レンダリングがうまくいかなかったため諦めた（文字がずれてしまう）。
+`fontFamily`には本当はInterを使いたかったが、`next/font`を使っている都合上、レンダリングがうまくいかなかったため諦めた（文字がずれてしまう）。
 
-`themeVariables` は図のスタイリングをするために使用している。
-独自のスタイリングをする場合は `theme` を `base` にしなければならない。
+`themeVariables`は図のスタイリングをするために使用している。
+独自のスタイリングをする場合は`theme`を`base`にしなければならない。
 
 それぞれの色を指定していくのだが、ドキュメントにも乗っていないため [実際のテーマ](https://github.com/mermaid-js/mermaid/blob/develop/packages/mermaid/src/themes/theme-dark.js) を定義してあるファイルを参考にして書いた。
 
-分量が多すぎるのと、それぞれのプロパティがどのパーツに紐づいているのか分からずに 1 つずつ確認したので骨が折れる作業であった。
+分量が多すぎるのと、それぞれのプロパティがどのパーツに紐づいているのか分からずに1つずつ確認したので骨が折れる作業であった。
 
 途方もないのでひとまずは頻繁に使うであろうダイアグラムのみ色塗りした。
 
-あとは、これはバグだと思うが、そのまま使うと文字がずれて描画されてしまうので全体に `line-height: 1.1rem` を指定してある。
+あとは、これはバグだと思うが、そのまま使うと文字がずれて描画されてしまうので全体に`line-height: 1.1rem`を指定してある。
 
-## Mermaid の例
+## Mermaidの例
 
 前述したとおり、全てのダイアグラムをスタイリングするのは時間的に無理だったためスタイリングしたものだけ例示する。
 今後使う機会があれば別のダイアグラムも追記していく。
