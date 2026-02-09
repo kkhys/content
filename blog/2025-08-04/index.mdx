@@ -1,6 +1,6 @@
 ---
-title: Claude Code の Subagents で記事の校正を効率化する
-description: Claude Code の Subagents 機能を活用したブログ記事校正の実践例である。構造分析、言語編集、読みやすさ向上、技術検証の4つの専門エージェントが並列でレビューを行い、記事品質を効率的に改善する手法を紹介している。
+title: Claude CodeのSubagentsで記事の校正を効率化する
+description: Claude CodeのSubagents機能を活用したブログ記事校正の実践例である。構造分析、言語編集、読みやすさ向上、技術検証の4つの専門エージェントが並列でレビューを行い、記事品質を効率的に改善する手法を紹介している。
 emoji: ✳
 category: Tech
 tags: [AI]
@@ -9,53 +9,53 @@ publishedAt: 2025-08-04
 slug: b1n9y6n
 ---
 
-つい最近、Claude Code に [Subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) という機能が追加された。
+つい最近、Claude Codeに [Subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) という機能が追加された。
 早速、試しに使ってみたところ、これがブログの校正作業と相性が良かったので、そのあたりの顛末を記しておこうと思う。
 
-## Subagents とは
+## Subagentsとは
 
-Subagents とは、Claude Code がタスクを委任できる、事前設定された AI パーソナリティのことである。
+Subagentsとは、Claude Codeがタスクを委任できる、事前設定されたAIパーソナリティのことである。
 つまり、各分野ごとに専門家を用意して、依頼したタスクがその専門家の領域であれば委任するという流れを組むことができる。
 
-まとめると、Subagents の特徴としては以下の 4 点があげられる。
+まとめると、Subagentsの特徴としては以下の4点があげられる。
 
 1. 特定の目的と専門分野を持つ（専門性の向上）
 2. メインの会話とは独立した独自のコンテキストウィンドウを使用する（コンテキストの分割）
 3. 使用を許可された特定のツールで設定できる（権限の分離）
 4. その動作を導くカスタムシステムプロンプトを含む（再利用性）
 
-上記の中で最も革新的な特徴は 2 である。
+上記の中で最も革新的な特徴は2である。
 
 定型的なタスクを実行させるのであれば、[Custom slash commands](https://docs.anthropic.com/en/docs/claude-code/slash-commands#custom-slash-commands) に一連の処理を記載すれば良い。
-ただし、Custom slash commands はメインスレッド上で実行されてしまうため、複雑な処理が Custom slash commands に含まれていると、あっという間に auto-compact されてしまい、出力精度が悪くなってしまう。
+ただし、Custom slash commandsはメインスレッド上で実行されてしまうため、複雑な処理がCustom slash commandsに含まれていると、あっという間にauto-compactされてしまい、出力精度が悪くなってしまう。
 通常のやり取りも同様である。
 
-Subagents では Custom slash commands で実行させる作業を移譲することで、大幅なコンテキストの節約ができる（Subagents で実行されるタスクはメインスレッドとは異なるコンテキストウィンドウを持つため）。
-例えば、 品質チェックを行う Custom slash commands を実行させているのであれば、Subagents に品質チェックを行うレビュワーとして定義するという具合に。
+SubagentsではCustom slash commandsで実行させる作業を移譲することで、大幅なコンテキストの節約ができる（Subagentsで実行されるタスクはメインスレッドとは異なるコンテキストウィンドウを持つため）。
+例えば、 品質チェックを行うCustom slash commandsを実行させているのであれば、Subagentsに品質チェックを行うレビュワーとして定義するという具合に。
 
-さらに、複数の Subagent を同時に動かすことで、並列作業も可能になる。
+さらに、複数のSubagentを同時に動かすことで、並列作業も可能になる。
 人間でいえば、複数の部署に同時に指示を出して、それぞれが独立して作業を進めるような状況である。
-そのメリットを活かすためにも各 Subagents は [Small, Focused Agents](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-10-small-focused-agents.md) として構築した方が良い。
+そのメリットを活かすためにも各Subagentsは [Small, Focused Agents](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-10-small-focused-agents.md) として構築した方が良い。
 
 何でもできる万能選手を一人作るより、それぞれが一つのことに特化した専門家を複数人雇う方が、結果的に効率が良いというイメージ。
 
-## Subagents の作成方法
+## Subagentsの作成方法
 
 https://docs.anthropic.com/en/docs/claude-code/sub-agents#quick-start
 
-Claude Code 上で `/agents` コマンドを実行すると対話形式で Subagents を作成できる。
-最初は CLI で雛形を作成してもらい、後から手動で変更したり、Claude Code に編集してもらうのがおすすめのやり方。
+Claude Code上で`/agents`コマンドを実行すると対話形式でSubagentsを作成できる。
+最初はCLIで雛形を作成してもらい、後から手動で変更したり、Claude Codeに編集してもらうのがおすすめのやり方。
 
 ## ブログ記事の校正を行う編集者を作成
 
-当ブログは Markdown 形式[^1] で記事を管理している（[kkhys/content](https://github.com/kkhys/content)）ため、ローカル環境で Claude Code を使った校正が可能。
-今までは Custom slash commands で誤字脱字や修正点がないかを検証していたが、Subagents を使った方法に切り替える。
+当ブログはMarkdown形式[^1] で記事を管理している（[kkhys/content](https://github.com/kkhys/content)）ため、ローカル環境でClaude Codeを使った校正が可能。
+今まではCustom slash commandsで誤字脱字や修正点がないかを検証していたが、Subagentsを使った方法に切り替える。
 
-[^1]: 正確には MDX。Astro でコンポーネントの置き換えを行うには拡張子を `.mdx` にしないとダメだった。本当は Plane な Markdown にしたい
+[^1]: 正確にはMDX。Astroでコンポーネントの置き換えを行うには拡張子を`.mdx`にしないとダメだった。本当はPlaneなMarkdownにしたい
 
-先ほど記載したように `/agents` コマンドを実行して、各質問に答えると `.claude/agents` 以下に Subagents ファイルが作成される。
+先ほど記載したように`/agents`コマンドを実行して、各質問に答えると`.claude/agents`以下にSubagentsファイルが作成される。
 次に作成されたファイルの中身を見て、分解できないか検証する。
-今回のケースでは以下のような役割ごとにファイルを分割した（役割の分割とファイル生成も Claude Code で実行）。
+今回のケースでは以下のような役割ごとにファイルを分割した（役割の分割とファイル生成もClaude Codeで実行）。
 
 - content-reviewer（構造・論理分析）
 - language-editor（言語・文体編集）
@@ -291,13 +291,13 @@ Your feedback should focus specifically on technical accuracy, clarity of techni
 Communicate entirely in Japanese, maintaining a precise and educational tone throughout your technical writing review.
 ```
 
-Claude Code は description を見て、動的に Subagents を選択してくれるので、あとはそのままプロンプトを書けば良い。
-と言いたいところだが、「この記事のレビューを行なってください」と依頼しても Subagents が使われないこともあった。
+Claude Codeはdescriptionを見て、動的にSubagentsを選択してくれるので、あとはそのままプロンプトを書けば良い。
+と言いたいところだが、「この記事のレビューを行なってください」と依頼してもSubagentsが使われないこともあった。
 また、並列実行して欲しいのに逐次実行だったりと、チグハグな動作をすることもある。
 
-それを防ぐために以下の文章をプロジェクトの `claude.me` に追加する。
+それを防ぐために以下の文章をプロジェクトの`claude.me`に追加する。
 そうすれば解決する。
-今のところ 100% 成功している。
+今のところ100% 成功している。
 
 ````md title="claude.md"
 ## Content Review System
@@ -362,13 +362,13 @@ https://kkhys.me/blog/posts/b1dwyvg
 以下のように Claude Code に指示を与える。
 
 ```shell
-> @content/blog/2025-07-21/index.mdx この記事のレビューを行なってください
+> @content/blog/2025-07-21/index.mdxこの記事のレビューを行なってください
 ```
 
 すると以下のように複数の Subagents が並列で動いて記事のレビューを出力してくれる。
 
 ```shell
-> @content/blog/2025-07-21/index.mdx この記事のレビューを行なってください
+> @content/blog/2025-07-21/index.mdxこの記事のレビューを行なってください
   ⎿  Read content/blog/2025-07-21/index.mdx (980 lines)
 
 ⏺ content-reviewer(Structural & logical analysis)
@@ -413,10 +413,10 @@ https://kkhys.me/blog/posts/b1dwyvg
   - 技術文書として適切な客観的表現への修正
 
   具体的修正例:
-  現在：AI が考えを巡らせている間、人間の方はただ待つしかない。
-  改善：AI が処理を実行している間、人間はただ待機するしかありません。
+  現在：AIが考えを巡らせている間、人間の方はただ待つしかない。
+  改善：AIが処理を実行している間、人間はただ待機するしかありません。
 
-  現在：一応 `settings.json` にファイルに「これは勝手にやっていいよ」というリストを書いておけば
+  現在：一応`settings.json`にファイルに「これは勝手にやっていいよ」というリストを書いておけば
   改善：`settings.json`ファイルに「これは自動実行を許可する」というリストを記述しておけば
 
   📖 Readability Enhancement (Readability Enhancement)
@@ -429,7 +429,7 @@ https://kkhys.me/blog/posts/b1dwyvg
   視覚的改善提案:
   ## 💡 この章のポイント
   - Git worktreeで複数のブランチを同時に管理
-  - Claude Code を並列実行して待機時間を削減
+  - Claude Codeを並列実行して待機時間を削減
   - 実際のセキュリティ修正タスクで効果を実証
 
   ## ⏱️ 所要時間の目安
@@ -583,7 +583,7 @@ https://kkhys.me/blog/posts/b1dwyvg
   追加すべき重要事項：
 
   ⚠️ **重要な注意点**
-  `--dangerously-skip-permissions` は以下のリスクがあります：
+  `--dangerously-skip-permissions`は以下のリスクがあります：
   - システムファイルの削除や改変
   - 機密情報の意図しない送信
   - 悪意のあるコードの実行
@@ -636,10 +636,10 @@ https://kkhys.me/blog/posts/b1dwyvg
 
 ## さいごに
 
-この記事も含めて、普段は WebStorm で記事を書いている。
-記事を書き終わったタイミングでターミナルを開いて、Claude Code にレビューを依頼。
-そして、レビューの修正が終われば `git commit & push` で記事の公開が IDE 上で完結する流れは、Subagents を取り入れることで、より強固になったと感じる。
+この記事も含めて、普段はWebStormで記事を書いている。
+記事を書き終わったタイミングでターミナルを開いて、Claude Codeにレビューを依頼。
+そして、レビューの修正が終われば`git commit & push`で記事の公開がIDE上で完結する流れは、Subagentsを取り入れることで、より強固になったと感じる。
 
-今回はブログ記事のレビューに特化した Subagents を作成した。
+今回はブログ記事のレビューに特化したSubagentsを作成した。
 他にも各分野に精通した専門家を育てていくことで、個人開発でもチームで開発しているような体験をできるのは面白い。
 有用な専門家を生み出せたら、またブログ記事で共有しようと思う。
