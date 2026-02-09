@@ -1,6 +1,6 @@
 ---
-title: "v2.3.0 リリースノート: Cron で毎日自動デプロイ"
-description: SSG サイトでランダム表示項目が固定化される問題を解決するため、Vercelの Deploy Hook と Cron Jobs を活用して毎日午前3時に自動再デプロイする仕組みを実装した方法である。
+title: "v2.3.0リリースノート: Cronで毎日自動デプロイ"
+description: SSGサイトでランダム表示項目が固定化される問題を解決するため、VercelのDeploy HookとCron Jobsを活用して毎日午前3時に自動再デプロイする仕組みを実装した方法である。
 emoji: 🚀
 category: Tech
 tags: ["Release note"]
@@ -10,11 +10,11 @@ slug: b1x2lan
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
-このサイトは基本的に SSG で静的にページを生成している。
-そのおかげで、ブラウザに直接 HTML を届けられるため、高速なパフォーマンスを得られる。
+このサイトは基本的にSSGで静的にページを生成している。
+そのおかげで、ブラウザに直接HTMLを届けられるため、高速なパフォーマンスを得られる。
 しかし、その代償としてランダムに表示させたい項目があったとしても、再ビルドしない限り氷漬けのままになってしまう。
 
 このサイトでビルドするたびに結果が変わる項目は以下のとおり。
@@ -24,39 +24,39 @@ slug: b1x2lan
 - 記事下部にある関連記事
 
 今は頻繁に更新しているので問題ないが、忙しさに飲み込まれた日々が続けば、サイトが時間の狭間に取り残される可能性も十分にある。
-そんなケースを見越して、毎日午前 3 時に自動で再デプロイする機能を追加した。
+そんなケースを見越して、毎日午前3時に自動で再デプロイする機能を追加した。
 みんなが寝静まっているころにひっそりとサイトを更新させる。
 
 ## 実装方法
 
-1. Vercel の Deploy Hook を作成する
-2. Vercel の Cron Jobs を使う
-3. デプロイを実行する API を作成する
+1. VercelのDeploy Hookを作成する
+2. VercelのCron Jobsを使う
+3. デプロイを実行するAPIを作成する
 
-やることはシンプル、この 3 ステップだけ。
+やることはシンプル、この3ステップだけ。
 
-### Vercel の Deploy Hook を作成する
+### VercelのDeploy Hookを作成する
 
-まずは Vercel の管理画面から Deploy Hook を作成する。
+まずはVercelの管理画面からDeploy Hookを作成する。
 
 https://vercel.com/docs/deployments/deploy-hooks
 
-この Deploy Hook の URL に POST リクエストを送るだけで、自動でデプロイが走る仕組みである。
-ヘッドレス CMS を使っている場合、コンテンツの変更と同時にデプロイをトリガーする用途でも活用できる。
+このDeploy HookのURLにPOSTリクエストを送るだけで、自動でデプロイが走る仕組みである。
+ヘッドレスCMSを使っている場合、コンテンツの変更と同時にデプロイをトリガーする用途でも活用できる。
 
-ただし、この URL が流出すると、誰でも勝手に再デプロイできるようになってしまうので注意が必要。
+ただし、このURLが流出すると、誰でも勝手に再デプロイできるようになってしまうので注意が必要。
 
 > [!IMPORTANT]
-> デフォルトだとビルドキャッシュが有効になっているため、Cron によるデプロイを実行してもアプリケーションの更新がされない。
-> eploy Hook URL の末尾に `?buildCache=false` を付与することで、ビルドキャッシュを無効化できる。
+> デフォルトだとビルドキャッシュが有効になっているため、Cronによるデプロイを実行してもアプリケーションの更新がされない。
+> eploy Hook URLの末尾に`?buildCache=false`を付与することで、ビルドキャッシュを無効化できる。
 
-### Vercel の Cron Jobs を設定する
+### VercelのCron Jobsを設定する
 
-次に、Vercel の Cron Jobs を設定して、自動的にデプロイを実行する。
+次に、VercelのCron Jobsを設定して、自動的にデプロイを実行する。
 
 https://vercel.com/docs/cron-jobs
 
-`vercel.json` に以下のような設定を追加すれば、指定した時間に実行される。
+`vercel.json`に以下のような設定を追加すれば、指定した時間に実行される。
 
 ```json title="vercel.json"
 {
@@ -69,16 +69,16 @@ https://vercel.com/docs/cron-jobs
 }
 ```
 
-ここで注意すべきは タイムゾーンが UTC（協定世界時）であること。
-JST（日本標準時）で 毎日 3 時 に実行したい場合は、9 時間マイナスして `0 18 * * *` となる。
+ここで注意すべきは タイムゾーンがUTC（協定世界時）であること。
+JST（日本標準時）で 毎日3時 に実行したい場合は、9時間マイナスして`0 18 * * *`となる。
 
-ちなみに GitHub Actions でも Cron を設定することは可能。
+ちなみにGitHub ActionsでもCronを設定することは可能。
 
 https://docs.github.com/ja/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
 
-### デプロイを実行する API を作成する
+### デプロイを実行するAPIを作成する
 
-あとは `/api/cron/deploy` にアクセスされたとき、Deploy Hook を叩く処理を書くだけ。
+あとは`/api/cron/deploy`にアクセスされたとき、Deploy Hookを叩く処理を書くだけ。
 
 ```ts title="apps/web/src/app/api/cron/deploy/route.ts" showLineNumbers
 import { env } from "#/env";
@@ -124,13 +124,13 @@ export const GET = async (request: Request) => {
 };
 ```
 
-ここで重要なのは 21 行目である。
-API リクエストの認証を行わなければ、誰でも無制限に API を叩けてしまう。
+ここで重要なのは21行目である。
+APIリクエストの認証を行わなければ、誰でも無制限にAPIを叩けてしまう。
 
-それは困るので、Cron 用の環境変数（`CRON_SECRET`）を使い、正しい認証情報を持ったリクエストのみ許可するようにする。
-具体的には、`Authorization` ヘッダを `Bearer` トークン の形で受け取り、それが環境変数 `CRON_SECRET` と一致するかを確認する。
+それは困るので、Cron用の環境変数（`CRON_SECRET`）を使い、正しい認証情報を持ったリクエストのみ許可するようにする。
+具体的には、`Authorization`ヘッダを`Bearer`トークン の形で受け取り、それが環境変数`CRON_SECRET`と一致するかを確認する。
 
-この仕組みにより、正しい `CRON_SECRET` を持ったリクエストだけがデプロイを実行できるようになる。
+この仕組みにより、正しい`CRON_SECRET`を持ったリクエストだけがデプロイを実行できるようになる。
 
 ### 実際に動くかテスト
 
