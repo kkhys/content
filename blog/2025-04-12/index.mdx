@@ -1,6 +1,6 @@
 ---
-title: Semantic Versioning から Calendar Versioning へ
-description: サイトのバージョン管理を SemVer から CalVer に変更した。
+title: Semantic VersioningからCalendar Versioningへ
+description: サイトのバージョン管理をSemVerからCalVerに変更した。
 emoji: 🚀
 category: Tech
 tags: ["Release note"]
@@ -9,33 +9,33 @@ publishedAt: 2025-04-12
 slug: b1lqgaq
 ---
 
-当サイトでは、これまで [Semantic Versioning](https://semver.org) （以下 SemVer）を採用していたが、今後は [Calendar Versioning](https://calver.org) （以下 CalVer）を使っていくことにした。
+当サイトでは、これまで [Semantic Versioning](https://semver.org) （以下SemVer）を採用していたが、今後は [Calendar Versioning](https://calver.org) （以下CalVer）を使っていくことにした。
 
-## Semver とは
+## Semverとは
 
-SemVer のバージョン番号は、`MAJOR.MINOR.PATCH` という形式で構成されている。
+SemVerのバージョン番号は、`MAJOR.MINOR.PATCH`という形式で構成されている。
 
 それぞれの役割は以下の通り：
 
-1. **MAJOR（メジャー）**: 後方互換性のない変更が加えられた場合に更新される番号。例えば、API の仕様が変更されて互換性が保てなくなった場合などに使用する
+1. **MAJOR（メジャー）**: 後方互換性のない変更が加えられた場合に更新される番号。例えば、APIの仕様が変更されて互換性が保てなくなった場合などに使用する
 2. **MINOR（マイナー）**: 後方互換性を保ったまま新機能を追加した場合に更新される番号。新しい機能が提供されるものの、既存の機能には影響を及ぼさない場合などに使用する
 3. **PATCH（パッチ）**: バグ修正など、後方互換性を保ちながら既存機能の改善や修正が行われた場合に更新される番号。小さなバグ修正やセキュリティパッチなどに使用する
 
 これにより、バージョン番号を見ただけでそのリリースが含む変更の規模や影響範囲を予測できる仕組みになる。
 
-たとえば `2.3.1` というバージョンの場合：
+たとえば`2.3.1`というバージョンの場合：
 
 - `2`: メジャーバージョン。後方互換性のない変更があったことを示す
 - `3`: マイナーバージョン。新機能が追加されていることを示す
 - `1`: パッチバージョン。小さなバグ修正が含まれていることを示す
 
-当サイトでは SemVer の管理に [semantic-release](https://github.com/semantic-release/semantic-release) を使っていた。
+当サイトではSemVerの管理に [semantic-release](https://github.com/semantic-release/semantic-release) を使っていた。
 
-semantic-release は、コミットメッセージを解析し、コードベースへの変更が与える影響を判断することで、次の SemVer を自動的に決定し、変更ログを生成・リリースするツールである。
+semantic-releaseは、コミットメッセージを解析し、コードベースへの変更が与える影響を判断することで、次のSemVerを自動的に決定し、変更ログを生成・リリースするツールである。
 
 デフォルトで使用されるコミットメッセージ形式は [Angular Commit Message Conventions](https://www.conventionalcommits.org/en/v1.0.0-beta.4) に従っている。
 
-とある PR が main ブランチにマージされたときに、PR に含まれるコミットメッセージの接頭辞によって、リリースのバージョン番号を決定する。
+とあるPRがmainブランチにマージされたときに、PRに含まれるコミットメッセージの接頭辞によって、リリースのバージョン番号を決定する。
 
 以下がその例。
 
@@ -45,26 +45,26 @@ semantic-release は、コミットメッセージを解析し、コードベー
 | **feat(scope): description** | マイナーリリース |
 | **perf(scope): description** | メジャーリリース|
 
-## CalVer とは
+## CalVerとは
 
-CalVer とは、バージョン番号をカレンダー（年月日）に基づいて付与する方法である。
+CalVerとは、バージョン番号をカレンダー（年月日）に基づいて付与する方法である。
 
 この方式は、リリースの日時を直感的に伝えられるため、リリース時期が重要なプロジェクトや、定期的なリリースを行うプロジェクトに適したバージョニングと言える。
-CalVer のバージョン番号には複数のフォーマットがあるが、一般的な形式は以下の通り：
+CalVerのバージョン番号には複数のフォーマットがあるが、一般的な形式は以下の通り：
 
 1. **YYYY.MINOR**: リリース年（例：「2025」）と、その年内のリリース回数を示すマイナーバージョンを使用。例: `2025.1`, `2025.2`。
-2. **YYYY.MM.MICRO**: リリース年、月（例：「04」）、バグ修正を示す MICRO 番号を使用。例: `2025.04.3`。
+2. **YYYY.MM.MICRO**: リリース年、月（例：「04」）、バグ修正を示すMICRO番号を使用。例: `2025.04.3`。
 3. **YYYYMMDD**: 完全なリリース日をバージョン番号として利用。例: `20250412`。
-4. **YY.MINOR**: リリース年の下 2 桁とマイナーバージョンを組み合わせた簡易的な形式。例: `25.4`。
+4. **YY.MINOR**: リリース年の下2桁とマイナーバージョンを組み合わせた簡易的な形式。例: `25.4`。
 
-JetBrains 系 IDE や、[Ubuntu](https://ubuntu.com/about/release-cycle)、[Arch Linux](https://archlinux.org/releng/releases) などの OS では、CalVer を採用している。
+JetBrains系IDEや、[Ubuntu](https://ubuntu.com/about/release-cycle)、[Arch Linux](https://archlinux.org/releng/releases) などのOSでは、CalVerを採用している。
 
-## なぜ CalVer に変更したのか
+## なぜCalVerに変更したのか
 
-Angular Commit Message Conventions に則った SemVer では以下の点が辛かった。
+Angular Commit Message Conventionsに則ったSemVerでは以下の点が辛かった。
 
-- マイナーバージョンを上げたくないがために、コミットメッセージに `feat` を使えない
-  - 結果的にコミットタイプに `chore` を使うことが多くなってしまう
+- マイナーバージョンを上げたくないがために、コミットメッセージに`feat`を使えない
+  - 結果的にコミットタイプに`chore`を使うことが多くなってしまう
 - メジャーバージョンをどのタイミングで上げるか悩む
   - メジャーバージョンは頻繁に上げるべきではないという考えがある
 - 当サイトではマイナーバージョンを上げるたびにリリースノートを書いていたが、それも辛くなってきた
@@ -72,33 +72,33 @@ Angular Commit Message Conventions に則った SemVer では以下の点が辛�
 特に最後の部分が個人的に辛かったところである。
 
 リリースノートを書くのは楽しいが、毎回書くのは大変。
-それにリリースノートに更新した内容をまとめて書くよりも、分割して書いたほうが読者にも SEO にも優しい。
+それにリリースノートに更新した内容をまとめて書くよりも、分割して書いたほうが読者にもSEOにも優しい。
 
 何より、頻繁にサイトを更新するため、過去のリリースノートと最新のコードとの差分が大きくなっているのも良くない。
 
-といったわけで、CalVer に変更することにした。
+といったわけで、CalVerに変更することにした。
 
-※ Angular Commit Message Conventions とは切り離した SemVer でも良いのだが、いずれにせよどのタイミングでバージョンを上げるのか悩むのは同じである
+※ Angular Commit Message Conventionsとは切り離したSemVerでも良いのだが、いずれにせよどのタイミングでバージョンを上げるのか悩むのは同じである
 
-## CalVer のリリースを自動化したい
+## CalVerのリリースを自動化したい
 
-今までは semantic-release と GitHub Actions を使ってリリースを自動化していた。
-が、CalVer に変更したことで、CI を使った自動化は必要なくなった。
+今まではsemantic-releaseとGitHub Actionsを使ってリリースを自動化していた。
+が、CalVerに変更したことで、CIを使った自動化は必要なくなった。
 
-なぜなら、semantic-release のようにコミットメッセージを解析してバージョン番号を決定する必要がなくなったからである。
-**CalVer の場合、リリースのタイミングは自分で決めることができるため、CI を使って自動化する必要がない。**
+なぜなら、semantic-releaseのようにコミットメッセージを解析してバージョン番号を決定する必要がなくなったからである。
+**CalVerの場合、リリースのタイミングは自分で決めることができるため、CIを使って自動化する必要がない。**
 
-とはいえ、毎回 `git tag` コマンドを使ってタグ付けし、GitHub 上でリリースを作成するのは面倒である。
-そのため、CalVer のリリースを 1 つのコマンドで行えるようにスクリプトを書いた。
+とはいえ、毎回`git tag`コマンドを使ってタグ付けし、GitHub上でリリースを作成するのは面倒である。
+そのため、CalVerのリリースを1つのコマンドで行えるようにスクリプトを書いた。
 
 スクリプトの要件
 
-- Git のタグ付けと GitHub へのリリース作成までを自動化する
-- タグの形式は `YYYY.0M.0D`
-- タグが重複する場合は `YYYY.0M.0D-MICRO`（MICRO の部分はインクリメント）
-- リリース本文には前回のリリースとのコミット比較 URL を含める
-- Bun で実行する
-- dry run オプションをつけると、実際にはリリースしない（ログを出力する）
+- Gitのタグ付けとGitHubへのリリース作成までを自動化する
+- タグの形式は`YYYY.0M.0D`
+- タグが重複する場合は`YYYY.0M.0D-MICRO`（MICROの部分はインクリメント）
+- リリース本文には前回のリリースとのコミット比較URLを含める
+- Bunで実行する
+- dry runオプションをつけると、実際にはリリースしない（ログを出力する）
 
 ```ts title="scripts/release.ts" showLineNumbers
 import { $ } from "bun";
@@ -237,7 +237,7 @@ bun run scripts/release.ts
 
 https://github.com/kkhys/me/releases/tag/2025.04.12-2
 
-dry run モードだと以下の出力になる。
+dry runモードだと以下の出力になる。
 
 ```bash
 bun run scripts/release.ts --dry-run
@@ -257,5 +257,5 @@ bun run scripts/release.ts --dry-run
 
 ## さいごに
 
-CalVer に変更したことで、本質的ではないところで悩む無駄を減らせたのは大きい（変なところで悩む性格を根本から治せば良い話だが）。
-今後は CalVer を使ってリリースを行っていくので、リリースノートは廃止してトピックごとに技術記事を書いていく予定である。
+CalVerに変更したことで、本質的ではないところで悩む無駄を減らせたのは大きい（変なところで悩む性格を根本から治せば良い話だが）。
+今後はCalVerを使ってリリースを行っていくので、リリースノートは廃止してトピックごとに技術記事を書いていく予定である。
