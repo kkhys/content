@@ -1,6 +1,6 @@
 ---
-title: "Redis を使った PV カウントに切り替える"
-description: PV カウント機能の初期表示遅延と重複計測問題を解決するため、Upstash の Redis を導入した。レイテンシ改善とデバウンス機能により正確な PV 計測を実現する実装方法を解説している。
+title: "Redisを使ったPVカウントに切り替える"
+description: PVカウント機能の初期表示遅延と重複計測問題を解決するため、UpstashのRedisを導入した。レイテンシ改善とデバウンス機能により正確なPV計測を実現する実装方法を解説している。
 emoji: 🛢️
 category: Tech
 tags: [Tips]
@@ -10,40 +10,40 @@ slug: b1ydlf6
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
-v1.7.0 で PV カウント機能を実装した。
+v1.7.0でPVカウント機能を実装した。
 
 https://kkhys.me/blog/posts/b1v9jvx
 
-リリースしてから 3 ヶ月ほど経過したが、以下の問題が気になるようになってきた。
+リリースしてから3ヶ月ほど経過したが、以下の問題が気になるようになってきた。
 
 1. 初期表示が遅い
-2. 1 人のユーザが短時間に PV を増やせる（重複計測）
+2. 1人のユーザが短時間にPVを増やせる（重複計測）
 
-上記の問題を解決するために [Upstash](https://upstash.com) の Redis を使った実装に切り替えることにした。
+上記の問題を解決するために [Upstash](https://upstash.com) のRedisを使った実装に切り替えることにした。
 
-## なぜ Redis を使うのか
+## なぜRedisを使うのか
 
-まず 1 つ目の問題は DB のリージョンに起因している。
-利用しているサーバレス DB サービス [Neon](https://neon.tech) の日本から最も近いリージョンはシンガポールである。
-シンガポールから日本までのレイテンシは 50ms ~ 100ms ほどなのでどうしても初期表示はそれ以上かかってしまう。
+まず1つ目の問題はDBのリージョンに起因している。
+利用しているサーバレスDBサービス [Neon](https://neon.tech) の日本から最も近いリージョンはシンガポールである。
+シンガポールから日本までのレイテンシは50ms ~ 100msほどなのでどうしても初期表示はそれ以上かかってしまう。
 
-Upstash はリージョンに日本（AWS の ap-northeast-1）を選択できるのでレイテンシを低く抑えられる。
-また、Redis はインメモリデータベースであるため、ディスク I/O のオーバーヘッドがなく高速な R/W を行えるという利点がある。
+Upstashはリージョンに日本（AWSのap-northeast-1）を選択できるのでレイテンシを低く抑えられる。
+また、Redisはインメモリデータベースであるため、ディスクI/Oのオーバーヘッドがなく高速なR/Wを行えるという利点がある。
 
-2 つ目の問題は RDBMS でも対応可能だが、定期的に重複排除のためのレコードを削除していく必要がある。
-でないと、DB のサイズがどんどん膨れ上がってしまう。
-Redis であれば Key-Value Pair の有効期限を設定可能で、その期限を経過すると自動的に揮発するのでストレージを圧迫することもない。
+2つ目の問題はRDBMSでも対応可能だが、定期的に重複排除のためのレコードを削除していく必要がある。
+でないと、DBのサイズがどんどん膨れ上がってしまう。
+RedisであればKey-Value Pairの有効期限を設定可能で、その期限を経過すると自動的に揮発するのでストレージを圧迫することもない。
 
-以上のことから PV カウントの計測に Redis を使うのは有効と判断した。
+以上のことからPVカウントの計測にRedisを使うのは有効と判断した。
 
 ## 実装方法
 
-### Upstash のセットアップ
+### Upstashのセットアップ
 
-まずは Upstash の管理画面から API キーを取得して `.env` ファイルに設定する。
+まずはUpstashの管理画面からAPIキーを取得して`.env`ファイルに設定する。
 
 ```text title=".env"
 UPSTASH_REDIS_REST_URL=
@@ -56,8 +56,8 @@ UPSTASH_REDIS_REST_TOKEN=
 pnpm add @upstash/redis
 ```
 
-最後に Redis クライアントを作成すればセットアップは完了。
-`fromEnv` を使えば特に環境変数を読み取る処理を書かなくて良いのは楽だ。
+最後にRedisクライアントを作成すればセットアップは完了。
+`fromEnv`を使えば特に環境変数を読み取る処理を書かなくて良いのは楽だ。
 
 ```ts title="packages/api/src/utils/redis.ts"
 import { Redis } from '@upstash/redis';
@@ -65,13 +65,13 @@ import { Redis } from '@upstash/redis';
 export const redis = Redis.fromEnv();
 ```
 
-### API の作成
+### APIの作成
 
-当サイトは API 作成に tRPC を使っている。
-tRPC を使っていない場合は適宜読み替えていただきたい。
+当サイトはAPI作成にtRPCを使っている。
+tRPCを使っていない場合は適宜読み替えていただきたい。
 
-まずは重複防止（デバウンス）のために IP アドレスをキーにした有効期限付きの Key-Value Pair を登録する。
-そして、重複がないことを確認できた場合のみ `incr` コマンドを使って PV をインクリメントする。
+まずは重複防止（デバウンス）のためにIPアドレスをキーにした有効期限付きのKey-Value Pairを登録する。
+そして、重複がないことを確認できた場合のみ`incr`コマンドを使ってPVをインクリメントする。
 
 ```ts title="packages/api/src/router/page-view.ts" showLineNumbers
 import type { TRPCRouterRecord } from '@trpc/server';
@@ -107,19 +107,19 @@ export const pageViewRouter = {
 } satisfies TRPCRouterRecord;
 ```
 
-お問い合わせ機能のレートリミットを設定したとき（[記事](/blog/posts/b143t9d)）と同様にセキュリティ対策として IP アドレスは SHA-256 でハッシュ化してから Redis に保存する。
-デバウンス用の Key-Value Pair の有効期限は 1 日にしている。
-つまり、1IP アドレスあたり 1 つの記事に対して 1 日に 1 回のみしか PV をインクリメントできないということになる。
-また、`nx: true` を設定することで、キーがすでに存在する場合は登録されない。
+お問い合わせ機能のレートリミットを設定したとき（[記事](/blog/posts/b143t9d)）と同様にセキュリティ対策としてIPアドレスはSHA-256でハッシュ化してからRedisに保存する。
+デバウンス用のKey-Value Pairの有効期限は1日にしている。
+つまり、1IPアドレスあたり1つの記事に対して1日に1回のみしかPVをインクリメントできないということになる。
+また、`nx: true`を設定することで、キーがすでに存在する場合は登録されない。
 
-すでに PV をインクリメント済みの場合は `'Deduplicated'` を返し、インクリメントに成功した場合は `'Incremented'` を返す。
-tRPC の良いところは API の型をクライアント側で定義しなくても良いところだ。
-上記の場合だと `incrementViews` の返り値の型は `'Deduplicated' | 'Incremented'` のユニオン型になる。
+すでにPVをインクリメント済みの場合は`'Deduplicated'`を返し、インクリメントに成功した場合は`'Incremented'`を返す。
+tRPCの良いところはAPIの型をクライアント側で定義しなくても良いところだ。
+上記の場合だと`incrementViews`の返り値の型は`'Deduplicated' | 'Incremented'`のユニオン型になる。
 この値は次の章で使用する。
 
 ### クライアント側から呼び出す
 
-PV カウントをインクリメントする API を作成したので次は PV カウントを取得する API を作成していく。
+PVカウントをインクリメントするAPIを作成したので次はPVカウントを取得するAPIを作成していく。
 
 ```ts title="packages/api/src/router/page-view.ts" showLineNumbers
 import type { TRPCRouterRecord } from '@trpc/server';
@@ -136,8 +136,8 @@ export const pageViewRouter = {
 } satisfies TRPCRouterRecord;
 ```
 
-セットしたときのキーと同じ値を get することで PV を取得できる。
-クライアント側から以下のように API を呼び出す。
+セットしたときのキーと同じ値をgetすることでPVを取得できる。
+クライアント側から以下のようにAPIを呼び出す。
 
 ```tsx title="apps/web/src/ui/post/view-counter/index.tsx" showLineNumbers
 'use client';
@@ -171,25 +171,25 @@ export const ViewCounter = ({ slug }: { slug: string }) => {
 export const ViewCounterSkeleton = () => <Skeleton className='h-4 w-14' />;
 ```
 
-ポイントは 2 点ある。
+ポイントは2点ある。
 
-まず 1 つ目は `useMutation` に成功した場合（`onSuccess`）、PV を更新したときのみ PV カウントを invalidate するということである。
-デバウンスの対象となるリクエストであっても `onSuccess` の処理が走るため、何もしなければ無駄に API がリクエストされてしまう。
-それを防ぐために `incrementViews` の返り値が `Incremented` の場合のみ PV を更新する。
+まず1つ目は`useMutation`に成功した場合（`onSuccess`）、PVを更新したときのみPVカウントをinvalidateするということである。
+デバウンスの対象となるリクエストであっても`onSuccess`の処理が走るため、何もしなければ無駄にAPIがリクエストされてしまう。
+それを防ぐために`incrementViews`の返り値が`Incremented`の場合のみPVを更新する。
 
-2 つ目のポイントは `useQuery` に `staleTime` を設定することである。
-`staleTime` を設定しないと何度もリロードが行われた場合、その回数分だけリクエストが送られてしまう。
-Upstash は従量課金制なので不要なリクエストは送られないようにする[^1]。
+2つ目のポイントは`useQuery`に`staleTime`を設定することである。
+`staleTime`を設定しないと何度もリロードが行われた場合、その回数分だけリクエストが送られてしまう。
+Upstashは従量課金制なので不要なリクエストは送られないようにする[^1]。
 
-[^1]: 従量課金制とはいっても 1 日 10,000 コマンドまでは無料なのでそこまで心配はいらない。
-仮にオーバーしてしまっても 100,000 コマンドあたり 0.2 ドルしか支払いは発生しない（[ソース](https://upstash.com/pricing)）
+[^1]: 従量課金制とはいっても1日10,000コマンドまでは無料なのでそこまで心配はいらない。
+仮にオーバーしてしまっても100,000コマンドあたり0.2ドルしか支払いは発生しない（[ソース](https://upstash.com/pricing)）
 
 ## データベースの移行
 
-今までは Neon の PostgreSQL に PV カウントのデータを保存していた。
-Upstash の Redis に移行するにあたり、PostgreSQL に保存されているデータを移さなければならない。
+今まではNeonのPostgreSQLにPVカウントのデータを保存していた。
+UpstashのRedisに移行するにあたり、PostgreSQLに保存されているデータを移さなければならない。
 
-Next.js に Ruby on Rails の Rake タスクみたいな機能があれば良いのだが、残念ながら無いので API として定義してそれをクライアント側から呼び出すことにした。
+Next.jsにRuby on RailsのRakeタスクみたいな機能があれば良いのだが、残念ながら無いのでAPIとして定義してそれをクライアント側から呼び出すことにした。
 
 ```ts title="apps/web/src/ui/post/view-counter/index.tsx" showLineNumbers
 import type { TRPCRouterRecord } from '@trpc/server';
@@ -205,14 +205,14 @@ export const pageViewRouter = {
 } satisfies TRPCRouterRecord;
 ```
 
-本番用のデータベースに接続して全ての PV カウントを取得する。
-そして、それを `forEach` で回して Redis にセットしていけば完了である。
+本番用のデータベースに接続して全てのPVカウントを取得する。
+そして、それを`forEach`で回してRedisにセットしていけば完了である。
 
-冪等性（サービスを停止させた状態で）が保たれるように `setnx` を使っている。
+冪等性（サービスを停止させた状態で）が保たれるように`setnx`を使っている。
 
 念の為、ちゃんと登録されたか確認してみる。
 
-まずは PostgreSQL 側のデータ。
+まずはPostgreSQL側のデータ。
 
 ```sql
 SELECT * FROM me_post ORDER BY slug;
@@ -250,7 +250,7 @@ SELECT * FROM me_post ORDER BY slug;
 +-------+-----+--------------------------+--------------------------+
 ```
 
-次に Redis 側のデータ。
+次にRedis側のデータ。
 
 ```shell
 redis-cli --tls -u redis://default:password@hostname:port "pageviews:production:*" | sort -n | while read key; do echo "$key: $(redis-cli --tls -u redis://default:password@hostname:port get $key)"; done
@@ -284,19 +284,19 @@ pageviews:production:p1y4nft: 52
 pageviews:production:p1ys5j8: 93
 ```
 
-PV が一致しているため問題なし。
+PVが一致しているため問題なし。
 
 ## バックアップ
 
-Upstash は毎日バックアップをとってくれるオプションがあるため有効化している。
+Upstashは毎日バックアップをとってくれるオプションがあるため有効化している。
 リストアもワンクリックで行えるため簡単。
 
-![Upstash の管理画面](./01.png "Upstash の管理画面")
+![Upstashの管理画面](./01.png "Upstashの管理画面")
 
 ## さいごに
 
-Upstash を使うと面倒な Redis のセットアップも一瞬で終わった。
+Upstashを使うと面倒なRedisのセットアップも一瞬で終わった。
 便利すぎる。
 
-PV をデバウンスさせることで全体的に PV は減るだろうが多くなれば良いというわけでもないので問題ない。
-正確な PV 数を算出できるので楽しみだ。
+PVをデバウンスさせることで全体的にPVは減るだろうが多くなれば良いというわけでもないので問題ない。
+正確なPV数を算出できるので楽しみだ。
