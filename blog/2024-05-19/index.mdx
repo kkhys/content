@@ -1,6 +1,6 @@
 ---
-title: Noto Emoji を SVG 化する API を作る
-description: Safari でNoto Emoji が正しく表示されない問題を解決するため、Satori を使って絵文字を SVG 化する API を作成し、ブログのアイキャッチ画像として活用する方法を解説した記事である。
+title: Noto EmojiをSVG化するAPIを作る
+description: SafariでNoto Emojiが正しく表示されない問題を解決するため、Satoriを使って絵文字をSVG化するAPIを作成し、ブログのアイキャッチ画像として活用する方法を解説した記事である。
 emoji: 🔄
 category: Tech
 tags: [Tips, Next.js]
@@ -10,14 +10,14 @@ slug: b15e6x7
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
-よくあるブログだと記事にアイキャッチ画像を添付するケースが多いと思う（例えば note とか）。
+よくあるブログだと記事にアイキャッチ画像を添付するケースが多いと思う（例えばnoteとか）。
 良い画像があれば特に迷うことはないのだが、ちょっとした記事を書くだけなのに毎回用意するのは正直言って面倒くさい。
 
-なので、このブログでは以下のように Frontmatter に絵文字をセットするだけでアイキャッチ画像を生成するように実装した。
-このアイデア自体は [Zenn](https://zenn.dev) や GitHub Discussions で採用されているものなので特に真新しいというわけではない。
+なので、このブログでは以下のようにFrontmatterに絵文字をセットするだけでアイキャッチ画像を生成するように実装した。
+このアイデア自体は [Zenn](https://zenn.dev) やGitHub Discussionsで採用されているものなので特に真新しいというわけではない。
 
 ```md title="index.mdx"
 ---
@@ -30,34 +30,34 @@ publishedAt: 2024-05-19
 ---
 ```
 
-そして、[こちらの記事](/blog/posts/b1fw2ts#h1ne0dv)で述べているように [Noto Emoji](https://fonts.google.com/noto/specimen/Noto+Emoji) を font-family として指定することでサイトのモノクロな雰囲気に合うように絵文字の表示を変えていた。
+そして、[こちらの記事](/blog/posts/b1fw2ts#h1ne0dv)で述べているように [Noto Emoji](https://fonts.google.com/noto/specimen/Noto+Emoji) をfont-familyとして指定することでサイトのモノクロな雰囲気に合うように絵文字の表示を変えていた。
 記事一覧ページを [min](https://minbrowser.org) ブラウザで見ると以下のようなデザインである。
 
-![min ブラウザで見た記事一覧ページ](./01.png)
+![minブラウザで見た記事一覧ページ](./01.png)
 
-ただ、Safari で記事一覧ページを見ると以下のように表示されてしまう。
+ただ、Safariで記事一覧ページを見ると以下のように表示されてしまう。
 
-![Safari で見た記事一覧ページ](./02.png)
+![Safariで見た記事一覧ページ](./02.png)
 
-ちなみに Chrome では問題ない。
-なぜか Safari でのみ変換されない絵文字がある。
+ちなみにChromeでは問題ない。
+なぜかSafariでのみ変換されない絵文字がある。
 
-## なぜ Noto Emoji が Safari で表示されない？
+## なぜNoto EmojiがSafariで表示されない？
 
 調べてみたのだが、[ZWJ Sequences](https://emojipedia.org/emoji-zwj-sequence) が関係しているっぽい。
-絵文字は端末で見ていると 1 つでも実際は複数の絵文字で構成されているパターンがある。
+絵文字は端末で見ていると1つでも実際は複数の絵文字で構成されているパターンがある。
 例えば絵文字 👩‍❤️‍💋‍👨は 👩❤️💋👨 をゼロ幅接合子（Zero Width Joiner）で繋げることで構成されている。
-Windows にしかないパターンもあったりとこれら全てに対応するのはさすがに時間がかかり過ぎるため諦めた。
+Windowsにしかないパターンもあったりとこれら全てに対応するのはさすがに時間がかかり過ぎるため諦めた。
 
-代案として Img 要素から SVG に変換された絵文字を読み込むことを考えた。
+代案としてImg要素からSVGに変換された絵文字を読み込むことを考えた。
 それならクロスプラットフォームにも対応できる。
 
-このサイトでは Next.js と Vercel を使って構成されているので Next.js の Route Handlers と Vercel の Edge Runtime を使うことにした。
-Edge Runtime にキャッシュさせておけばパフォーマンス面でも問題なさそう。
+このサイトではNext.jsとVercelを使って構成されているのでNext.jsのRoute HandlersとVercelのEdge Runtimeを使うことにした。
+Edge Runtimeにキャッシュさせておけばパフォーマンス面でも問題なさそう。
 
-（基本的な原理がわかっていれば Cloud Functions や Cloudflare Workers のようなサーバレス環境でも OK。今回は Vercel を使いたかっただけ。）
+（基本的な原理がわかっていればCloud FunctionsやCloudflare Workersのようなサーバレス環境でもOK。今回はVercelを使いたかっただけ。）
 
-## 絵文字 SVG を返す API の実装
+## 絵文字SVGを返すAPIの実装
 
 今回は以下のようなエンドポイントを作成する。
 試しにアクセスしてみてほしい。
@@ -68,12 +68,12 @@ https://kkhys.me/api/noto-emoji/🐟.svg?theme=light
 ```
 
 上記では 🐟 を指定しているが、ここはどんな絵文字でも問題ない。
-逆に絵文字以外が入力されていたり、svg が抜けていれば適切なエラーを返すようにする。
+逆に絵文字以外が入力されていたり、svgが抜けていれば適切なエラーを返すようにする。
 
 また、このサイトはダークモードとライトモードに対応しているため、クエリパラメータでテーマを選択可能にしている。
-`theme=dark` を指定すればダークモード用の SVG が返される。
+`theme=dark`を指定すればダークモード用のSVGが返される。
 
-絵文字の SVG 化には Vercel 製のライブラリ [satori](https://github.com/vercel/satori) を使用した。
+絵文字のSVG化にはVercel製のライブラリ [satori](https://github.com/vercel/satori) を使用した。
 
 実装自体はシンプルで、以下のようになっている。
 
@@ -151,20 +151,20 @@ export const GET = async (request: NextRequest, { params: { slug } }: { params: 
 const isEmoji = (str: string) => emojiRegex().test(str);
 ```
 
-25 行目で Google Fonts からダウンロードした Noto Emoji の TTF ファイルへのパスを指定している。
+25行目でGoogle FontsからダウンロードしたNoto EmojiのTTFファイルへのパスを指定している。
 ここは相対パスでなければいけないので注意が必要。
 ここを変えればいろんなフォントに対応できる。
 
-77 行目に絵文字かどうかを判別するための関数がある。
+77行目に絵文字かどうかを判別するための関数がある。
 絵文字かどうかは正規表現を使えばわかるのだが、けっこう複雑なので [emoji-regex](https://github.com/mathiasbynens/emoji-regex) というライブラリに頼っている。
 
-そして、ここで最も重要なのは 66 行目の `cache-control` である。
-ここで `max-age=31536000` を指定することで一度 SVG 画像を読み込めばブラウザのキャッシュに保存するため 2 回目以降サーバにリソースの再要求を行わない。
+そして、ここで最も重要なのは66行目の`cache-control`である。
+ここで`max-age=31536000`を指定することで一度SVG画像を読み込めばブラウザのキャッシュに保存するため2回目以降サーバにリソースの再要求を行わない。
 キャッシュ時間はかなり長めにとっているが、絵文字が変わることはおそらくないので問題ない。
 
 ## フロント側の処理
 
-フロント側では Img 要素を使って SVG 画像を読み込んでいる。
+フロント側ではImg要素を使ってSVG画像を読み込んでいる。
 
 ```tsx title="ui/post/eye-catch/index.tsx" showLineNumbers
 export const EyeCatch = ({
@@ -188,17 +188,17 @@ export const EyeCatch = ({
 };
 ```
 
-[next-themes](https://github.com/pacocoursey/next-themes) を使ってダークモード対応をしているため、ページ読み込み時に `useEffect` を使い、現在のテーマ状態を取得して適切な SVG 画像に切り替えている。
+[next-themes](https://github.com/pacocoursey/next-themes) を使ってダークモード対応をしているため、ページ読み込み時に`useEffect`を使い、現在のテーマ状態を取得して適切なSVG画像に切り替えている。
 
-10 行目が肝である。
+10行目が肝である。
 このサイトでは初期状態はシステム設定の外観モードを読み取るため、このような処理が必要になる。
 
-これらの処理をした上で Safari を確認するとちゃんと全ての絵文字が Noto Emoji で表示されていた。
+これらの処理をした上でSafariを確認するとちゃんと全ての絵文字がNoto Emojiで表示されていた。
 テーマの切り替えも問題なさそう。
 
-![修正後の Safari で見た記事一覧ページ](./03.png)
+![修正後のSafariで見た記事一覧ページ](./03.png)
 
-今回の修正 PR はこちら。
+今回の修正PRはこちら。
 
 https://github.com/kkhys/me.v2/pull/1035
 
