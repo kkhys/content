@@ -1,6 +1,6 @@
 ---
-title: "v1.6.0 リリースノート: MDX コンポーネントの強化"
-description: MDX に Google Maps、YouTube、X 埋め込み、アコーディオン、アラート、タブ、ステップ、カルーセルなどの便利な機能を追加した。意味的に理解しやすい JSX コンポーネントとして実装している。
+title: "v1.6.0リリースノート: MDXコンポーネントの強化"
+description: MDXにGoogle Maps、YouTube、X埋め込み、アコーディオン、アラート、タブ、ステップ、カルーセルなどの便利な機能を追加した。意味的に理解しやすいJSXコンポーネントとして実装している。
 emoji: 🚀
 category: Tech
 tags: ["Release note"]
@@ -10,18 +10,18 @@ slug: b1r60de
 ---
 
 > [!WARNING]
-> この記事は Next.js 版の内容です。現在は Astro で構築し直したため、情報が古い可能性があります。
+> この記事はNext.js版の内容です。現在はAstroで構築し直したため、情報が古い可能性があります。
 > 当時のリポジトリは [こちら](https://github.com/kkhys/me.v2) にあるので参考にしてください。
 
 今回のアップデートではなくても良いけど、あったら嬉しい機能を追加した。
 
-このブログは [MDX](https://mdxjs.com) を使って書かれており、いくらでも JavaScript のコードを埋め込める。
-便利な機能ではあるのだが、GitHub でコンテンツを保存しているという背景もあり、できるだけ素のマークダウンファイルか [GFM](https://github.github.com/gfm) の形式を崩さない程度に実装してきた。
-そうすればいつの日かホスティングを止めても GitHub から自然言語に近い形で記事を閲覧できる。
+このブログは [MDX](https://mdxjs.com) を使って書かれており、いくらでもJavaScriptのコードを埋め込める。
+便利な機能ではあるのだが、GitHubでコンテンツを保存しているという背景もあり、できるだけ素のマークダウンファイルか [GFM](https://github.github.com/gfm) の形式を崩さない程度に実装してきた。
+そうすればいつの日かホスティングを止めてもGitHubから自然言語に近い形で記事を閲覧できる。
 
-GitHub で見ると [このような感じ](https://github.com/kkhys/me.v2/blob/main/apps/web/content/posts/tech/2024-03-16/index.mdx?plain=1) で表示される。
+GitHubで見ると [このような感じ](https://github.com/kkhys/me.v2/blob/main/apps/web/content/posts/tech/2024-03-16/index.mdx?plain=1) で表示される。
 
-ただ、それらの形式で表現するには限界があるので JSX コンポーネントを意味的に理解しやすい形で実装することにした。
+ただ、それらの形式で表現するには限界があるのでJSXコンポーネントを意味的に理解しやすい形で実装することにした。
 意味的に理解しやすいの定義はコンポーネント名と属性を見るだけで何をしているのかがレンダリングされる前の状態でも推測できるということ。
 
 https://github.com/kkhys/me.v2/releases/tag/v1.6.0
@@ -32,21 +32,21 @@ https://github.com/kkhys/me.v2/releases/tag/v1.6.0
 <GoogleMaps placeId='ChIJ2-L1uEhbFkcR-Zek84Ap7zI' caption='Google Maps の下にはキャプションを付けられる' />
 ```
 
-これから旅行関係の記事も記録として書いていきたいので一目で場所を理解できる Google Maps は取り入れたかった。
+これから旅行関係の記事も記録として書いていきたいので一目で場所を理解できるGoogle Mapsは取り入れたかった。
 
-幸いにも Next.js が Google Maps の埋め込みをサポートする [ライブラリ](https://nextjs.org/docs/app/building-your-application/optimizing/third-party-libraries#google-maps-embed) を作成していたためそれをラップする形で利用した。
+幸いにもNext.jsがGoogle Mapsの埋め込みをサポートする [ライブラリ](https://nextjs.org/docs/app/building-your-application/optimizing/third-party-libraries#google-maps-embed) を作成していたためそれをラップする形で利用した。
 
-GCP の API キーが必要とのことで、もしかして API の呼び出し制限がある？と思ったが、Maps Embed API は無料かつ無制限で呼び出せた（[ソース](https://mapsplatform.google.com/intl/ja/pricing)）。
-他の API はリクエスト数に応じた従量課金制であるため、もし API キーが流出した場合を考えて他の API は使えないように設定した。
+GCPのAPIキーが必要とのことで、もしかしてAPIの呼び出し制限がある？と思ったが、Maps Embed APIは無料かつ無制限で呼び出せた（[ソース](https://mapsplatform.google.com/intl/ja/pricing)）。
+他のAPIはリクエスト数に応じた従量課金制であるため、もしAPIキーが流出した場合を考えて他のAPIは使えないように設定した。
 
-地図のマーカーを一意に設定するために `placeId` という Google Maps 固有の ID を使用している。
-`旧オスカー・シンドラーのホーロー工場` のように名称を入れてもマーカーを設定できるが、それがユニークである保証はないため、少し面倒だが `placeId` を入れるようにしてある。
+地図のマーカーを一意に設定するために`placeId`というGoogle Maps固有のIDを使用している。
+`旧オスカー・シンドラーのホーロー工場`のように名称を入れてもマーカーを設定できるが、それがユニークである保証はないため、少し面倒だが`placeId`を入れるようにしてある。
 
-`placeId` の取得は下記のページから行える。
+`placeId`の取得は下記のページから行える。
 
 https://developers.google.com/maps/documentation/places/web-service/place-id?hl=ja#find-id
 
-また、`caption` プロパティに文字列を入れるとコンポーネントの下に説明文を挿入できる。
+また、`caption`プロパティに文字列を入れるとコンポーネントの下に説明文を挿入できる。
 もちろん設定しなくてもよし。
 
 https://github.com/kkhys/me.v2/issues/683
@@ -57,23 +57,23 @@ https://github.com/kkhys/me.v2/issues/683
 https://www.youtube.com/watch?v=eZCSOdi19jQ
 ```
 
-YouTube を記事に埋め込むことで、文章だけでは伝えきれない内容を視覚的に訴えられるので好きだ。
+YouTubeを記事に埋め込むことで、文章だけでは伝えきれない内容を視覚的に訴えられるので好きだ。
 また、読者が動画を再生したら必然的に滞在時間が長くなり検索エンジンからの評価も上がる。
 基本的にメリットしかないので実装するしかない。
 
-これも Google Maps と同様に Next.js の [便利なライブラリ](https://nextjs.org/docs/app/building-your-application/optimizing/third-party-libraries#youtube-embed) があったためラップして使用している。
-本来 YouTube の埋め込みは大量のデータを読み込むため、かなり LCP スコアを悪化させてしまう。
+これもGoogle Mapsと同様にNext.jsの [便利なライブラリ](https://nextjs.org/docs/app/building-your-application/optimizing/third-party-libraries#youtube-embed) があったためラップして使用している。
+本来YouTubeの埋め込みは大量のデータを読み込むため、かなりLCPスコアを悪化させてしまう。
 
-Next.js のライブラリでは内部的に [lite-youtube-embed](https://github.com/paulirish/lite-youtube-embed) を使うことで通常の画像読み込みと遜色ないパフォーマンスを実現している。
+Next.jsのライブラリでは内部的に [lite-youtube-embed](https://github.com/paulirish/lite-youtube-embed) を使うことで通常の画像読み込みと遜色ないパフォーマンスを実現している。
 
-lite-youtube-embed がやっていることは非常にシンプルで、動画の代わりにサムネイル画像を最初に読み込む。
+lite-youtube-embedがやっていることは非常にシンプルで、動画の代わりにサムネイル画像を最初に読み込む。
 動画の再生はユーザがサムネイル画像をクリックしたときのみ開始されるため余計なリクエストが行われないという訳だ。
 
-ただ、デメリットとしてはサムネイル画像が角丸だったりすると UI と合わずに違和感が出てしまう。
+ただ、デメリットとしてはサムネイル画像が角丸だったりするとUIと合わずに違和感が出てしまう。
 これは避けようがない問題なので、そういった動画に当たらないことを願うしかない。
 
-MDX 内では YouTube の URL を入力するだけでビルド時に `videoId` を抜き出してコンポーネントに属性として渡している。
-便利な方法なのだが、キャプションを追加できないのが少し引っかかっているため Google Maps と同じように `<YouTube />` のようなコンポーネントに変えるかもしれない。
+MDX内ではYouTubeのURLを入力するだけでビルド時に`videoId`を抜き出してコンポーネントに属性として渡している。
+便利な方法なのだが、キャプションを追加できないのが少し引っかかっているためGoogle Mapsと同じように`<YouTube />`のようなコンポーネントに変えるかもしれない。
 
 あと、動画再生時は必ずミュートでスタートするようにしてある（大事なポイント）。
 
@@ -85,11 +85,11 @@ https://github.com/kkhys/me.v2/issues/685
 https://twitter.com/jack/status/20
 ```
 
-X（前 Twitter）ではよく IT 技術関係のポストを見ており、稀に興味深くて記事で言及したいものがあったりする。
+X（前Twitter）ではよくIT技術関係のポストを見ており、稀に興味深くて記事で言及したいものがあったりする。
 そのときに引用する形で埋め込めたら便利だなと思ったため実装してみた。
 
-内部的には [react-tweet](https://github.com/vercel/react-tweet) という Vercel 製のライブラリを使用している。
-Vercel が作っているだけあって非常に使い勝手が良く、ポストを埋め込みたい場合はおすすめだ。
+内部的には [react-tweet](https://github.com/vercel/react-tweet) というVercel製のライブラリを使用している。
+Vercelが作っているだけあって非常に使い勝手が良く、ポストを埋め込みたい場合はおすすめだ。
 
 特にライトモードとダークモードのスタイリングの切り替えを勝手にしてくれたのは驚いた。
 
@@ -109,11 +109,11 @@ A footnote can also have multiple lines[^2].
 技術記事ではソースが非常に重要になってくる。
 そのときに本文内で言及すると冗長な印象を与えてしまうため脚注を追加できるようにした。
 
-この書き方自体は GitHub のマークダウンファイルでサポートされている[^1]。
-[remark-gfm](https://github.com/remarkjs/remark-gfm) で脚注の HTML は生成されているため、今回はそのスタイリングのみ行った。
+この書き方自体はGitHubのマークダウンファイルでサポートされている[^1]。
+[remark-gfm](https://github.com/remarkjs/remark-gfm) で脚注のHTMLは生成されているため、今回はそのスタイリングのみ行った。
 
 [^1]: [基本的な書き方とフォーマットの構文: 脚注](https://docs.github.com/ja/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#footnotes) に記載。
-ただし、GitHub では半角スペースを 2 つ入れることで改行できたが `remark-gfm` では対応していないため `<br />` タグの追加が必要になる。
+ただし、GitHubでは半角スペースを2つ入れることで改行できたが`remark-gfm`では対応していないため`<br />`タグの追加が必要になる。
 
 https://github.com/kkhys/me.v2/issues/630
 
@@ -166,7 +166,7 @@ https://github.com/kkhys/me.v2/issues/630
 ```
 
 記事内のレイアウトを整理するのに便利そうなアコーディオンコンポーネントを実装した。
-複数か単数かで UI を分けている。
+複数か単数かでUIを分けている。
 
 ### シングル
 
@@ -179,10 +179,10 @@ https://github.com/kkhys/me.v2/issues/630
 
 どちらかというとシングルの方が使う頻度は高そう。
 
-HTML には `details` [^2]というタグがあり、JavaScript を使わずともブラウザ側で折りたたみウィジェットを作成できる。
+HTMLには`details` [^2]というタグがあり、JavaScriptを使わずともブラウザ側で折りたたみウィジェットを作成できる。
 以下のように使用する。
 
-[^2]: [MDN ドキュメント: 詳細折りたたみ要素](https://developer.mozilla.org/ja/docs/Web/HTML/Element/details)
+[^2]: [MDNドキュメント: 詳細折りたたみ要素](https://developer.mozilla.org/ja/docs/Web/HTML/Element/details)
 
 ````md
 <details>
@@ -194,7 +194,7 @@ HTML には `details` [^2]というタグがあり、JavaScript を使わずと�
 ````
 
 ただ、デフォルトだといまいち見た目が好きではないため独自のコンポーネントを実装した。
-コンポーネント名と属性名は `<details>` タグに基づいている。
+コンポーネント名と属性名は`<details>`タグに基づいている。
 
 https://github.com/kkhys/me.v2/issues/626
 
@@ -210,11 +210,11 @@ https://github.com/kkhys/me.v2/issues/626
 <Alert type='warning' description='ユーザが危険な状況を回避するために必要な情報を伝えるために使用する。緊急性の高い警告などにも使用できる。' />
 ```
 
-とりあえず 4 種類のアラートを実装した。
+とりあえず4種類のアラートを実装した。
 これから増える可能性もある。
 
-GitHub がドキュメントでアラートの Markdown 拡張を最近追加した[^3]が、最初はその構文に基づいた書き方にしようとしていた。
-しかし、ブロッククォートを解析してコンポーネントに変換するのはけっこう面倒なのでシンプルに JSX で書けるようにした。
+GitHubがドキュメントでアラートのMarkdown拡張を最近追加した[^3]が、最初はその構文に基づいた書き方にしようとしていた。
+しかし、ブロッククォートを解析してコンポーネントに変換するのはけっこう面倒なのでシンプルにJSXで書けるようにした。
 
 それに転載・引用元を示す構文でアラートを表示するのは意味論的に微妙な実装だと思う。
 
@@ -239,7 +239,7 @@ https://github.com/kkhys/me.v2/issues/627
 </Tabs>
 ```
 
-この記事でも多用しているが、要素を 1 画面で表示してしまいたいときにタブは便利だ。
+この記事でも多用しているが、要素を1画面で表示してしまいたいときにタブは便利だ。
 
 https://github.com/kkhys/me.v2/issues/631
 
@@ -269,7 +269,7 @@ https://github.com/kkhys/me.v2/issues/631
 何かを作るときは必ずステップが存在する。
 そのプロセスを説明するときに便利なコンポーネントを追加した。
 
-`<Step>` タグで囲んだ文字列は `<h3>` タグとしてレンダリングされる点に注意が必要。
+`<Step>`タグで囲んだ文字列は`<h3>`タグとしてレンダリングされる点に注意が必要。
 
 
 https://github.com/kkhys/me.v2/issues/632
@@ -292,10 +292,10 @@ https://github.com/kkhys/me.v2/issues/632
 - 画像のみ対応している
 - 全ての画像を同じ比率に揃える必要がある
 
-コードでこれらの制約を表現できていないため、まだ WIP の機能となる。
+コードでこれらの制約を表現できていないため、まだWIPの機能となる。
 とはいえ、カルーセルにこれ以上の機能を求めるべきかというのは疑問だし、ビルド時にバリデーションを追加して違反していれば例外を投げる対応が現実的かもしれない。
 
-表示されている画像以外の不透明度を 15% にしているのと現在のページ数を表示しているのがポイント。
+表示されている画像以外の不透明度を15% にしているのと現在のページ数を表示しているのがポイント。
 通常の画像に比べてカルーセルだと画像サイズが小さくなるのはデメリットだが、画像の拡大表示をこれから実装すれば問題なさそう。
 
 https://github.com/kkhys/me.v2/issues/624
@@ -303,6 +303,6 @@ https://github.com/kkhys/me.v2/issues/624
 ## さいごに
 
 独自コンポーネント満載のこのページを見返してみたら雑多な感じがしてちょっと微妙に感じてしまった。
-1 つ 1 つのコンポーネントのレイアウトやデザインを修正することで対応できれば一番良いが、研究が必要なのでしばらく時間がかかる。
+1つ1つのコンポーネントのレイアウトやデザインを修正することで対応できれば一番良いが、研究が必要なのでしばらく時間がかかる。
 
 そのため、記事を書く際はこれらのコンポーネントにできるだけ頼ることなくシンプルに書いていきたい。
