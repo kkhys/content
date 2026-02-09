@@ -1,6 +1,6 @@
 ---
-title: 複数の Claude Code を並列実行する Git worktree 活用術
-description: Claude Code と Git worktree を組み合わせて、複数の AI 開発セッションを並列実行する手法を解説。OWASP Juice Shop を例に、セキュリティ修正タスクを同時並行で処理する実践的な開発手法である。
+title: 複数のClaude Codeを並列実行するGit worktree活用術
+description: Claude CodeとGit worktreeを組み合わせて、複数のAI開発セッションを並列実行する手法を解説。OWASP Juice Shopを例に、セキュリティ修正タスクを同時並行で処理する実践的な開発手法である。
 emoji: 🔀
 category: Tech
 tags: [AI]
@@ -9,22 +9,22 @@ publishedAt: 2025-07-21
 slug: b1dwyvg
 ---
 
-AI にコードを書かせるという行為が、いつの間にか日常の一部になってしまった。
-Claude Code と付き合い始めて、そろそろ 2 か月が経つ。
+AIにコードを書かせるという行為が、いつの間にか日常の一部になってしまった。
+Claude Codeと付き合い始めて、そろそろ2か月が経つ。
 
 ただし、完璧な関係などというものは存在しない。
-AI が考えを巡らせている間、人間の方はただ待つしかない。
+AIが考えを巡らせている間、人間の方はただ待つしかない。
 この手持ち無沙汰な時間が、なんとももったいなく感じていた。
 
-Claude Code の[ベストプラクティス](https://www.anthropic.com/engineering/claude-code-best-practices)でも言及されているように、Claude インスタンスを並列で動かすことでその課題が解決できるので、Git worktree を使った実例をまとめる。
+Claude Codeの[ベストプラクティス](https://www.anthropic.com/engineering/claude-code-best-practices)でも言及されているように、Claudeインスタンスを並列で動かすことでその課題が解決できるので、Git worktreeを使った実例をまとめる。
 
 ## 環境のセットアップ
 
-Claude Code の活用法としては、1 から何かを作るというよりも、実務では積み上がった Issue を消化させることに使うケースが多い。
-なので、今回は実際に存在するプロジェクトを元に並列処理で複数の Claude セッションを同時に実行させる。
+Claude Codeの活用法としては、1から何かを作るというよりも、実務では積み上がったIssueを消化させることに使うケースが多い。
+なので、今回は実際に存在するプロジェクトを元に並列処理で複数のClaudeセッションを同時に実行させる。
 
 今回、実験対象となるのは [OWASP Juice Shop](https://github.com/juice-shop/juice-shop)。
-意図的にあらゆる Web の脆弱性が組み込まれたジュース屋さんの Web アプリである。
+意図的にあらゆるWebの脆弱性が組み込まれたジュース屋さんのWebアプリである。
 
 まずはローカル環境で立ち上げる。
 
@@ -40,15 +40,15 @@ npm start
 
 以下のトップページが表示されれば起動に成功。
 
-![OWASP Juice Shop のトップページ](./01.png)
+![OWASP Juice Shopのトップページ](./01.png)
 
 ## 実行させるタスクを抽出する
 
-さて、この Web アプリには数多くの脆弱性が潜んでいる。
-それを Claude Code にまとめてもらう。
+さて、このWebアプリには数多くの脆弱性が潜んでいる。
+それをClaude Codeにまとめてもらう。
 
-まずはトークン消費数を節約するために、コンテキストとなる `CLAUDE.md` を生成する。
-スラッシュコマンドの `/init` を実行すると、以下のようなファイルが生成される。
+まずはトークン消費数を節約するために、コンテキストとなる`CLAUDE.md`を生成する。
+スラッシュコマンドの`/init`を実行すると、以下のようなファイルが生成される。
 
 ````md title="CLAUDE.md"
 # CLAUDE.md
@@ -177,7 +177,7 @@ SQLiteデータベースでSequelize ORMを使用。重要なモデル:
 ### 国際化（i18n）
 - 40以上の言語サポート
 - Crowdin統合による翻訳管理
-- `frontend/src/assets/i18n/` にローカライゼーションファイル
+- `frontend/src/assets/i18n/`にローカライゼーションファイル
 
 ### チャレンジシステム
 - SQLクエリでのチャレンジ管理
@@ -201,7 +201,7 @@ SQLiteデータベースでSequelize ORMを使用。重要なモデル:
 
 次に脆弱性診断を行い、タスク化していく。
 
-WebStorm の[スクラッチファイル](https://pleiades.io/help/idea/scratches.html)（一時保存用のファイル置き場）に以下のマークダウンファイルを追加する（VSCode にはスクラッチファイル的な機能はないので適当な場所に置く）。
+WebStormの[スクラッチファイル](https://pleiades.io/help/idea/scratches.html)（一時保存用のファイル置き場）に以下のマークダウンファイルを追加する（VSCodeにはスクラッチファイル的な機能はないので適当な場所に置く）。
 
 ```md title="security-audit.md"
 # 脆弱性診断
@@ -271,7 +271,7 @@ WebStorm の[スクラッチファイル](https://pleiades.io/help/idea/scratche
     - 箇条書きでタスクを細分化（後で Claude Code にタスクを投げる予定）
 ```
 
-脆弱性診断用のマークダウンファイルを Claude Code に読み取らせる。
+脆弱性診断用のマークダウンファイルをClaude Codeに読み取らせる。
 
 ```bash
 > @xxx/JetBrains/WebStorm2025.1/scratches/security-audit.md の内容を実施してください。結果は xxx/JetBrains/WebStorm2025.1/scratches/security-audit-result.md に出力してください。
@@ -662,16 +662,16 @@ OWASP Juice Shopは教育目的の脆弱なアプリケーションとして、O
 
 これで下準備は完了。
 
-## Git worktree の使い方
+## Git worktreeの使い方
 
-[Git worktree](https://git-scm.com/docs/git-worktree) は、1 つの Git リポジトリに対して複数の作業ディレクトリを作成できる機能である。
+[Git worktree](https://git-scm.com/docs/git-worktree) は、1つのGitリポジトリに対して複数の作業ディレクトリを作成できる機能である。
 
-- `git checkout` や `git switch` でブランチを切り替える = 1 冊ずつ本を読み替える（しおりで場所を保存）
-- `git worktree` で複数のディレクトリを作る = 複数の本を同時に開いて読める
+- `git checkout`や`git switch`でブランチを切り替える = 1冊ずつ本を読み替える（しおりで場所を保存）
+- `git worktree`で複数のディレクトリを作る = 複数の本を同時に開いて読める
 
 みたいなイメージ。
 
-Mermaid に落とし込むと以下のようなグラフになる。
+Mermaidに落とし込むと以下のようなグラフになる。
 
 ```mermaid
 graph TD
@@ -704,16 +704,16 @@ graph TD
 主な活用場面として以下があげられる。
 
 1. 複数ブランチでの並行作業（メインブランチでホットフィックス対応中に、別ブランチで新機能開発を継続）
-2. レビュー作業（自分のコードを別の worktree でテストしながら、メインの worktree で開発継続）
-3. 長時間のビルド・テスト（テスト実行中でも別の worktree で作業を続行）
+2. レビュー作業（自分のコードを別のworktreeでテストしながら、メインのworktreeで開発継続）
+3. 長時間のビルド・テスト（テスト実行中でも別のworktreeで作業を続行）
 4. デプロイ用ディレクトリ（本番環境向けの特定ブランチを専用ディレクトリで管理）
 
-まさに Claude Code を並列で動かすにはうってつけの機能である。
+まさにClaude Codeを並列で動かすにはうってつけの機能である。
 
-## 並列で Claude Code セッションを実行する
+## 並列でClaude Codeセッションを実行する
 
-以下が worktree を作成する実際の流れ。
-ブランチ名は各 worktree で一意でなければならない点に注意。
+以下がworktreeを作成する実際の流れ。
+ブランチ名は各worktreeで一意でなければならない点に注意。
 
 ```shell
 # worktrees 用のディレクトリを作る
@@ -749,7 +749,7 @@ cd worktrees/project-fix-c
 claude
 ```
 
-各 worktree で Claude Code を起動できたので、それぞれに以下の指示を与える。
+各worktreeでClaude Codeを起動できたので、それぞれに以下の指示を与える。
 
 ````md title="worktree A に対する指示"
 SQL インジェクション経由の認証バイパスに関する問題を修正してください。
@@ -796,27 +796,27 @@ JWT 秘密キー漏洩に関する問題を修正してください。
 4. パスワード比較関数も併せて実装
 ````
 
-IDE やエディタを使っている場合は以下画像のように、画面分割すると進捗がわかりやすいのでおすすめ。
+IDEやエディタを使っている場合は以下画像のように、画面分割すると進捗がわかりやすいのでおすすめ。
 
-![Claude Code を並列で実行中](./02.png)
+![Claude Codeを並列で実行中](./02.png)
 
-もしくは worktree ごとに別々の IDE ウィンドウを立ち上げるのも良いかもしれない。
+もしくはworktreeごとに別々のIDEウィンドウを立ち上げるのも良いかもしれない。
 
 ## 変更を取り込む流れ
 
-### 1. PR を作成して GitHub でマージ
+### 1. PRを作成してGitHubでマージ
 
 機能ごとに開発しているのであればこの方法がベストかもしれない。
 
-PR を使うメリット:
+PRを使うメリット:
 
 - 各ブランチのレビューが個別にできる
-- CI が自動で走る
+- CIが自動で走る
 - マージ後に履歴が明確
 
-### 2. worktree のブランチを main ブランチにマージ
+### 2. worktreeのブランチをmainブランチにマージ
 
-ちょっとした修正や機能追加であれば worktree で作成したブランチをそのまま main ブランチにマージで OK。
+ちょっとした修正や機能追加であればworktreeで作成したブランチをそのままmainブランチにマージでOK。
 
 ```shell
 # main ブランチに切り替え
@@ -829,8 +829,8 @@ git merge fix/a --no-ff -m "Merge fix/a"
 git merge fix/b --no-ff -m "Merge fix/b"
 ```
 
-コンフリクトがあればその場で解決できる点が Good。
-コミット単位で整理したい場合は `--squash` を使っても良い。
+コンフリクトがあればその場で解決できる点がGood。
+コミット単位で整理したい場合は`--squash`を使っても良い。
 
 ```mermaid
 gitGraph
@@ -850,17 +850,17 @@ gitGraph
 
 ### アクションを求められたら通知音を鳴らす
 
-Claude Code ではシステムを変更する可能性のあるすべてのアクション（ファイルの書き込み、多くの bash コマンド、MCP ツールなど）に対して許可を求める。
+Claude Codeではシステムを変更する可能性のあるすべてのアクション（ファイルの書き込み、多くのbashコマンド、MCPツールなど）に対して許可を求める。
 
-一応 `settings.json` にファイルに「これは勝手にやっていいよ」というリストを書いておけば、多少は楽になる（[My settings.json](https://github.com/kkhys/dotfiles/blob/main/.claude/settings.json)）。
+一応`settings.json`にファイルに「これは勝手にやっていいよ」というリストを書いておけば、多少は楽になる（[My settings.json](https://github.com/kkhys/dotfiles/blob/main/.claude/settings.json)）。
 だが所詮は「多少」の話であって、完璧に自動化されるわけではない。
-結局のところ、AI が人間の許可を求める瞬間は残り続ける。
+結局のところ、AIが人間の許可を求める瞬間は残り続ける。
 
-困ったことに、複数の作業を同時並行でやっていると、どこかで AI が「すみません、確認お願いします」と手を挙げているのに気づかない確率が上がる。
+困ったことに、複数の作業を同時並行でやっていると、どこかでAIが「すみません、確認お願いします」と手を挙げているのに気づかない確率が上がる。
 そうして貴重な時間が空転していく。
 そこで考えたのが、許可を求められた瞬間に音を鳴らすという、実にアナログな対処法だ。
 
-通知音は macOS に標準で入っているシステムサウンドを使う。
+通知音はmacOSに標準で入っているシステムサウンドを使う。
 
 ```shell
 # システムサウンド一覧を表示
@@ -888,9 +888,9 @@ Tink.aiff
 afplay /System/Library/Sounds/Basso.aiff
 ```
 
-通知音は Claude Code の [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) を使うことで鳴らせる。
+通知音はClaude Codeの [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) を使うことで鳴らせる。
 
-フックイベントは以下の 7 種類（今後も増えていくことが予想される）。
+フックイベントは以下の7種類（今後も増えていくことが予想される）。
 
 - PreToolUse
 - PostToolUse
@@ -900,9 +900,9 @@ afplay /System/Library/Sounds/Basso.aiff
 - SubagentStop
 - PreCompact
 
-今回は `Notification`（ユーザにアクションを求める時）と `Stop`（処理が終了した時）をトリガーに通知音を鳴らす。
+今回は`Notification`（ユーザにアクションを求める時）と`Stop`（処理が終了した時）をトリガーに通知音を鳴らす。
 
-以下のコードを `~/.claude/settings.json` に追加すれば通知音が鳴る。
+以下のコードを`~/.claude/settings.json`に追加すれば通知音が鳴る。
 
 ```json title="~/.claude/settings.json"
 {
@@ -936,44 +936,44 @@ afplay /System/Library/Sounds/Basso.aiff
 指示を出したら処理が完了するまで放置しておきたい。
 しかし、たまにアクションを求められるので、定期的に様子を見に行く必要がある（前項で通知音を鳴らすようにはしたが、結局は耳を澄まして待機しなければならない）。
 
-そんな煩わしさから解放してくれる魔法の呪文が `--dangerously-skip-permissions` である。
-まさに YOLO（You Only Live Once）の精神を体現したオプション。
+そんな煩わしさから解放してくれる魔法の呪文が`--dangerously-skip-permissions`である。
+まさにYOLO（You Only Live Once）の精神を体現したオプション。
 
-Hooks や deny 機能を使えば危険なコマンドを事前にブロックできると主張している人もいるが、それでも自分の PC で使うには心許ない。
+Hooksやdeny機能を使えば危険なコマンドを事前にブロックできると主張している人もいるが、それでも自分のPCで使うには心許ない。
 
-極端な話、`rm -rf /*` なんてコマンドを実行されてしまったら、パソコンが文字通り消し飛んでしまう。
-AI が暴走して、デジタル世界の終末を迎えるという、SF 映画のような悪夢が現実になりかねない。
+極端な話、`rm -rf /*`なんてコマンドを実行されてしまったら、パソコンが文字通り消し飛んでしまう。
+AIが暴走して、デジタル世界の終末を迎えるという、SF映画のような悪夢が現実になりかねない。
 
 そこで登場するのが [Dev Containers](https://containers.dev/) という救世主である。
-[公式のリファレンス実装](https://github.com/anthropics/claude-code/tree/main/.devcontainer)も用意されており、Claude Code も推奨している解決策だ。
+[公式のリファレンス実装](https://github.com/anthropics/claude-code/tree/main/.devcontainer)も用意されており、Claude Codeも推奨している解決策だ。
 
-仮想的な箱庭の中で AI を自由に遊ばせることで、本当の世界への被害を防ぐという発想である。
+仮想的な箱庭の中でAIを自由に遊ばせることで、本当の世界への被害を防ぐという発想である。
 たとえファイルが全て消去されようが、システムが乗っ取られようが、所詮は隔離された世界での出来事に過ぎない。
 
-この記事では省略するが、今度は Dev Containers や [Apple Container](https://github.com/apple/container) で並列処理を行った様子を書こうと思う。
+この記事では省略するが、今度はDev Containersや [Apple Container](https://github.com/apple/container) で並列処理を行った様子を書こうと思う。
 
 ## やってはないけど、やりたいこと
 
-### AI に下準備まで丸投げする
+### AIに下準備まで丸投げする
 
-今回は人間が worktree を作成してから Claude Code に指示を出したが、よく考えてみればこの作業も AI にやらせて構わないはずである。
-ブランチを切って、作業環境を整えて、最後は GitHub に Pull Request まで投げさせる。
+今回は人間がworktreeを作成してからClaude Codeに指示を出したが、よく考えてみればこの作業もAIにやらせて構わないはずである。
+ブランチを切って、作業環境を整えて、最後はGitHubにPull Requestまで投げさせる。
 
-一連の流れを全て AI に委ねることができれば、人間はただ「この機能を作って PR まで投げといて」と言うだけで済む。
+一連の流れを全てAIに委ねることができれば、人間はただ「この機能を作ってPRまで投げといて」と言うだけで済む。
 
-### AI から AI に指揮させる
+### AIからAIに指揮させる
 
-以下の記事が興味深かったのだが、親分格の Claude が複数の子分 Claude に並列で作業を振り分けるという方法もあるらしいw
+以下の記事が興味深かったのだが、親分格のClaudeが複数の子分Claudeに並列で作業を振り分けるという方法もあるらしいw
 
 https://zenn.dev/kazuph/articles/beb87d102bd4f5
 
-この記事を読んでいると、AI エージェントの組織論とでも呼ぶべき新しい分野が生まれつつあるのを感じる。
-人間が 1 つ 1 つの AI を管理するのではなく、AI 同士で勝手に役割分担をしてくれる世界。
+この記事を読んでいると、AIエージェントの組織論とでも呼ぶべき新しい分野が生まれつつあるのを感じる。
+人間が1つ1つのAIを管理するのではなく、AI同士で勝手に役割分担をしてくれる世界。
 
 ## さいごに
 
-Git worktree という昔からある仕組みと、 Claude Code という新しい技術の組み合わせというのが面白かった。
+Git worktreeという昔からある仕組みと、 Claude Codeという新しい技術の組み合わせというのが面白かった。
 
 ただし、今回紹介した並列処理の手法も、所詮は過渡期の技術に過ぎないだろう。
 数ヶ月後には、もっと洗練された仕組みが登場して、この記事も古い資料として扱われることになる。
-それでも、人間と AI が協働する現場の実情を記録しておくことには、それなりの価値があるはずである。
+それでも、人間とAIが協働する現場の実情を記録しておくことには、それなりの価値があるはずである。
