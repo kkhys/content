@@ -1,6 +1,5 @@
 ---
 title: Claude CodeのSubagentsで記事の校正を効率化する
-description: Claude CodeのSubagents機能を活用したブログ記事校正の実践例である。構造分析、言語編集、読みやすさ向上、技術検証の4つの専門エージェントが並列でレビューを行い、記事品質を効率的に改善する手法を紹介している。
 emoji: ✳
 category: Tech
 tags: [AI]
@@ -67,7 +66,6 @@ Claude Code上で`/agents`コマンドを実行すると対話形式でSubagents
 ```md title=".claude/agents/content-reviewer.md"
 ---
 name: content-reviewer
-description: >
   Use this agent when you need professional content and structural analysis for blog posts, articles, and essays. This agent focuses on evaluating logical flow, organization, argumentation, and overall content structure. Examples: <example>Context: User has written a blog post and wants to ensure the content flows logically. user: "ブログ記事の論理的な構成と内容の一貫性をチェックしてください。" assistant: "内容と構造の分析のために、content-reviewerエージェントを使用します。" <commentary>Since the user needs content structure and logical flow analysis, use the content-reviewer agent for comprehensive content evaluation.</commentary></example> <example>Context: User wants to improve the argumentation in their article. user: "記事の論証に弱い部分がないか確認したいです。" assistant: "論証と内容分析のために、content-reviewerエージェントを使用します。" <commentary>Since the user needs argumentation analysis, use the content-reviewer agent to evaluate logical consistency and gaps.</commentary></example>
 model: sonnet
 color: purple
@@ -122,7 +120,6 @@ Communicate entirely in Japanese, maintaining a professional and analytical tone
 ```md title=".claude/agents/language-editor.md"
 ---
 name: language-editor
-description: >
   Use this agent when you need professional language editing and proofreading for blog posts, articles, and essays. This agent specializes in grammar, style, vocabulary, and sentence structure improvements. Examples: <example>Context: User has written content and needs proofreading and language refinement. user: "文章の文法チェックと文体を改善してください。" assistant: "言語と文体の編集のために、language-editorエージェントを使用します。" <commentary>Since the user needs language-focused editing including grammar and style improvements, use the language-editor agent for comprehensive language refinement.</commentary></example> <example>Context: User wants to improve the flow and readability of their writing. user: "文章のリズムと読みやすさを向上させたいです。" assistant: "文章の改善のために、language-editorエージェントを使用します。" <commentary>Since the user needs sentence structure and flow improvements, use the language-editor agent for language-focused enhancements.</commentary></example>
 model: sonnet
 color: green
@@ -177,7 +174,6 @@ Communicate entirely in Japanese, maintaining a supportive and educational tone 
 ```md title=".claude/agents/readability-enhancer.md"
 ---
 name: readability-enhancer
-description: >
   Use this agent when you need to improve the readability, engagement, and accessibility of blog posts, articles, and essays. This agent focuses on reader experience, comprehensibility, and maintaining audience interest throughout the content. Examples: <example>Context: User has written content but is concerned about reader engagement. user: "読者の興味を引き続ける文章にしたいです。読みやすさを改善してください。" assistant: "読みやすさと読者エンゲージメントの向上のために、readability-enhancerエージェントを使用します。" <commentary>Since the user wants to improve reader engagement and readability, use the readability-enhancer agent for audience-focused improvements.</commentary></example> <example>Context: User wants to make their content more accessible and understandable. user: "内容をより分かりやすく、アクセスしやすい文章にしたいです。" assistant: "理解しやすさの向上のために、readability-enhancerエージェントを使用します。" <commentary>Since the user needs accessibility and comprehensibility improvements, use the readability-enhancer agent for reader-focused enhancements.</commentary></example>
 model: sonnet
 color: orange
@@ -239,7 +235,6 @@ Communicate entirely in Japanese, maintaining an encouraging and reader-focused 
 ```md title=".claude/agents/technical-writer.md"
 ---
 name: technical-writer
-description: >
   Use this agent when you need specialized technical writing assistance for blog posts, documentation, and articles containing technical content. This agent focuses on technical accuracy, code formatting, and ensuring complex concepts are properly explained. Examples: <example>Context: User has written a technical blog post with code examples and needs verification. user: "技術的なブログ記事のコードサンプルと説明の正確性をチェックしてください。" assistant: "技術文書の専門的なレビューのために、technical-writerエージェントを使用します。" <commentary>Since the user needs technical accuracy verification and code review, use the technical-writer agent for specialized technical content evaluation.</commentary></example> <example>Context: User wants to improve the explanation of complex technical concepts. user: "複雑な技術概念の説明をより分かりやすくしたいです。" assistant: "技術概念の説明改善のために、technical-writerエージェントを使用します。" <commentary>Since the user needs help with technical concept explanation, use the technical-writer agent for technical communication expertise.</commentary></example>
 model: sonnet
 color: blue
